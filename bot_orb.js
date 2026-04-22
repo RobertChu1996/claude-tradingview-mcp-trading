@@ -379,6 +379,16 @@ async function runSymbol(symbol, log, positions) {
     return false;
   }
 
+  // ── 時間窗口：只在 UTC 00:30 ~ 04:00 找進場 ──────────────
+  const utcHour = new Date().getUTCHours();
+  const utcMin  = new Date().getUTCMinutes();
+  const utcMins = utcHour * 60 + utcMin;
+  const inWindow = utcMins >= 30 && utcMins <= 240; // 00:30 ~ 04:00
+  if (!inWindow) {
+    console.log(`  ⏰ 進場窗口外 (UTC ${utcHour}:${String(utcMin).padStart(2,"0")})，只管理持倉。`);
+    return false;
+  }
+
   // ── 進場邏輯 ──────────────────────────────────────────────
   if (countTodaysTrades(log) >= CONFIG.maxTradesPerDay) {
     console.log("  跳過 — 今日上限已達。");
