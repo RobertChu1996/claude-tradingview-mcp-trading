@@ -188,6 +188,22 @@ function countTodaysTrades(log) {
   return log.trades.filter((t) => t.timestamp.startsWith(today) && t.orderPlaced).length;
 }
 
+function updateTrailingStop(position, currentPrice) {
+  const { side, entryPrice, stopLoss } = position;
+  const initialRisk = Math.abs(entryPrice - stopLoss);
+  if (initialRisk < 0.000001) return null;
+  const profit = side === "long" ? currentPrice - entryPrice : entryPrice - currentPrice;
+  const profitR = profit / initialRisk;
+  if (profitR < 1.0) return null;
+  const lockR = Math.max(0, Math.floor(profitR * 2) / 2 - 1.0);
+  const newStop = side === "long"
+    ? entryPrice + initialRisk * lockR
+    : entryPrice - initialRisk * lockR;
+  if (side === "long" && newStop > stopLoss) return newStop;
+  if (side === "short" && newStop < stopLoss) return newStop;
+  return null;
+}
+
 // ─── Exit Logic ──────────────────────────────────────────────────────────────
 
 function checkExitConditions(pos, currentPrice, orb) {
@@ -321,7 +337,13 @@ async function runSymbol(symbol, log, positions) {
   // ── 出場邏輯 ──────────────────────────────────────────────
   const openPos = positions.open.find((p) => p.symbol === symbol);
   if (openPos) {
-    console.log(`\n── 持倉檢查 (${openPos.side.toUpperCase()} 進場: $${openPos.entryPrice.toFixed(6)}) ──\n`);
+    const newStop = updateTrailingStop(openPos, price);
+    if (newStop !== null) {
+      console.log(`  📈 追蹤止損更新：$${openPos.stopLoss.toFixed(6)} → $${newStop.toFixed(6)}`);
+      openPos.stopLoss = newStop;
+      savePositions(positions);
+    }
+    console.log(`\n── 持倉檢查 (${openPos.side.toUpperCase()} 進場: $${openPos.entryPrice.toFixed(6)} | 止損: $${openPos.stopLoss.toFixed(6)}) ──\n`);
     const { exit, reason } = checkExitConditions(openPos, price, orb);
 
     if (exit) {

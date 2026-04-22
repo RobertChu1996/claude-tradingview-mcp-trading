@@ -101,27 +101,49 @@ function savePositions(positions) {
   writeFileSync(POSITIONS_FILE, JSON.stringify(positions, null, 2));
 }
 
+// 追蹤止損更新：依獲利 R 倍數向上/下移動止損，只鎖利不退讓
+function updateTrailingStop(position, currentPrice) {
+  const { side, entryPrice, stopLoss } = position;
+  const initialRisk = Math.abs(entryPrice - stopLoss);
+  if (initialRisk < 0.000001) return null;
+
+  const profit = side === "long" ? currentPrice - entryPrice : entryPrice - currentPrice;
+  const profitR = profit / initialRisk;
+  if (profitR < 1.0) return null; // 未達 1R 不移動
+
+  // 鎖住 (profitR - 1R)，最低保本
+  const lockR = Math.max(0, Math.floor(profitR * 2) / 2 - 1.0);
+  const newStop = side === "long"
+    ? entryPrice + initialRisk * lockR
+    : entryPrice - initialRisk * lockR;
+
+  // 只移動，不退後
+  if (side === "long" && newStop > stopLoss) return newStop;
+  if (side === "short" && newStop < stopLoss) return newStop;
+  return null;
+}
+
 function checkExitConditions(position, price, ema8, vwap, rsi3) {
-  const { side, entryPrice } = position;
+  const { side, stopLoss } = position;
 
   if (side === "long") {
-    if (price <= entryPrice * 0.997)
-      return { exit: true, reason: "止損觸發 (跌破進場價 -0.3%)" };
+    if (price <= stopLoss)
+      return { exit: true, reason: `止損觸發 $${stopLoss.toFixed(6)}` };
     if (price <= vwap)
-      return { exit: true, reason: "價格碰觸 VWAP（止盈）" };
+      return { exit: true, reason: "價格跌破 VWAP（多頭論點失效）" };
     if (price < ema8)
-      return { exit: true, reason: "價格跌破 EMA(8)（止盈）" };
+      return { exit: true, reason: "價格跌破 EMA(8)（趨勢轉弱）" };
     if (rsi3 > 50)
-      return { exit: true, reason: "RSI(3) 穿越 50 向上（出場）" };
+      return { exit: true, reason: "RSI(3) 穿越 50（動能出場）" };
   } else {
-    if (price >= entryPrice * 1.003)
-      return { exit: true, reason: "止損觸發 (漲破進場價 +0.3%)" };
+    if (price >= stopLoss)
+      return { exit: true, reason: `止損觸發 $${stopLoss.toFixed(6)}` };
     if (price >= vwap)
-      return { exit: true, reason: "價格碰觸 VWAP（止盈）" };
+      return { exit: true, reason: "價格突破 VWAP（空頭論點失效）" };
     if (price > ema8)
-      return { exit: true, reason: "價格突破 EMA(8)（止盈）" };
+      return { exit: true, reason: "價格突破 EMA(8)（趨勢轉弱）" };
     if (rsi3 < 50)
-      return { exit: true, reason: "RSI(3) 穿越 50 向下（出場）" };
+      return { exit: true, reason: "RSI(3) 穿越 50（動能出場）" };
   }
 
   return { exit: false };
@@ -675,7 +697,15 @@ async function runSymbol(symbol, rules, log, positions) {
   const openPos = positions.open.find((p) => p.symbol === symbol);
 
   if (openPos) {
-    console.log(`\n── 持倉檢查 (${openPos.side.toUpperCase()} 進場價: $${openPos.entryPrice.toFixed(4)}) ──\n`);
+    // 追蹤止損：先更新 stopLoss 再判斷出場
+    const newStop = updateTrailingStop(openPos, price);
+    if (newStop !== null) {
+      console.log(`  📈 追蹤止損更新：$${openPos.stopLoss.toFixed(6)} → $${newStop.toFixed(6)}`);
+      openPos.stopLoss = newStop;
+      savePositions(positions);
+    }
+
+    console.log(`\n── 持倉檢查 (${openPos.side.toUpperCase()} 進場價: $${openPos.entryPrice.toFixed(4)} | 止損: $${openPos.stopLoss.toFixed(6)}) ──\n`);
     const { exit, reason } = checkExitConditions(openPos, price, ema8, vwap, rsi3);
 
     if (exit) {

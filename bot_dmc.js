@@ -158,21 +158,37 @@ function runDMCSafetyCheck(candles) {
 
 // ─── Exit Check ──────────────────────────────────────────────────────────────
 
+function updateTrailingStop(position, currentPrice) {
+  const { side, entryPrice, stopLoss } = position;
+  const initialRisk = Math.abs(entryPrice - stopLoss);
+  if (initialRisk < 0.000001) return null;
+  const profit = side === "long" ? currentPrice - entryPrice : entryPrice - currentPrice;
+  const profitR = profit / initialRisk;
+  if (profitR < 1.0) return null;
+  const lockR = Math.max(0, Math.floor(profitR * 2) / 2 - 1.0);
+  const newStop = side === "long"
+    ? entryPrice + initialRisk * lockR
+    : entryPrice - initialRisk * lockR;
+  if (side === "long" && newStop > stopLoss) return newStop;
+  if (side === "short" && newStop < stopLoss) return newStop;
+  return null;
+}
+
 function checkDMCExit(position, candles) {
   const closes = candles.map((c) => c.close);
   const last   = candles[candles.length - 1];
   const price  = last.close;
   const sma20  = calcSMA(closes, 20);
   const strength = calcCandleStrength(last);
-  const { side, entryPrice } = position;
+  const { side, stopLoss } = position;
 
   if (side === "long") {
-    if (price <= entryPrice * 0.995) return { exit: true, reason: "止損觸發 (-0.5%)" };
-    if (price < sma20)               return { exit: true, reason: "價格跌破 SMA20（結構破壞）" };
+    if (price <= stopLoss)                        return { exit: true, reason: `止損觸發 $${stopLoss.toFixed(6)}` };
+    if (price < sma20)                            return { exit: true, reason: "價格跌破 SMA20（結構破壞）" };
     if (last.close < last.open && strength > 0.6) return { exit: true, reason: "強勢空頭K棒出現（反轉訊號）" };
   } else {
-    if (price >= entryPrice * 1.005) return { exit: true, reason: "止損觸發 (+0.5%)" };
-    if (price > sma20)               return { exit: true, reason: "價格突破 SMA20（結構破壞）" };
+    if (price >= stopLoss)                        return { exit: true, reason: `止損觸發 $${stopLoss.toFixed(6)}` };
+    if (price > sma20)                            return { exit: true, reason: "價格突破 SMA20（結構破壞）" };
     if (last.close > last.open && strength > 0.6) return { exit: true, reason: "強勢多頭K棒出現（反轉訊號）" };
   }
   return { exit: false };
@@ -320,7 +336,13 @@ async function runSymbol(symbol, log, positions) {
   // 出場優先
   const openPos = positions.open.find((p) => p.symbol === symbol);
   if (openPos) {
-    console.log(`\n── 持倉檢查 (${openPos.side.toUpperCase()} 進場價: $${openPos.entryPrice.toFixed(4)}) ──\n`);
+    const newStop = updateTrailingStop(openPos, price);
+    if (newStop !== null) {
+      console.log(`  📈 追蹤止損更新：$${openPos.stopLoss.toFixed(6)} → $${newStop.toFixed(6)}`);
+      openPos.stopLoss = newStop;
+      savePositions(positions);
+    }
+    console.log(`\n── 持倉檢查 (${openPos.side.toUpperCase()} 進場價: $${openPos.entryPrice.toFixed(4)} | 止損: $${openPos.stopLoss.toFixed(6)}) ──\n`);
     const { exit, reason } = checkDMCExit(openPos, candles);
     if (exit) {
       const pnl = openPos.side === "long"
