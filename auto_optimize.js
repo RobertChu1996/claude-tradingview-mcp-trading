@@ -42,7 +42,7 @@ async function fetchUniverse() {
 export async function runAutoOptimize(force = false) {
   // 週檢查：距上次優化未滿7天就跳過（除非 force）
   if (!force && existsSync(LAST_RUN_FILE)) {
-    const lastRun  = new Date(readFileSync(LAST_RUN_FILE, "utf8").trim());
+    const lastRun   = new Date(readFileSync(LAST_RUN_FILE, "utf8").trim());
     const daysSince = (Date.now() - lastRun.getTime()) / (1000 * 60 * 60 * 24);
     if (daysSince < 7) {
       console.log(`[Auto-Optimize] 上次優化 ${daysSince.toFixed(1)} 天前，跳過（7天週期）`);
@@ -51,60 +51,26 @@ export async function runAutoOptimize(force = false) {
   }
 
   console.log("\n" + "═".repeat(60));
-  console.log("  [Auto-Optimize] 開始週優化...");
-  console.log(`  宇宙門檻: 24h 成交量 > $${MIN_VOL_M}M | PF ≥ ${MIN_PF} | 信號 ≥ ${MIN_TRADES}`);
+  console.log("  [Auto-Optimize] 週優化開始 — 四策略全幣種");
+  console.log(`  宇宙門檻: 24h > $${MIN_VOL_M}M | PF ≥ ${MIN_PF} | 信號 ≥ ${MIN_TRADES}`);
   console.log("═".repeat(60));
 
-  console.log("\n  [1/3] 從 Binance 永續合約抓取活躍幣種...");
-  const symbols = await fetchUniverse();
-  console.log(`  共 ${symbols.length} 個幣種符合成交量門檻\n`);
-  console.log("  [2/3] 回測中（3個月）...\n");
-  const results = [];
+  // 委派給 optimize_all.js（包含四策略完整邏輯）
+  const { execSync } = await import("child_process");
+  execSync(`node optimize_all.js ${MIN_PF} ${MIN_TRADES}`, { stdio: "inherit" });
 
-  for (const sym of symbols) {
-    process.stdout.write(`  ${sym.padEnd(20)}`);
-    try {
-      const r = await backtestSymbol(sym);
-      if (r) {
-        results.push(r);
-        const tag = r.pf >= 1.5 ? "✅" : r.pf >= 0.9 ? "🟡" : "❌";
-        console.log(`${tag}  PF ${String(r.pf).padEnd(5)} WR ${r.winRate}%  PnL $${r.pnl.toFixed(2)} (${r.trades}筆)`);
-      } else {
-        console.log("⚪ 數據不足");
-      }
-    } catch (e) {
-      console.log(`⚠️  ${e.message.slice(0,40)}`);
-    }
-  }
-
-  console.log("\n  [3/3] 篩選結果...");
-  results.sort((a, b) => b.pnl - a.pnl);
-  const keep = results.filter(r => r.pf >= MIN_PF && r.trades >= MIN_TRADES).map(r => r.symbol);
-  const drop = results.filter(r => r.pf < MIN_PF || r.trades < MIN_TRADES).map(r => r.symbol);
-
-  // 更新 rules_bb.json
-  const rules = JSON.parse(readFileSync("rules_bb.json", "utf8"));
-  const prev  = rules.watchlist.length;
-  rules.watchlist = keep;
-  writeFileSync("rules_bb.json", JSON.stringify(rules, null, 2));
-
-  // 重置連虧統計（新週期）
-  if (existsSync("symbol_stats.json")) {
+  // 重置策略 C 連虧統計（新週期）
+  if (existsSync("symbol_stats.json") && existsSync("rules_bb.json")) {
     const stats = JSON.parse(readFileSync("symbol_stats.json", "utf8"));
-    keep.forEach(sym => {
-      if (stats[sym]) stats[sym].consecutiveLosses = 0;
-    });
+    const keep  = JSON.parse(readFileSync("rules_bb.json", "utf8")).watchlist;
+    keep.forEach(sym => { if (stats[sym]) stats[sym].consecutiveLosses = 0; });
     writeFileSync("symbol_stats.json", JSON.stringify(stats, null, 2));
   }
 
   // 記錄執行時間
   writeFileSync(LAST_RUN_FILE, new Date().toISOString());
-
-  console.log(`\n  ✅ 優化完成：${prev} → ${keep.length} 幣（移除 ${drop.length} 幣）`);
-  if (drop.length) console.log(`  移除：${drop.slice(0,10).join(", ")}${drop.length > 10 ? "..." : ""}`);
-  console.log("═".repeat(60) + "\n");
-
-  return { keep, drop };
+  console.log("\n  ✅ 週優化完成（四策略名單已更新）\n");
+  return true;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
