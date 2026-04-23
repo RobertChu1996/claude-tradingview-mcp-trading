@@ -26,8 +26,10 @@ const CONFIG = {
 
 const LOG_FILE       = "safety-check-log-bb.json";
 const POSITIONS_FILE = "positions_bb.json";
+const STATS_FILE     = "symbol_stats.json";
 const CSV_FILE       = "trades_bb.csv";
 const CSV_HEADERS    = "Date,Time (UTC),Exchange,Symbol,Side,Quantity,Price,Total USD,Fee (est.),Net Amount,Order ID,Mode,Notes";
+const MAX_CONSEC_LOSSES = 3; // 連虧幾次後暫停該幣
 
 // ─── Market Data ─────────────────────────────────────────────────────────────
 
@@ -181,6 +183,37 @@ function loadLog() {
 }
 function saveLog(l) { writeFileSync(LOG_FILE, JSON.stringify(l, null, 2)); }
 
+function loadStats() {
+  if (!existsSync(STATS_FILE)) return {};
+  return JSON.parse(readFileSync(STATS_FILE, "utf8"));
+}
+function saveStats(s) { writeFileSync(STATS_FILE, JSON.stringify(s, null, 2)); }
+
+function updateSymbolStats(symbol, win) {
+  const stats = loadStats();
+  if (!stats[symbol]) stats[symbol] = { consecutiveLosses: 0, totalTrades: 0, wins: 0 };
+  stats[symbol].totalTrades++;
+  if (win) {
+    stats[symbol].wins++;
+    stats[symbol].consecutiveLosses = 0;
+  } else {
+    stats[symbol].consecutiveLosses++;
+  }
+  saveStats(stats);
+  return stats[symbol];
+}
+
+function isSymbolPaused(symbol) {
+  const stats = loadStats();
+  const s = stats[symbol];
+  if (!s) return false;
+  if (s.consecutiveLosses >= MAX_CONSEC_LOSSES) {
+    console.log(`  ⏸️  ${symbol} 連虧 ${s.consecutiveLosses} 次，本週暫停`);
+    return true;
+  }
+  return false;
+}
+
 function countTodaysTrades(log) {
   const today = new Date().toISOString().slice(0, 10);
   return log.trades.filter((t) => t.timestamp.startsWith(today) && t.orderPlaced).length;
@@ -299,6 +332,10 @@ async function runSymbol(symbol, log, positions) {
   console.log(`  [BB] ${symbol}`);
   console.log(`${"─".repeat(57)}`);
 
+  // 連虧暫停檢查（持倉中的幣不受此限，允許正常出場）
+  const hasOpenPos = positions.open.some((p) => p.symbol === symbol);
+  if (!hasOpenPos && isSymbolPaused(symbol)) return false;
+
   const candles = await fetchCandles(symbol, CONFIG.timeframe, 60);
   const price   = candles[candles.length - 1].close;
   console.log(`\n  Current price: $${price.toFixed(4)}`);
@@ -320,6 +357,9 @@ async function runSymbol(symbol, log, positions) {
         : (openPos.entryPrice - price) * openPos.quantity;
       const win = pnl > 0;
       console.log(`  ${win ? "✅" : "🔴"} 出場：${reason} | P&L: $${pnl.toFixed(4)}`);
+      const symStats = updateSymbolStats(symbol, win);
+      if (!win && symStats.consecutiveLosses >= MAX_CONSEC_LOSSES)
+        console.log(`  ⚠️  ${symbol} 累計連虧 ${symStats.consecutiveLosses} 次，下次掃描暫停`);
       positions.open = positions.open.filter((p) => p.symbol !== symbol);
       positions.closed.push({ ...openPos, exitPrice: price, exitTime: new Date().toISOString(), exitReason: reason, pnl, win, paperTrading: CONFIG.paperTrading });
       savePositions(positions);
