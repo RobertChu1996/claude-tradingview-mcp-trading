@@ -486,7 +486,8 @@ async function run() {
 
   if (process.argv[2] === "--stats") { generateStats(); return; }
 
-  const rules = JSON.parse(readFileSync("rules_bb.json", "utf8")); // 共用 150 幣種清單
+  const orbFile = existsSync("rules_orb.json") ? "rules_orb.json" : "rules_bb.json";
+  const rules = JSON.parse(readFileSync(orbFile, "utf8"));
   const log = loadLog();
   const positions = loadPositions();
 
