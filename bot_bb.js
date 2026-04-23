@@ -27,6 +27,7 @@ const CONFIG = {
 const LOG_FILE       = "safety-check-log-bb.json";
 const POSITIONS_FILE = "positions_bb.json";
 const STATS_FILE     = "symbol_stats.json";
+const PF_FILE        = "symbol_pf.json";
 const CSV_FILE       = "trades_bb.csv";
 const CSV_HEADERS    = "Date,Time (UTC),Exchange,Symbol,Side,Quantity,Price,Total USD,Fee (est.),Net Amount,Order ID,Mode,Notes";
 const MAX_CONSEC_LOSSES = 3; // 連虧幾次後暫停該幣
@@ -188,6 +189,18 @@ function loadStats() {
   return JSON.parse(readFileSync(STATS_FILE, "utf8"));
 }
 function saveStats(s) { writeFileSync(STATS_FILE, JSON.stringify(s, null, 2)); }
+
+function getPFMultiplier(symbol) {
+  try {
+    if (!existsSync(PF_FILE)) return 1.0;
+    const pf = JSON.parse(readFileSync(PF_FILE, "utf8"))?.C?.[symbol];
+    if (!pf) return 1.0;
+    if (pf >= 3.5) return 2.0;
+    if (pf >= 2.0) return 1.5;
+    if (pf >= 1.2) return 1.0;
+    return 0.5;
+  } catch { return 1.0; }
+}
 
 function updateSymbolStats(symbol, win) {
   const stats = loadStats();
@@ -393,8 +406,9 @@ async function runSymbol(symbol, log, positions) {
     ? entryCandle.low - atr * 0.5    // 多單：進場棒最低點下方半個ATR
     : entryCandle.high + atr * 0.5;  // 空單：進場棒最高點上方半個ATR
 
-  // 固定風險倉位：每筆最多虧本金 1%，倉位由止損距離反推
-  const riskAmount  = CONFIG.portfolioValue * 0.01;
+  // 動態風險倉位：PF加權 × 本金1%
+  const pfMult      = getPFMultiplier(symbol);
+  const riskAmount  = CONFIG.portfolioValue * 0.01 * pfMult;
   const stopLossPct = Math.abs(price - stopLoss) / price;
   const maxLeverage = parseFloat(process.env.LEVERAGE || "1");
   const rawSize     = stopLossPct > 0.001 ? riskAmount / stopLossPct : riskAmount;

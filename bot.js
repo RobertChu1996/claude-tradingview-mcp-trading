@@ -89,6 +89,19 @@ const CONFIG = {
 
 const LOG_FILE = "safety-check-log.json";
 const POSITIONS_FILE = "positions.json";
+const PF_FILE = "symbol_pf.json";
+
+function getPFMultiplier(symbol) {
+  try {
+    if (!existsSync(PF_FILE)) return 1.0;
+    const pf = JSON.parse(readFileSync(PF_FILE,"utf8"))?.A?.[symbol];
+    if (!pf) return 1.0;
+    if (pf >= 3.5) return 2.0;
+    if (pf >= 2.0) return 1.5;
+    if (pf >= 1.2) return 1.0;
+    return 0.5;
+  } catch { return 1.0; }
+}
 
 // ─── Position Tracking ───────────────────────────────────────────────────────
 
@@ -777,8 +790,9 @@ async function runSymbol(symbol, rules, log, positions) {
     ? vwap - buffer          // 多單：VWAP 下方 0.3 ATR
     : vwap + buffer;         // 空單：VWAP 上方 0.3 ATR
 
-  // 固定風險倉位：每筆最多虧本金 1%，倉位由止損距離反推
-  const riskAmount   = CONFIG.portfolioValue * 0.01;
+  // 動態風險倉位：PF 加權 × 1%基礎風險，止損距離反推
+  const pfMult       = getPFMultiplier(symbol);
+  const riskAmount   = CONFIG.portfolioValue * 0.01 * pfMult;
   const stopLossPct  = Math.abs(price - stopLossPrice) / price;
   const maxLeverage  = parseFloat(process.env.LEVERAGE || "1");
   const rawSize      = stopLossPct > 0.001 ? riskAmount / stopLossPct : riskAmount * 3;

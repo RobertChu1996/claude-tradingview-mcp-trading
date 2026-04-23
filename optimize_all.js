@@ -8,6 +8,9 @@
 
 import { readFileSync, writeFileSync, existsSync } from "fs";
 
+// symbol_pf.json 格式: { A: { BTCUSDT: 2.4, ... }, B: {...}, C: {...}, D: {...} }
+const PF_FILE = "symbol_pf.json";
+
 const MIN_PF     = parseFloat(process.argv[2] || "0.9");
 const MIN_TRADES = parseInt(process.argv[3]  || "3");
 const MIN_VOL_M  = parseFloat(process.env.MIN_VOL_M || "20");
@@ -330,6 +333,12 @@ async function main() {
     const prev  = (rules.watchlist||[]).length;
     rules.watchlist = keep;
     writeFileSync(file, JSON.stringify(rules, null, 2));
+
+    // 儲存每幣 PF 供動態倉位使用
+    const pfData = existsSync(PF_FILE) ? JSON.parse(readFileSync(PF_FILE,"utf8")) : {};
+    pfData[key] = {};
+    results.forEach(r => { pfData[key][r.symbol] = r.pf; });
+    writeFileSync(PF_FILE, JSON.stringify(pfData, null, 2));
 
     summary[key] = { keep:keep.length, prev, totalPnl:totalPnl.toFixed(0), top5:results.slice(0,5).map(r=>`${r.symbol}($${r.pnl.toFixed(0)})`).join(" ") };
     console.log(`\n  ✅ 策略${key}: ${prev} → ${keep.length} 幣 | 預期損益 $${totalPnl.toFixed(0)}`);
