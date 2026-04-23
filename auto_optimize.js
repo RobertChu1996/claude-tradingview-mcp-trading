@@ -1,22 +1,48 @@
 /**
  * 自動週優化 — 策略 C 名單管理
- * 每週日自動跑：從 watchlist_master.json 回測全部幣種
- * PF ≥ 0.9 且有效信號 ≥ 3 的幣留下，其餘移除
- * 結果寫入 rules_bb.json，並重置連虧統計
+ * 每週自動執行：
+ *   1. 從 Binance 永續合約抓取 24h 成交量 > $20M 的所有 USDT 幣種
+ *   2. 回測3個月，PF ≥ 0.9 且有效信號 ≥ 3 的幣留下
+ *   3. 結果寫入 rules_bb.json + watchlist_master.json（快取）
+ *   4. 重置連虧統計
  */
 
 import { readFileSync, writeFileSync, existsSync } from "fs";
 
-const MIN_PF     = parseFloat(process.argv[2] || "0.9");
-const MIN_TRADES = parseInt(process.argv[3]  || "3");
-const PORTFOLIO  = parseFloat(process.env.PORTFOLIO_VALUE_USD || "388");
-const RISK       = 0.01;
+const MIN_PF        = parseFloat(process.argv[2] || "0.9");
+const MIN_TRADES    = parseInt(process.argv[3]  || "3");
+const MIN_VOL_M     = parseFloat(process.env.MIN_VOL_M || "20"); // 24h 成交量下限（百萬USD）
+const PORTFOLIO     = parseFloat(process.env.PORTFOLIO_VALUE_USD || "388");
+const RISK          = 0.01;
 const LAST_RUN_FILE = "last_optimized.txt";
+
+// 排除非加密貨幣或特殊合約
+const EXCLUDE = new Set(["XAUUSDT","XAGUSDT","BTCDOMUSDT","DEFIUSDT","BNXUSDT"]);
+
+async function fetchUniverse() {
+  const fetch = (await import("node-fetch")).default;
+  const res  = await fetch("https://fapi.binance.com/fapi/v1/ticker/24hr");
+  const data = await res.json();
+  const symbols = data
+    .filter(t =>
+      t.symbol.endsWith("USDT") &&
+      !EXCLUDE.has(t.symbol) &&
+      /^[A-Z0-9]+USDT$/.test(t.symbol) &&          // 只允許純英數字
+      !/\d+(LONG|SHORT|UP|DOWN|BULL|BEAR)/.test(t.symbol) &&
+      parseFloat(t.quoteVolume) >= MIN_VOL_M * 1e6
+    )
+    .sort((a, b) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume))
+    .map(t => t.symbol);
+
+  // 快取到 watchlist_master.json
+  writeFileSync("watchlist_master.json", JSON.stringify({ watchlist: symbols, updatedAt: new Date().toISOString(), minVolM: MIN_VOL_M }, null, 2));
+  return symbols;
+}
 
 export async function runAutoOptimize(force = false) {
   // 週檢查：距上次優化未滿7天就跳過（除非 force）
   if (!force && existsSync(LAST_RUN_FILE)) {
-    const lastRun = new Date(readFileSync(LAST_RUN_FILE, "utf8").trim());
+    const lastRun  = new Date(readFileSync(LAST_RUN_FILE, "utf8").trim());
     const daysSince = (Date.now() - lastRun.getTime()) / (1000 * 60 * 60 * 24);
     if (daysSince < 7) {
       console.log(`[Auto-Optimize] 上次優化 ${daysSince.toFixed(1)} 天前，跳過（7天週期）`);
@@ -26,11 +52,13 @@ export async function runAutoOptimize(force = false) {
 
   console.log("\n" + "═".repeat(60));
   console.log("  [Auto-Optimize] 開始週優化...");
-  console.log(`  門檻: PF ≥ ${MIN_PF} | 最低信號 ≥ ${MIN_TRADES} 筆`);
+  console.log(`  宇宙門檻: 24h 成交量 > $${MIN_VOL_M}M | PF ≥ ${MIN_PF} | 信號 ≥ ${MIN_TRADES}`);
   console.log("═".repeat(60));
 
-  const master  = JSON.parse(readFileSync("watchlist_master.json", "utf8"));
-  const symbols = master.watchlist;
+  console.log("\n  [1/3] 從 Binance 永續合約抓取活躍幣種...");
+  const symbols = await fetchUniverse();
+  console.log(`  共 ${symbols.length} 個幣種符合成交量門檻\n`);
+  console.log("  [2/3] 回測中（3個月）...\n");
   const results = [];
 
   for (const sym of symbols) {
@@ -45,10 +73,11 @@ export async function runAutoOptimize(force = false) {
         console.log("⚪ 數據不足");
       }
     } catch (e) {
-      console.log(`錯誤: ${e.message}`);
+      console.log(`⚠️  ${e.message.slice(0,40)}`);
     }
   }
 
+  console.log("\n  [3/3] 篩選結果...");
   results.sort((a, b) => b.pnl - a.pnl);
   const keep = results.filter(r => r.pf >= MIN_PF && r.trades >= MIN_TRADES).map(r => r.symbol);
   const drop = results.filter(r => r.pf < MIN_PF || r.trades < MIN_TRADES).map(r => r.symbol);
