@@ -15,7 +15,7 @@ const CONFIG = {
   timeframe: "15m",
   portfolioValue: parseFloat(process.env.PORTFOLIO_VALUE_USD || "1000"),
   maxTradeSizeUSD: parseFloat(process.env.MAX_TRADE_SIZE_USD || "100"),
-  maxTradesPerDay: parseInt(process.env.MAX_TRADES_PER_DAY || "3"),
+  maxTradesPerDay: parseInt(process.env.MAX_TRADES_PER_DAY || "20"),
   paperTrading: process.env.PAPER_TRADING !== "false",
   okx: {
     apiKey: process.env.OKX_API_KEY,
@@ -204,7 +204,11 @@ function loadLog() {
   if (!existsSync(LOG_FILE)) return { trades: [] };
   return JSON.parse(readFileSync(LOG_FILE, "utf8"));
 }
-function saveLog(l) { writeFileSync(LOG_FILE, JSON.stringify(l, null, 2)); }
+function saveLog(l) {
+  const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  l.trades = l.trades.filter(t => t.timestamp > cutoff);
+  writeFileSync(LOG_FILE, JSON.stringify(l, null, 2));
+}
 
 function countTodaysTrades(log) {
   const today = new Date().toISOString().slice(0, 10);

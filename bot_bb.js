@@ -15,7 +15,7 @@ const CONFIG = {
   timeframe: "1H",
   portfolioValue: parseFloat(process.env.PORTFOLIO_VALUE_USD || "1000"),
   maxTradeSizeUSD: parseFloat(process.env.MAX_TRADE_SIZE_USD || "100"),
-  maxTradesPerDay: parseInt(process.env.MAX_TRADES_PER_DAY || "3"),
+  maxTradesPerDay: parseInt(process.env.MAX_TRADES_PER_DAY || "20"),
   paperTrading: process.env.BB_PAPER_TRADING !== "false",
   okx: {
     apiKey: process.env.OKX_API_KEY,
@@ -178,7 +178,11 @@ function loadLog() {
   if (!existsSync(LOG_FILE)) return { trades: [] };
   return JSON.parse(readFileSync(LOG_FILE, "utf8"));
 }
-function saveLog(l) { writeFileSync(LOG_FILE, JSON.stringify(l, null, 2)); }
+function saveLog(l) {
+  const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  l.trades = l.trades.filter(t => t.timestamp > cutoff);
+  writeFileSync(LOG_FILE, JSON.stringify(l, null, 2));
+}
 
 function loadStats() {
   if (!existsSync(STATS_FILE)) return {};
@@ -287,6 +291,35 @@ async function placeOKXOrder(symbol, side, sizeUSD, price, stopLossPrice) {
     console.log(slData.code === "0" ? `  🛡️ 止損單已掛 → ${stopLossPrice.toFixed(6)}` : `  ⚠️ 止損單失敗 — ${slData.msg}`);
   }
   return order;
+}
+
+async function reconcileWithOKX(positions) {
+  if (CONFIG.paperTrading || !positions.open.length) return;
+  const ts = new Date().toISOString();
+  const path = "/api/v5/account/positions?instType=SWAP";
+  const sig = signOKX(ts, "GET", path);
+  try {
+    const res = await fetch(`${CONFIG.okx.baseUrl}${path}`, {
+      headers: {
+        "OK-ACCESS-KEY": CONFIG.okx.apiKey,
+        "OK-ACCESS-SIGN": sig,
+        "OK-ACCESS-TIMESTAMP": ts,
+        "OK-ACCESS-PASSPHRASE": CONFIG.okx.passphrase,
+      },
+    });
+    const data = await res.json();
+    if (data.code !== "0") { console.log(`  ⚠️ OKX 對帳失敗: ${data.msg}`); return; }
+    const okxOpen = new Set(data.data.map(p => p.instId.replace("-USDT-SWAP", "USDT")));
+    positions.open = positions.open.filter(p => {
+      if (okxOpen.has(p.symbol)) return true;
+      console.log(`  🔔 [對帳] ${p.symbol} 已在OKX平倉（止損觸發），同步本地狀態`);
+      positions.closed.push({ ...p, exitTime: new Date().toISOString(), exitReason: "OKX止損觸發", pnl: null });
+      return false;
+    });
+    savePositions(positions);
+  } catch (e) {
+    console.log(`  ⚠️ OKX 對帳例外: ${e.message}`);
+  }
 }
 
 // ─── Stats ───────────────────────────────────────────────────────────────────
@@ -482,6 +515,9 @@ async function run() {
 
   const log       = loadLog();
   const positions = loadPositions();
+
+  // OKX 持倉對帳：修正 OKX 已止損但本地未更新的狀態
+  await reconcileWithOKX(positions);
 
   if (positions.open.length > 0)
     console.log(`\n目前持倉: ${positions.open.map((p) => `${p.side.toUpperCase()} ${p.symbol}`).join(", ")}`);

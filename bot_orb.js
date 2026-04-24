@@ -18,7 +18,7 @@ const CONFIG = {
   orbCandles: 2,           // 開盤區間用幾根 15m K棒（2根 = 30分鐘）
   portfolioValue: parseFloat(process.env.PORTFOLIO_VALUE_USD || "1000"),
   maxTradeSizeUSD: parseFloat(process.env.MAX_TRADE_SIZE_USD || "388"),
-  maxTradesPerDay: parseInt(process.env.MAX_TRADES_PER_DAY || "3"),
+  maxTradesPerDay: parseInt(process.env.MAX_TRADES_PER_DAY || "20"),
   paperTrading: process.env.PAPER_TRADING !== "false",
   okx: {
     apiKey: process.env.OKX_API_KEY,
@@ -164,6 +164,8 @@ function loadLog() {
 }
 
 function saveLog(log) {
+  const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  log.trades = log.trades.filter(t => t.timestamp > cutoff);
   writeFileSync(LOG_FILE, JSON.stringify(log, null, 2));
 }
 

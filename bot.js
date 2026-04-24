@@ -13,7 +13,7 @@ import "dotenv/config";
 import { readFileSync, writeFileSync, existsSync, appendFileSync } from "fs";
 import crypto from "crypto";
 import { execSync } from "child_process";
-import { LOG_FILE, POSITIONS_FILE, PF_FILE, CSV_FILE } from "./paths.js";
+import { LOG_FILE, POSITIONS_FILE, PF_FILE, CSV_FILE, RULES_A_FILE } from "./paths.js";
 
 // ─── Onboarding ───────────────────────────────────────────────────────────────
 
@@ -43,7 +43,7 @@ function checkOnboarding() {
       ].join("\n") + "\n",
     );
     try {
-      execSync("open .env");
+      if (process.platform === "darwin") execSync("open .env");
     } catch {}
     console.log(
       "Fill in your BitGet credentials in .env then re-run: node bot.js\n",
@@ -55,7 +55,7 @@ function checkOnboarding() {
     console.log(`\n⚠️  Missing credentials in .env: ${missing.join(", ")}`);
     console.log("Opening .env for you now...\n");
     try {
-      execSync("open .env");
+      if (process.platform === "darwin") execSync("open .env");
     } catch {}
     console.log("Add the missing values then re-run: node bot.js\n");
     process.exit(0);
@@ -77,7 +77,7 @@ const CONFIG = {
   timeframe: process.env.TIMEFRAME || "4H",
   portfolioValue: parseFloat(process.env.PORTFOLIO_VALUE_USD || "1000"),
   maxTradeSizeUSD: parseFloat(process.env.MAX_TRADE_SIZE_USD || "100"),
-  maxTradesPerDay: parseInt(process.env.MAX_TRADES_PER_DAY || "3"),
+  maxTradesPerDay: parseInt(process.env.MAX_TRADES_PER_DAY || "20"),
   paperTrading: process.env.A_PAPER_TRADING !== "false",
   tradeMode: process.env.TRADE_MODE || "spot",
   okx: {
@@ -222,6 +222,8 @@ function loadLog() {
 }
 
 function saveLog(log) {
+  const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  log.trades = log.trades.filter(t => t.timestamp > cutoff);
   writeFileSync(LOG_FILE, JSON.stringify(log, null, 2));
 }
 
@@ -554,6 +556,38 @@ async function placeOKXOrder(symbol, side, sizeUSD, price, stopLossPrice) {
   return order;
 }
 
+// OKX 實際持倉對帳：若 OKX 止損已觸發，同步本地 positions
+async function reconcileWithOKX(positions) {
+  if (CONFIG.paperTrading || !positions.open.length) return;
+  const ts = new Date().toISOString();
+  const path = "/api/v5/account/positions?instType=SWAP";
+  const sig = signOKX(ts, "GET", path);
+  try {
+    const res = await fetch(`${CONFIG.okx.baseUrl}${path}`, {
+      headers: {
+        "OK-ACCESS-KEY": CONFIG.okx.apiKey,
+        "OK-ACCESS-SIGN": sig,
+        "OK-ACCESS-TIMESTAMP": ts,
+        "OK-ACCESS-PASSPHRASE": CONFIG.okx.passphrase,
+      },
+    });
+    const data = await res.json();
+    if (data.code !== "0") { console.log(`  ⚠️ OKX 對帳失敗: ${data.msg}`); return; }
+    const okxOpen = new Set(data.data.map(p => p.instId.replace("-USDT-SWAP", "USDT")));
+    const removed = [];
+    positions.open = positions.open.filter(p => {
+      if (okxOpen.has(p.symbol)) return true;
+      console.log(`  🔔 [對帳] ${p.symbol} 已在OKX平倉（止損觸發），同步本地狀態`);
+      positions.closed.push({ ...p, exitTime: new Date().toISOString(), exitReason: "OKX止損觸發", pnl: null });
+      removed.push(p.symbol);
+      return false;
+    });
+    if (removed.length) savePositions(positions);
+  } catch (e) {
+    console.log(`  ⚠️ OKX 對帳例外: ${e.message}`);
+  }
+}
+
 // ─── Tax CSV Logging ─────────────────────────────────────────────────────────
 
 // Always ensure trades.csv exists with headers — open it in Excel/Sheets any time
@@ -874,7 +908,7 @@ async function run() {
   console.log(`  Mode: ${CONFIG.paperTrading ? "📋 PAPER TRADING" : "🔴 LIVE TRADING"}`);
   console.log("═══════════════════════════════════════════════════════════");
 
-  const rules = JSON.parse(readFileSync("rules.json", "utf8"));
+  const rules = JSON.parse(readFileSync(RULES_A_FILE, "utf8"));
   const watchlist = rules.watchlist || [CONFIG.symbol];
 
   console.log(`\nStrategy: ${rules.strategy.name}`);
@@ -883,6 +917,9 @@ async function run() {
 
   const log = loadLog();
   const positions = loadPositions();
+
+  // OKX 持倉對帳：修正 OKX 已止損但本地未更新的狀態
+  await reconcileWithOKX(positions);
 
   // 顯示目前持倉狀況
   if (positions.open.length > 0) {
