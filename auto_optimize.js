@@ -50,6 +50,9 @@ export async function runAutoOptimize(force = false) {
     }
   }
 
+  // 先寫 lock，防止15分鐘 cron 重複觸發
+  writeFileSync(LAST_RUN_FILE, new Date().toISOString());
+
   console.log("\n" + "═".repeat(60));
   console.log("  [Auto-Optimize] 週優化開始 — 四策略全幣種");
   console.log(`  宇宙門檻: 24h > $${MIN_VOL_M}M | PF ≥ ${MIN_PF} | 信號 ≥ ${MIN_TRADES}`);

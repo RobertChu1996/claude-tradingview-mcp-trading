@@ -7,8 +7,10 @@
  *
  * 每週自動優化策略C名單（讀 watchlist_master.json，重算PF，更新 rules_bb.json）
  */
-import { execSync } from "child_process";
-import { runAutoOptimize } from "./auto_optimize.js";
+import { execSync, spawn } from "child_process";
+import { existsSync, readFileSync, writeFileSync } from "fs";
+
+const LAST_RUN_FILE = "last_optimized.txt";
 
 const run = (label, cmd) => {
   console.log("\n" + "━".repeat(57));
@@ -18,8 +20,16 @@ const run = (label, cmd) => {
   catch (e) { console.error(`執行失敗: ${e.message}`); }
 };
 
-// 週優化：每7天自動重算名單
-await runAutoOptimize(false);
+// 週優化：背景執行，不阻擋交易 bot
+const needsOptimize = !existsSync(LAST_RUN_FILE) ||
+  (Date.now() - new Date(readFileSync(LAST_RUN_FILE, "utf8").trim()).getTime()) / (1000 * 60 * 60 * 24) >= 7;
+
+if (needsOptimize) {
+  writeFileSync(LAST_RUN_FILE, new Date().toISOString()); // 先鎖定，防止重複觸發
+  console.log("\n[Auto-Optimize] 週優化背景啟動...\n");
+  const child = spawn("node", ["optimize_all.js"], { detached: true, stdio: "ignore" });
+  child.unref();
+}
 
 run("策略 A：VWAP + RSI(3) + EMA(8)  [4H]", "node bot.js");
 run("策略 B：DMC-Inspired             [15m]", "node bot_dmc.js");
