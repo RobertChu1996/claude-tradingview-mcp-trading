@@ -490,6 +490,13 @@ async function run() {
   if (positions.open.length > 0)
     console.log(`\n目前持倉: ${positions.open.map((p) => `${p.side.toUpperCase()} ${p.symbol}`).join(", ")}`);
 
+  // 先管理不在當前名單的孤立持倉（避免踢出名單後止損失效）
+  const orphans = positions.open.filter(p => !watchlist.includes(p.symbol));
+  if (orphans.length > 0) {
+    console.log(`\n[BB] 孤立持倉管理: ${orphans.map(p => p.symbol).join(", ")}`);
+    for (const p of orphans) await runSymbol(p.symbol, log, positions);
+  }
+
   for (const symbol of watchlist) {
     const hasOpen = positions.open.some((p) => p.symbol === symbol);
     if (!hasOpen && countTodaysTrades(log) >= CONFIG.maxTradesPerDay) {
