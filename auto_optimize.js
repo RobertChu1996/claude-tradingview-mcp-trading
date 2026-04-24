@@ -8,13 +8,14 @@
  */
 
 import { readFileSync, writeFileSync, existsSync } from "fs";
+import { LAST_RUN_FILE as _LRF, STATS_FILE, RULES_BB_FILE, WATCHLIST_FILE } from "./paths.js";
 
 const MIN_PF        = parseFloat(process.argv[2] || "0.9");
 const MIN_TRADES    = parseInt(process.argv[3]  || "3");
 const MIN_VOL_M     = parseFloat(process.env.MIN_VOL_M || "20"); // 24h 成交量下限（百萬USD）
 const PORTFOLIO     = parseFloat(process.env.PORTFOLIO_VALUE_USD || "388");
 const RISK          = 0.01;
-const LAST_RUN_FILE = "last_optimized.txt";
+const LAST_RUN_FILE = _LRF;
 
 // 排除非加密貨幣或特殊合約
 const EXCLUDE = new Set(["XAUUSDT","XAGUSDT","BTCDOMUSDT","DEFIUSDT","BNXUSDT"]);
@@ -35,7 +36,7 @@ async function fetchUniverse() {
     .map(t => t.symbol);
 
   // 快取到 watchlist_master.json
-  writeFileSync("watchlist_master.json", JSON.stringify({ watchlist: symbols, updatedAt: new Date().toISOString(), minVolM: MIN_VOL_M }, null, 2));
+  writeFileSync(WATCHLIST_FILE, JSON.stringify({ watchlist: symbols, updatedAt: new Date().toISOString(), minVolM: MIN_VOL_M }, null, 2));
   return symbols;
 }
 
@@ -63,9 +64,9 @@ export async function runAutoOptimize(force = false) {
   execSync(`node optimize_all.js ${MIN_PF} ${MIN_TRADES}`, { stdio: "inherit" });
 
   // 重置策略 C 連虧統計（新週期）
-  if (existsSync("symbol_stats.json") && existsSync("rules_bb.json")) {
-    const stats = JSON.parse(readFileSync("symbol_stats.json", "utf8"));
-    const keep  = JSON.parse(readFileSync("rules_bb.json", "utf8")).watchlist;
+  if (existsSync(STATS_FILE) && existsSync(RULES_BB_FILE)) {
+    const stats = JSON.parse(readFileSync(STATS_FILE, "utf8"));
+    const keep  = JSON.parse(readFileSync(RULES_BB_FILE, "utf8")).watchlist;
     keep.forEach(sym => { if (stats[sym]) stats[sym].consecutiveLosses = 0; });
     writeFileSync("symbol_stats.json", JSON.stringify(stats, null, 2));
   }

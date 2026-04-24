@@ -9,8 +9,7 @@
  */
 import { execSync, spawn } from "child_process";
 import { existsSync, readFileSync, writeFileSync } from "fs";
-
-const LAST_RUN_FILE = "last_optimized.txt";
+import { LAST_RUN_FILE } from "./paths.js";
 
 const run = (label, cmd) => {
   console.log("\n" + "━".repeat(57));

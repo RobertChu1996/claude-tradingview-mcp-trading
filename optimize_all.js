@@ -7,9 +7,7 @@
  */
 
 import { readFileSync, writeFileSync, existsSync } from "fs";
-
-// symbol_pf.json 格式: { A: { BTCUSDT: 2.4, ... }, B: {...}, C: {...}, D: {...} }
-const PF_FILE = "symbol_pf.json";
+import { PF_FILE, RULES_A_FILE, RULES_B_FILE, RULES_BB_FILE, RULES_ORB_FILE, WATCHLIST_FILE } from "./paths.js";
 
 const MIN_PF     = parseFloat(process.argv[2] || "0.9");
 const MIN_TRADES = parseInt(process.argv[3]  || "3");
@@ -285,7 +283,7 @@ async function backtestSymbol(symbol, strat) {
 
 // ─── Rules file map ───────────────────────────────────────────────────────────
 
-const RULES_FILES = { A:"rules.json", B:"rules_dmc.json", C:"rules_bb.json", D:"rules_orb.json" };
+const RULES_FILES = { A: RULES_A_FILE, B: RULES_B_FILE, C: RULES_BB_FILE, D: RULES_ORB_FILE };
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 

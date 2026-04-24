@@ -13,6 +13,7 @@ import "dotenv/config";
 import { readFileSync, writeFileSync, existsSync, appendFileSync } from "fs";
 import crypto from "crypto";
 import { execSync } from "child_process";
+import { LOG_FILE, POSITIONS_FILE, PF_FILE, CSV_FILE } from "./paths.js";
 
 // ─── Onboarding ───────────────────────────────────────────────────────────────
 
@@ -87,9 +88,6 @@ const CONFIG = {
   },
 };
 
-const LOG_FILE = "safety-check-log.json";
-const POSITIONS_FILE = "positions.json";
-const PF_FILE = "symbol_pf.json";
 
 function getPFMultiplier(symbol) {
   try {
@@ -557,8 +555,6 @@ async function placeOKXOrder(symbol, side, sizeUSD, price, stopLossPrice) {
 }
 
 // ─── Tax CSV Logging ─────────────────────────────────────────────────────────
-
-const CSV_FILE = "trades.csv";
 
 // Always ensure trades.csv exists with headers — open it in Excel/Sheets any time
 function initCsv() {

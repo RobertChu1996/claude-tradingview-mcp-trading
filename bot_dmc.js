@@ -7,6 +7,7 @@
 import "dotenv/config";
 import { readFileSync, writeFileSync, existsSync, appendFileSync } from "fs";
 import crypto from "crypto";
+import { LOG_DMC_FILE as LOG_FILE, POSITIONS_DMC_FILE as POSITIONS_FILE, CSV_DMC_FILE as CSV_FILE, RULES_B_FILE } from "./paths.js";
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
@@ -24,9 +25,6 @@ const CONFIG = {
   },
 };
 
-const LOG_FILE = "safety-check-log-dmc.json";
-const POSITIONS_FILE = "positions_dmc.json";
-const CSV_FILE = "trades_dmc.csv";
 const CSV_HEADERS = "Date,Time (UTC),Exchange,Symbol,Side,Quantity,Price,Total USD,Fee (est.),Net Amount,Order ID,Mode,Notes";
 
 // ─── Market Data ─────────────────────────────────────────────────────────────
@@ -456,7 +454,7 @@ async function run() {
   console.log(`  Mode: ${CONFIG.paperTrading ? "📋 PAPER TRADING" : "🔴 LIVE TRADING"}`);
   console.log("═══════════════════════════════════════════════════════════");
 
-  const rules     = JSON.parse(readFileSync("rules_dmc.json", "utf8"));
+  const rules     = JSON.parse(readFileSync(RULES_B_FILE, "utf8"));
   const watchlist = rules.watchlist;
   console.log(`\nStrategy: ${rules.strategy.name}`);
   console.log(`Watchlist: ${watchlist.length} 個幣種 | Timeframe: ${CONFIG.timeframe}`);

@@ -7,6 +7,7 @@
 import "dotenv/config";
 import { readFileSync, writeFileSync, existsSync, appendFileSync } from "fs";
 import crypto from "crypto";
+import { LOG_BB_FILE as LOG_FILE, POSITIONS_BB_FILE as POSITIONS_FILE, STATS_FILE, PF_FILE, CSV_BB_FILE as CSV_FILE, RULES_BB_FILE } from "./paths.js";
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
@@ -24,11 +25,6 @@ const CONFIG = {
   },
 };
 
-const LOG_FILE       = "safety-check-log-bb.json";
-const POSITIONS_FILE = "positions_bb.json";
-const STATS_FILE     = "symbol_stats.json";
-const PF_FILE        = "symbol_pf.json";
-const CSV_FILE       = "trades_bb.csv";
 const CSV_HEADERS    = "Date,Time (UTC),Exchange,Symbol,Side,Quantity,Price,Total USD,Fee (est.),Net Amount,Order ID,Mode,Notes";
 const MAX_CONSEC_LOSSES = 3; // 連虧幾次後暫停該幣
 
@@ -479,7 +475,7 @@ async function run() {
   console.log(`  Mode: ${CONFIG.paperTrading ? "📋 PAPER TRADING" : "🔴 LIVE TRADING"}`);
   console.log("═══════════════════════════════════════════════════════════");
 
-  const rules     = JSON.parse(readFileSync("rules_bb.json", "utf8"));
+  const rules     = JSON.parse(readFileSync(RULES_BB_FILE, "utf8"));
   const watchlist = rules.watchlist;
   console.log(`\nStrategy: ${rules.strategy.name}`);
   console.log(`Watchlist: ${watchlist.length} 個幣種 | Timeframe: ${CONFIG.timeframe}`);
