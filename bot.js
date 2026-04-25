@@ -903,6 +903,17 @@ async function runSymbol(symbol, rules, log, positions) {
     return false;
   }
 
+  if (positions.open.length >= 4) {
+    console.log(`  🚫 [${symbol}] 已達最大持倉數(4)，跳過`);
+    return false;
+  }
+
+  const adx14 = calcADX(candles, 14);
+  if (adx14 < 20) {
+    console.log(`  📉 [${symbol}] ADX=${adx14.toFixed(1)} < 20，趨勢不足，跳過`);
+    return false;
+  }
+
   const { results, allPass } = runSafetyCheck(price, ema8, vwap, rsi3, rules);
   const side = price > vwap && price > ema8 ? "long" : "short";
   const atr14 = calcATR(candles, 14);
