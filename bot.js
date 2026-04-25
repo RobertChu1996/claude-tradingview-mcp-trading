@@ -601,9 +601,11 @@ async function closeOKXPosition(position) {
   return data.data[0];
 }
 
-// OKX 實際持倉對帳：若 OKX 止損已觸發，同步本地 positions
+// OKX 實際持倉對帳：雙向同步
+// 1. 本地有但 OKX 無 → 已被 SL/TP 觸發，寫出場記錄
+// 2. OKX 有但本地無 → 補回 positions.json（重部署或遷移後復原）
 async function reconcileWithOKX(positions) {
-  if (CONFIG.paperTrading || !positions.open.length) return;
+  if (CONFIG.paperTrading) return;
   const ts = new Date().toISOString();
   const path = "/api/v5/account/positions?instType=SWAP";
   const sig = signOKX(ts, "GET", path);
@@ -618,19 +620,23 @@ async function reconcileWithOKX(positions) {
     });
     const data = await res.json();
     if (data.code !== "0") { console.log(`  ⚠️ OKX 對帳失敗: ${data.msg}`); return; }
-    const okxOpen = new Set(data.data.map(p => p.instId.replace("-USDT-SWAP", "USDT")));
+
+    const okxPositions = (data.data || []).filter(p => parseFloat(p.pos) !== 0);
+    const okxOpen = new Set(okxPositions.map(p => p.instId.replace("-USDT-SWAP", "USDT")));
+    let changed = false;
+
+    // 1. 本地有但 OKX 無 → 已平倉
     const removed = [];
     for (const p of [...positions.open]) {
       if (okxOpen.has(p.symbol)) continue;
 
-      // 查 OKX 歷史平倉取得實際出場價和 P&L
       let exitPrice = null, realPnl = null;
       try {
-        const instId   = p.symbol.replace("USDT", "-USDT-SWAP");
-        const hTs      = new Date().toISOString();
-        const hPath    = `/api/v5/account/positions-history?instType=SWAP&instId=${instId}&limit=1`;
-        const hSig     = signOKX(hTs, "GET", hPath);
-        const hRes     = await fetch(`${CONFIG.okx.baseUrl}${hPath}`, {
+        const instId = p.symbol.replace("USDT", "-USDT-SWAP");
+        const hTs    = new Date().toISOString();
+        const hPath  = `/api/v5/account/positions-history?instType=SWAP&instId=${instId}&limit=1`;
+        const hSig   = signOKX(hTs, "GET", hPath);
+        const hRes   = await fetch(`${CONFIG.okx.baseUrl}${hPath}`, {
           headers: { "OK-ACCESS-KEY": CONFIG.okx.apiKey, "OK-ACCESS-SIGN": hSig,
             "OK-ACCESS-TIMESTAMP": hTs, "OK-ACCESS-PASSPHRASE": CONFIG.okx.passphrase },
         });
@@ -646,7 +652,6 @@ async function reconcileWithOKX(positions) {
       positions.closed.push({ ...p, exitPrice, exitTime: new Date().toISOString(), exitReason, pnl: realPnl });
       removed.push(p.symbol);
 
-      // 補寫出場 CSV
       if (exitPrice !== null) {
         const now = new Date();
         appendFileSync(CSV_FILE, [
@@ -661,9 +666,29 @@ async function reconcileWithOKX(positions) {
           `"${exitReason}"`,
         ].join(",") + "\n");
       }
+      changed = true;
     }
     positions.open = positions.open.filter(p => !removed.includes(p.symbol));
-    if (removed.length) savePositions(positions);
+
+    // 2. OKX 有但本地無 → 補回（重部署或遷移後復原）
+    for (const okxPos of okxPositions) {
+      const symbol = okxPos.instId.replace("-USDT-SWAP", "USDT");
+      if (positions.open.some(p => p.symbol === symbol)) continue;
+      const entryPrice = parseFloat(okxPos.avgPx);
+      const side = okxPos.posSide; // "long" or "short"
+      console.log(`  📥 [對帳] 從OKX補回持倉: ${symbol} ${side} @${entryPrice}`);
+      positions.open.push({
+        symbol, side, entryPrice,
+        entryTime: new Date(parseInt(okxPos.cTime || Date.now())).toISOString(),
+        tradeSize: 0, quantity: 0,
+        orderId: null, algoId: null,
+        stopLoss: 0, riskAmount: 0,
+        syncedFromOKX: true,
+      });
+      changed = true;
+    }
+
+    if (changed) savePositions(positions);
   } catch (e) {
     console.log(`  ⚠️ OKX 對帳例外: ${e.message}`);
   }
