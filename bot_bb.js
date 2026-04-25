@@ -7,6 +7,7 @@
 import "dotenv/config";
 import { readFileSync, writeFileSync, existsSync, appendFileSync } from "fs";
 import crypto from "crypto";
+import { spawn } from "child_process";
 import { LOG_BB_FILE as LOG_FILE, POSITIONS_BB_FILE as POSITIONS_FILE, STATS_FILE, PF_FILE, CSV_BB_FILE as CSV_FILE, RULES_BB_FILE } from "./paths.js";
 
 // ─── Config ──────────────────────────────────────────────────────────────────
@@ -94,18 +95,12 @@ function runBBSafetyCheck(candles) {
 
   const check = (label, required, actual, pass) => {
     results.push({ label, required, actual, pass });
-    console.log(`  ${pass ? "✅" : "🚫"} ${label}`);
-    console.log(`     Required: ${required} | Actual: ${actual}`);
+    // 靜默記錄，不輸出每條條件
   };
 
-  console.log("\n── BB 安全檢查 ──────────────────────────────────────────\n");
-  console.log(`  BB 上軌: $${bb.upper.toFixed(4)} | 中軌: $${bb.middle.toFixed(4)} | 下軌: $${bb.lower.toFixed(4)}`);
-  console.log(`  ATR: ${atr.toFixed(4)} | ATR均值: ${atrAvg.toFixed(4)} | 波動: ${atrExpanding ? "擴張" : "收縮"}`);
-  console.log(`  量比: ${volRatio.toFixed(2)}x | SMA20 趨勢: ${smaTrend}\n`);
 
   if (breakoutLong) {
     side = "long";
-    console.log("  方向: 突破上軌，檢查做多條件\n");
     check("收盤突破 BB 上軌", `> ${bb.upper.toFixed(4)}`, price.toFixed(4), breakoutLong);
     check("成交量放大", "> 1.5x 均量", `${volRatio.toFixed(2)}x`, volRatio > 1.5);
     check("SMA20 向上（趨勢確認）", "rising", smaTrend, smaTrend === "rising");
@@ -113,14 +108,12 @@ function runBBSafetyCheck(candles) {
 
   } else if (breakoutShort) {
     side = "short";
-    console.log("  方向: 跌破下軌，檢查做空條件\n");
     check("收盤跌破 BB 下軌", `< ${bb.lower.toFixed(4)}`, price.toFixed(4), breakoutShort);
     check("成交量放大", "> 1.5x 均量", `${volRatio.toFixed(2)}x`, volRatio > 1.5);
     check("SMA20 向下（趨勢確認）", "falling", smaTrend, smaTrend === "falling");
     check("ATR 擴張（動能充足）", "> ATR均值", `${atr.toFixed(4)} vs ${atrAvg.toFixed(4)}`, atrExpanding);
 
   } else {
-    console.log(`  價格在布林帶內 ($${bb.lower.toFixed(4)} ~ $${bb.upper.toFixed(4)})，等待突破。\n`);
     results.push({ label: "BB 突破", required: "突破上軌或下軌", actual: `帶內 $${price.toFixed(4)}`, pass: false });
   }
 
@@ -242,18 +235,48 @@ function signOKX(ts, method, path, body = "") {
   return crypto.createHmac("sha256", CONFIG.okx.secretKey).update(`${ts}${method}${path}${body}`).digest("base64");
 }
 
+const _contractSpecCache = {};
+async function fetchContractSpec(instId) {
+  if (_contractSpecCache[instId]) return _contractSpecCache[instId];
+  const res = await fetch(`${CONFIG.okx.baseUrl}/api/v5/public/instruments?instType=SWAP&instId=${instId}`);
+  const d = await res.json();
+  const inst = d.data?.[0];
+  if (!inst) throw new Error(`找不到合約規格: ${instId}`);
+  const spec = { ctVal: parseFloat(inst.ctVal), minSz: parseFloat(inst.minSz), lotSz: parseFloat(inst.lotSz) };
+  _contractSpecCache[instId] = spec;
+  return spec;
+}
+
+function floorToLot(value, lotSz) {
+  const factor = Math.pow(10, Math.round(-Math.log10(lotSz)));
+  return Math.floor(value * factor) / factor;
+}
+
 async function placeOKXOrder(symbol, side, sizeUSD, price, stopLossPrice) {
   const tradeMode = process.env.TRADE_MODE || "spot";
   const instId = tradeMode === "spot"
     ? symbol.replace("USDT", "-USDT")
     : symbol.replace("USDT", "-USDT-SWAP");
-  const quantity = (sizeUSD / price).toFixed(6);
+
+  let sz;
+  if (tradeMode === "futures") {
+    const spec = await fetchContractSpec(instId);
+    const rawContracts = sizeUSD / (price * spec.ctVal);
+    sz = String(floorToLot(rawContracts, spec.lotSz));
+    if (parseFloat(sz) < spec.minSz) {
+      throw new Error(`倉位不足最小下單量：需 ${spec.minSz} 張，只能買 ${sz} 張 (ctVal=${spec.ctVal})`);
+    }
+    console.log(`  合約規格: ctVal=${spec.ctVal}, 張數=${sz}`);
+  } else {
+    sz = (sizeUSD / price).toFixed(6);
+  }
+
   const ts   = new Date().toISOString();
   const path = "/api/v5/trade/order";
   const bodyObj = tradeMode === "spot"
-    ? { instId, tdMode: "cash", side, ordType: "market", sz: quantity }
+    ? { instId, tdMode: "cash", side, ordType: "market", sz }
     : { instId, tdMode: "isolated", lever: String(process.env.LEVERAGE || "1"),
-        side, posSide: side === "buy" ? "long" : "short", ordType: "market", sz: quantity };
+        side, posSide: side === "buy" ? "long" : "short", ordType: "market", sz };
   const body = JSON.stringify(bodyObj);
   const res = await fetch(`${CONFIG.okx.baseUrl}${path}`, {
     method: "POST",
@@ -271,14 +294,21 @@ async function placeOKXOrder(symbol, side, sizeUSD, price, stopLossPrice) {
   const order = data.data[0];
 
   if (tradeMode === "futures" && stopLossPrice) {
-    const slSide = side === "buy" ? "sell" : "buy";
-    const slTs = new Date().toISOString();
+    const exitSide   = side === "buy" ? "sell" : "buy";
+    const exitPosSide = side === "buy" ? "long" : "short";
+    // Strategy C SL = entryCandle.low/high ± ATR×0.5；TP = 進場價 ± |進場-SL| × 2（2:1 R:R）
+    // OKX 市價單回應不含 avgPx，用下單時的 price 估算（誤差極小）
+    const tpPx       = side === "buy"
+      ? price + Math.abs(price - stopLossPrice) * 2
+      : price - Math.abs(price - stopLossPrice) * 2;
+    const slTs   = new Date().toISOString();
     const slPath = "/api/v5/trade/order-algo";
     const slBody = JSON.stringify({
-      instId, tdMode: "isolated", side: slSide,
-      posSide: side === "buy" ? "long" : "short",
-      ordType: "conditional", sz: quantity,
+      instId, tdMode: "isolated", side: exitSide,
+      posSide: exitPosSide,
+      ordType: "conditional", sz,
       slTriggerPx: stopLossPrice.toFixed(8), slOrdPx: "-1", slTriggerPxType: "last",
+      tpTriggerPx: tpPx.toFixed(8),          tpOrdPx: "-1", tpTriggerPxType: "last",
     });
     const slSig = signOKX(slTs, "POST", slPath, slBody);
     const slRes = await fetch(`${CONFIG.okx.baseUrl}${slPath}`, {
@@ -288,9 +318,47 @@ async function placeOKXOrder(symbol, side, sizeUSD, price, stopLossPrice) {
       body: slBody,
     });
     const slData = await slRes.json();
-    console.log(slData.code === "0" ? `  🛡️ 止損單已掛 → ${stopLossPrice.toFixed(6)}` : `  ⚠️ 止損單失敗 — ${slData.msg}`);
+    if (slData.code === "0") {
+      order.algoId = slData.data?.[0]?.algoId;
+      console.log(`  🛡️ SL:${stopLossPrice.toFixed(6)} | 🎯 TP:${tpPx.toFixed(6)}`);
+    } else {
+      console.log(`  ⚠️ SL/TP 掛單失敗 — ${slData.msg}`);
+    }
   }
   return order;
+}
+
+async function closeOKXPosition(position) {
+  const instId      = position.symbol.replace("USDT", "-USDT-SWAP");
+  const exitSide    = position.side === "long" ? "sell" : "buy";
+  const exitPosSide = position.side === "long" ? "long" : "short";
+
+  if (position.algoId) {
+    const ts   = new Date().toISOString();
+    const path = "/api/v5/trade/cancel-algos";
+    const body = JSON.stringify([{ algoId: position.algoId, instId }]);
+    await fetch(`${CONFIG.okx.baseUrl}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "OK-ACCESS-KEY": CONFIG.okx.apiKey,
+        "OK-ACCESS-SIGN": signOKX(ts, "POST", path, body), "OK-ACCESS-TIMESTAMP": ts, "OK-ACCESS-PASSPHRASE": CONFIG.okx.passphrase },
+      body,
+    });
+  }
+
+  const spec = await fetchContractSpec(instId);
+  const sz   = String(floorToLot(position.quantity / spec.ctVal, spec.lotSz));
+  const ts   = new Date().toISOString();
+  const path = "/api/v5/trade/order";
+  const body = JSON.stringify({ instId, tdMode: "isolated", side: exitSide, posSide: exitPosSide, ordType: "market", sz });
+  const res  = await fetch(`${CONFIG.okx.baseUrl}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "OK-ACCESS-KEY": CONFIG.okx.apiKey,
+      "OK-ACCESS-SIGN": signOKX(ts, "POST", path, body), "OK-ACCESS-TIMESTAMP": ts, "OK-ACCESS-PASSPHRASE": CONFIG.okx.passphrase },
+    body,
+  });
+  const data = await res.json();
+  if (data.code !== "0") throw new Error(`OKX 平倉失敗: ${data.msg}`);
+  return data.data[0];
 }
 
 async function reconcileWithOKX(positions) {
@@ -310,12 +378,48 @@ async function reconcileWithOKX(positions) {
     const data = await res.json();
     if (data.code !== "0") { console.log(`  ⚠️ OKX 對帳失敗: ${data.msg}`); return; }
     const okxOpen = new Set(data.data.map(p => p.instId.replace("-USDT-SWAP", "USDT")));
-    positions.open = positions.open.filter(p => {
-      if (okxOpen.has(p.symbol)) return true;
-      console.log(`  🔔 [對帳] ${p.symbol} 已在OKX平倉（止損觸發），同步本地狀態`);
-      positions.closed.push({ ...p, exitTime: new Date().toISOString(), exitReason: "OKX止損觸發", pnl: null });
-      return false;
-    });
+    const removed = [];
+    for (const p of [...positions.open]) {
+      if (okxOpen.has(p.symbol)) continue;
+
+      let exitPrice = null, realPnl = null;
+      try {
+        const instId = p.symbol.replace("USDT", "-USDT-SWAP");
+        const hTs    = new Date().toISOString();
+        const hPath  = `/api/v5/account/positions-history?instType=SWAP&instId=${instId}&limit=1`;
+        const hSig   = signOKX(hTs, "GET", hPath);
+        const hRes   = await fetch(`${CONFIG.okx.baseUrl}${hPath}`, {
+          headers: { "OK-ACCESS-KEY": CONFIG.okx.apiKey, "OK-ACCESS-SIGN": hSig,
+            "OK-ACCESS-TIMESTAMP": hTs, "OK-ACCESS-PASSPHRASE": CONFIG.okx.passphrase },
+        });
+        const hData = await hRes.json();
+        if (hData.code === "0" && hData.data?.[0]) {
+          exitPrice = parseFloat(hData.data[0].closeAvgPx);
+          realPnl   = parseFloat(hData.data[0].realizedPnl);
+        }
+      } catch (_) {}
+
+      const exitReason = "OKX SL/TP 觸發";
+      console.log(`  🔔 [BB對帳] ${p.symbol} 已平倉 | 出場$${exitPrice?.toFixed(4) ?? "?"} | P&L $${realPnl?.toFixed(4) ?? "?"}`);
+      positions.closed.push({ ...p, exitPrice, exitTime: new Date().toISOString(), exitReason, pnl: realPnl });
+      removed.push(p.symbol);
+
+      if (exitPrice !== null) {
+        const now = new Date();
+        appendFileSync(CSV_FILE, [
+          now.toISOString().slice(0, 10), now.toISOString().slice(11, 19),
+          "OKX", p.symbol, p.side === "long" ? "SELL" : "BUY",
+          p.quantity.toFixed(6), exitPrice.toFixed(4),
+          Math.abs(realPnl + p.tradeSize).toFixed(2),
+          (Math.abs(realPnl + p.tradeSize) * 0.001).toFixed(4),
+          realPnl.toFixed(4),
+          `EXIT-OKX-${Date.now()}`,
+          "LIVE",
+          `"OKX SL/TP 觸發"`,
+        ].join(",") + "\n");
+      }
+    }
+    positions.open = positions.open.filter(p => !removed.includes(p.symbol));
     savePositions(positions);
   } catch (e) {
     console.log(`  ⚠️ OKX 對帳例外: ${e.message}`);
@@ -370,38 +474,40 @@ function generateStats() {
 // ─── Run Symbol ──────────────────────────────────────────────────────────────
 
 async function runSymbol(symbol, log, positions) {
-  console.log(`\n${"─".repeat(57)}`);
-  console.log(`  [BB] ${symbol}`);
-  console.log(`${"─".repeat(57)}`);
-
-  // 連虧暫停檢查（持倉中的幣不受此限，允許正常出場）
   const hasOpenPos = positions.open.some((p) => p.symbol === symbol);
   if (!hasOpenPos && isSymbolPaused(symbol)) return false;
 
   const candles = await fetchCandles(symbol, CONFIG.timeframe, 60);
   const price   = candles[candles.length - 1].close;
-  console.log(`\n  Current price: $${price.toFixed(4)}`);
 
   // 出場優先
   const openPos = positions.open.find((p) => p.symbol === symbol);
   if (openPos) {
     const newStop = updateTrailingStop(openPos, price);
     if (newStop !== null) {
-      console.log(`  📈 追蹤止損更新：$${openPos.stopLoss.toFixed(6)} → $${newStop.toFixed(6)}`);
+      console.log(`  📈 [BB:${symbol}] 追蹤止損：$${openPos.stopLoss.toFixed(6)} → $${newStop.toFixed(6)}`);
       openPos.stopLoss = newStop;
       savePositions(positions);
     }
-    console.log(`\n── 持倉檢查 (${openPos.side.toUpperCase()} 進場價: $${openPos.entryPrice.toFixed(4)} | 止損: $${openPos.stopLoss.toFixed(6)}) ──\n`);
     const { exit, reason } = checkBBExit(openPos, candles);
     if (exit) {
+      if (!CONFIG.paperTrading) {
+        try {
+          await closeOKXPosition(openPos);
+          console.log(`  📤 [BB:${symbol}] OKX平倉送出`);
+        } catch (err) {
+          console.log(`  ⚠️ [BB:${symbol}] OKX平倉失敗 — ${err.message}（本地狀態仍會更新）`);
+        }
+      }
+
       const pnl = openPos.side === "long"
         ? (price - openPos.entryPrice) * openPos.quantity
         : (openPos.entryPrice - price) * openPos.quantity;
       const win = pnl > 0;
-      console.log(`  ${win ? "✅" : "🔴"} 出場：${reason} | P&L: $${pnl.toFixed(4)}`);
+      console.log(`  ${win ? "✅" : "🔴"} [BB:${symbol}] 出場：${reason} | P&L: $${pnl.toFixed(4)}`);
       const symStats = updateSymbolStats(symbol, win);
       if (!win && symStats.consecutiveLosses >= MAX_CONSEC_LOSSES)
-        console.log(`  ⚠️  ${symbol} 累計連虧 ${symStats.consecutiveLosses} 次，下次掃描暫停`);
+        console.log(`  ⚠️  [BB:${symbol}] 連虧${symStats.consecutiveLosses}次，暫停`);
       positions.open = positions.open.filter((p) => p.symbol !== symbol);
       positions.closed.push({ ...openPos, exitPrice: price, exitTime: new Date().toISOString(), exitReason: reason, pnl, win, paperTrading: CONFIG.paperTrading });
       savePositions(positions);
@@ -415,27 +521,21 @@ async function runSymbol(symbol, log, positions) {
         CONFIG.paperTrading ? "PAPER" : "LIVE",
         `"出場: ${reason} | P&L: $${pnl.toFixed(4)}"`,
       ].join(",") + "\n");
-    } else {
-      console.log(`  持倉中，繼續持有。`);
     }
     return false;
   }
 
-  // 進場
-  if (countTodaysTrades(log) >= CONFIG.maxTradesPerDay) {
-    console.log("  跳過 — 今日上限已達。");
-    return false;
-  }
+  if (countTodaysTrades(log) >= CONFIG.maxTradesPerDay) return false;
+  if (price < 0.001) return false;
 
   const { results, allPass, side, atr } = runBBSafetyCheck(candles);
-
-  // 策略C 止損：進場K棒最低/高點 ± ATR×0.5 buffer（BB突破失效才出場）
   const entryCandle = candles[candles.length - 1];
   const stopLoss = side === "long"
-    ? entryCandle.low - atr * 0.5    // 多單：進場棒最低點下方半個ATR
-    : entryCandle.high + atr * 0.5;  // 空單：進場棒最高點上方半個ATR
+    ? entryCandle.low - atr * 0.5
+    : entryCandle.high + atr * 0.5;
+  const slPct = Math.abs(price - stopLoss) / price * 100;
+  if (allPass && (slPct < 1.0 || slPct > 5)) return false;
 
-  // 動態風險倉位：PF加權 × 本金1%
   const pfMult      = getPFMultiplier(symbol);
   const riskAmount  = CONFIG.portfolioValue * 0.01 * pfMult;
   const stopLossPct = Math.abs(price - stopLoss) / price;
@@ -443,8 +543,6 @@ async function runSymbol(symbol, log, positions) {
   const rawSize     = stopLossPct > 0.001 ? riskAmount / stopLossPct : riskAmount;
   const tradeSize   = Math.min(rawSize, CONFIG.portfolioValue * maxLeverage, CONFIG.maxTradeSizeUSD);
   const quantity    = tradeSize / price;
-
-  console.log("\n── 決策 ─────────────────────────────────────────────────\n");
 
   const logEntry = {
     timestamp: new Date().toISOString(), symbol,
@@ -454,25 +552,25 @@ async function runSymbol(symbol, log, positions) {
     paperTrading: CONFIG.paperTrading,
   };
 
-  if (!allPass) {
-    const failed = results.filter((r) => !r.pass).map((r) => r.label);
-    console.log(`🚫 不進場`);
-    failed.forEach((f) => console.log(`   - ${f}`));
-  } else {
-    console.log(`✅ BB 突破確認 — ${side.toUpperCase()} ${symbol}`);
-    console.log(`   止損: $${stopLoss.toFixed(4)} (ATR×1.5 = ${(atr*1.5).toFixed(4)})`);
+  if (allPass) {
+    console.log(`✅ [BB] 信號 — ${side.toUpperCase()} ${symbol} | 價$${price.toFixed(4)} | SL$${stopLoss.toFixed(4)}`);
 
     if (CONFIG.paperTrading) {
-      console.log(`\n📋 紙上交易 — ${side} ${symbol}`);
-      console.log(`   倉位: $${tradeSize.toFixed(2)} | 風險: $${riskAmount.toFixed(2)} (本金1%) | 止損: ${stopLoss.toFixed(6)} (ATR×1.5=${stopLossPct.toFixed(3)*100}%)`);
+      console.log(`   📋 模擬 $${tradeSize.toFixed(2)}`);
       logEntry.orderPlaced = true;
       logEntry.orderId = `BB-PAPER-${Date.now()}`;
     } else {
       try {
         const order = await placeOKXOrder(symbol, side === "long" ? "buy" : "sell", tradeSize, price, stopLoss);
         logEntry.orderPlaced = true;
-        logEntry.orderId = order.orderId;
-        console.log(`✅ 訂單成立 — ${order.orderId}`);
+        logEntry.orderId = order.ordId;
+        logEntry.algoId = order.algoId;
+        console.log(`   🔴 下單成功 — ordId:${order.ordId}`);
+
+        // TradingView 標記（本地有 TradingView 才執行，Railway 自動跳過）
+        const tp = side === "long" ? price + Math.abs(price - stopLoss) * 2 : price - Math.abs(price - stopLoss) * 2;
+        spawn("node", ["tv_mark_trade.js", symbol, side, String(price), String(stopLoss), String(tp)],
+          { detached: true, stdio: "ignore" }).unref();
       } catch (err) {
         console.log(`❌ 下單失敗 — ${err.message}`);
         logEntry.error = err.message;
@@ -480,7 +578,7 @@ async function runSymbol(symbol, log, positions) {
     }
 
     if (logEntry.orderPlaced) {
-      positions.open.push({ symbol, side, entryPrice: price, entryTime: new Date().toISOString(), tradeSize, quantity, orderId: logEntry.orderId, stopLoss, riskAmount });
+      positions.open.push({ symbol, side, entryPrice: price, entryTime: new Date().toISOString(), tradeSize, quantity, orderId: logEntry.orderId, algoId: logEntry.algoId, stopLoss, riskAmount });
       savePositions(positions);
       appendFileSync(CSV_FILE, [
         new Date().toISOString().slice(0,10), new Date().toISOString().slice(11,19),
@@ -502,32 +600,17 @@ async function runSymbol(symbol, log, positions) {
 
 async function run() {
   initCsv();
-  console.log("═══════════════════════════════════════════════════════════");
-  console.log("  BB+ATR Trading Bot");
-  console.log(`  ${new Date().toISOString()}`);
-  console.log(`  Mode: ${CONFIG.paperTrading ? "📋 PAPER TRADING" : "🔴 LIVE TRADING"}`);
-  console.log("═══════════════════════════════════════════════════════════");
-
   const rules     = JSON.parse(readFileSync(RULES_BB_FILE, "utf8"));
   const watchlist = rules.watchlist;
-  console.log(`\nStrategy: ${rules.strategy.name}`);
-  console.log(`Watchlist: ${watchlist.length} 個幣種 | Timeframe: ${CONFIG.timeframe}`);
-
   const log       = loadLog();
   const positions = loadPositions();
 
-  // OKX 持倉對帳：修正 OKX 已止損但本地未更新的狀態
+  console.log(`[BB] ${new Date().toISOString()} | ${CONFIG.paperTrading ? "PAPER" : "LIVE"} | ${watchlist.length}幣 | 持倉:${positions.open.length}`);
+
   await reconcileWithOKX(positions);
 
-  if (positions.open.length > 0)
-    console.log(`\n目前持倉: ${positions.open.map((p) => `${p.side.toUpperCase()} ${p.symbol}`).join(", ")}`);
-
-  // 先管理不在當前名單的孤立持倉（避免踢出名單後止損失效）
   const orphans = positions.open.filter(p => !watchlist.includes(p.symbol));
-  if (orphans.length > 0) {
-    console.log(`\n[BB] 孤立持倉管理: ${orphans.map(p => p.symbol).join(", ")}`);
-    for (const p of orphans) await runSymbol(p.symbol, log, positions);
-  }
+  for (const p of orphans) await runSymbol(p.symbol, log, positions);
 
   for (const symbol of watchlist) {
     const hasOpen = positions.open.some((p) => p.symbol === symbol);
@@ -537,9 +620,7 @@ async function run() {
     await runSymbol(symbol, log, positions);
   }
 
-  console.log("\n═══════════════════════════════════════════════════════════");
-  console.log("  BB+ATR 掃描完成");
-  console.log("═══════════════════════════════════════════════════════════\n");
+  console.log(`[BB] 掃描完成`);
 }
 
 if (process.argv.includes("--stats")) {

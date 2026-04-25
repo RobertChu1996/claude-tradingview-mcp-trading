@@ -12,7 +12,7 @@
 import "dotenv/config";
 import { readFileSync, writeFileSync, existsSync, appendFileSync } from "fs";
 import crypto from "crypto";
-import { execSync } from "child_process";
+import { execSync, spawn } from "child_process";
 import { LOG_FILE, POSITIONS_FILE, PF_FILE, CSV_FILE, RULES_A_FILE } from "./paths.js";
 
 // ─── Onboarding ───────────────────────────────────────────────────────────────
@@ -74,7 +74,7 @@ function checkOnboarding() {
 
 const CONFIG = {
   symbol: process.env.SYMBOL || "BTCUSDT",
-  timeframe: process.env.TIMEFRAME || "4H",
+  timeframe: process.env.TIMEFRAME || "1m",
   portfolioValue: parseFloat(process.env.PORTFOLIO_VALUE_USD || "1000"),
   maxTradeSizeUSD: parseFloat(process.env.MAX_TRADE_SIZE_USD || "100"),
   maxTradesPerDay: parseInt(process.env.MAX_TRADES_PER_DAY || "20"),
@@ -134,12 +134,23 @@ function updateTrailingStop(position, currentPrice) {
   return null;
 }
 
+function recentlyClosed(symbol, positions, hoursBack = 4) {
+  const cutoff = Date.now() - hoursBack * 60 * 60 * 1000;
+  return (positions.closed || []).some(
+    p => p.symbol === symbol && new Date(p.exitTime).getTime() > cutoff
+  );
+}
+
 function checkExitConditions(position, price, ema8, vwap, rsi3) {
-  const { side, stopLoss } = position;
+  const { side, stopLoss, entryPrice } = position;
+  const initialRisk = Math.abs(entryPrice - stopLoss);
+  const tp = side === "long" ? entryPrice + initialRisk * 2 : entryPrice - initialRisk * 2;
 
   if (side === "long") {
     if (price <= stopLoss)
       return { exit: true, reason: `止損觸發 $${stopLoss.toFixed(6)}` };
+    if (price >= tp)
+      return { exit: true, reason: `2:1止盈達成 $${tp.toFixed(6)}` };
     if (price <= vwap)
       return { exit: true, reason: "價格跌破 VWAP（多頭論點失效）" };
     if (price < ema8)
@@ -149,6 +160,8 @@ function checkExitConditions(position, price, ema8, vwap, rsi3) {
   } else {
     if (price >= stopLoss)
       return { exit: true, reason: `止損觸發 $${stopLoss.toFixed(6)}` };
+    if (price <= tp)
+      return { exit: true, reason: `2:1止盈達成 $${tp.toFixed(6)}` };
     if (price >= vwap)
       return { exit: true, reason: "價格突破 VWAP（空頭論點失效）" };
     if (price > ema8)
@@ -315,6 +328,27 @@ function calcATR(candles, period = 14) {
   return trs.slice(-period).reduce((a, b) => a + b, 0) / period;
 }
 
+function calcADX(candles, period = 14) {
+  if (candles.length < period + 2) return 0;
+  const dms = candles.slice(1).map((c, i) => {
+    const upMove = c.high - candles[i].high;
+    const downMove = candles[i].low - c.low;
+    return {
+      plus: upMove > downMove && upMove > 0 ? upMove : 0,
+      minus: downMove > upMove && downMove > 0 ? downMove : 0,
+      tr: Math.max(c.high - c.low, Math.abs(c.high - candles[i].close), Math.abs(c.low - candles[i].close)),
+    };
+  });
+  const s = dms.slice(-period);
+  const sumTR = s.reduce((a, d) => a + d.tr, 0);
+  const sumP  = s.reduce((a, d) => a + d.plus, 0);
+  const sumM  = s.reduce((a, d) => a + d.minus, 0);
+  if (!sumTR) return 0;
+  const diP = sumP / sumTR * 100;
+  const diM = sumM / sumTR * 100;
+  return Math.abs(diP - diM) / ((diP + diM) || 1) * 100;
+}
+
 // 最近 N 根K棒的擺動低點/高點（含 buffer）
 function swingStop(candles, side, lookback = 8, bufferMult = 0.1) {
   const recent = candles.slice(-lookback - 1, -1); // 不含當根
@@ -332,94 +366,24 @@ function swingStop(candles, side, lookback = 8, bufferMult = 0.1) {
 
 function runSafetyCheck(price, ema8, vwap, rsi3, rules) {
   const results = [];
+  const check = (label, required, actual, pass) => results.push({ label, required, actual, pass });
 
-  const check = (label, required, actual, pass) => {
-    results.push({ label, required, actual, pass });
-    const icon = pass ? "✅" : "🚫";
-    console.log(`  ${icon} ${label}`);
-    console.log(`     Required: ${required} | Actual: ${actual}`);
-  };
-
-  console.log("\n── Safety Check ─────────────────────────────────────────\n");
-
-  // Determine bias first
   const bullishBias = price > vwap && price > ema8;
   const bearishBias = price < vwap && price < ema8;
+  const distFromVWAP = Math.abs((price - vwap) / vwap) * 100;
 
   if (bullishBias) {
-    console.log("  Bias: BULLISH — checking long entry conditions\n");
-
-    // 1. Price above VWAP
-    check(
-      "Price above VWAP (buyers in control)",
-      `> ${vwap.toFixed(2)}`,
-      price.toFixed(2),
-      price > vwap,
-    );
-
-    // 2. Price above EMA(8)
-    check(
-      "Price above EMA(8) (uptrend confirmed)",
-      `> ${ema8.toFixed(2)}`,
-      price.toFixed(2),
-      price > ema8,
-    );
-
-    // 3. RSI(3) pullback
-    check(
-      "RSI(3) below 30 (snap-back setup in uptrend)",
-      "< 30",
-      rsi3.toFixed(2),
-      rsi3 < 30,
-    );
-
-    // 4. Not overextended from VWAP
-    const distFromVWAP = Math.abs((price - vwap) / vwap) * 100;
-    check(
-      "Price within 1.5% of VWAP (not overextended)",
-      "< 1.5%",
-      `${distFromVWAP.toFixed(2)}%`,
-      distFromVWAP < 1.5,
-    );
+    check("Price above VWAP (buyers in control)", `> ${vwap.toFixed(2)}`, price.toFixed(2), price > vwap);
+    check("Price above EMA(8) (uptrend confirmed)", `> ${ema8.toFixed(2)}`, price.toFixed(2), price > ema8);
+    check("RSI(3) below 30 (snap-back setup in uptrend)", "< 30", rsi3.toFixed(2), rsi3 < 30);
+    check("Price within 1.5% of VWAP (not overextended)", "< 1.5%", `${distFromVWAP.toFixed(2)}%`, distFromVWAP < 1.5);
   } else if (bearishBias) {
-    console.log("  Bias: BEARISH — checking short entry conditions\n");
-
-    check(
-      "Price below VWAP (sellers in control)",
-      `< ${vwap.toFixed(2)}`,
-      price.toFixed(2),
-      price < vwap,
-    );
-
-    check(
-      "Price below EMA(8) (downtrend confirmed)",
-      `< ${ema8.toFixed(2)}`,
-      price.toFixed(2),
-      price < ema8,
-    );
-
-    check(
-      "RSI(3) above 70 (reversal setup in downtrend)",
-      "> 70",
-      rsi3.toFixed(2),
-      rsi3 > 70,
-    );
-
-    const distFromVWAP = Math.abs((price - vwap) / vwap) * 100;
-    check(
-      "Price within 1.5% of VWAP (not overextended)",
-      "< 1.5%",
-      `${distFromVWAP.toFixed(2)}%`,
-      distFromVWAP < 1.5,
-    );
+    check("Price below VWAP (sellers in control)", `< ${vwap.toFixed(2)}`, price.toFixed(2), price < vwap);
+    check("Price below EMA(8) (downtrend confirmed)", `< ${ema8.toFixed(2)}`, price.toFixed(2), price < ema8);
+    check("RSI(3) above 70 (reversal setup in downtrend)", "> 70", rsi3.toFixed(2), rsi3 > 70);
+    check("Price within 1.5% of VWAP (not overextended)", "< 1.5%", `${distFromVWAP.toFixed(2)}%`, distFromVWAP < 1.5);
   } else {
-    console.log("  Bias: NEUTRAL — no clear direction. No trade.\n");
-    results.push({
-      label: "Market bias",
-      required: "Bullish or bearish",
-      actual: "Neutral",
-      pass: false,
-    });
+    results.push({ label: "Market bias", required: "Bullish or bearish", actual: "Neutral", pass: false });
   }
 
   const allPass = results.every((r) => r.pass);
@@ -433,26 +397,11 @@ function checkTradeLimits(log) {
 
   console.log("\n── Trade Limits ─────────────────────────────────────────\n");
 
-  if (todayCount >= CONFIG.maxTradesPerDay) {
-    console.log(
-      `🚫 Max trades per day reached: ${todayCount}/${CONFIG.maxTradesPerDay}`,
-    );
-    return false;
-  }
+  if (todayCount >= CONFIG.maxTradesPerDay) return false;
 
-  console.log(
-    `✅ Trades today: ${todayCount}/${CONFIG.maxTradesPerDay} — within limit`,
-  );
-
-  const tradeSize = Math.min(
-    CONFIG.portfolioValue * 0.01,
-    CONFIG.maxTradeSizeUSD,
-  );
+  const tradeSize = Math.min(CONFIG.portfolioValue * 0.01, CONFIG.maxTradeSizeUSD);
 
   if (tradeSize > CONFIG.maxTradeSizeUSD) {
-    console.log(
-      `🚫 Trade size $${tradeSize.toFixed(2)} exceeds max $${CONFIG.maxTradeSizeUSD}`,
-    );
     return false;
   }
 
@@ -473,19 +422,58 @@ function signOKX(timestamp, method, path, body = "") {
     .digest("base64");
 }
 
+// 取得合約規格（ctVal, minSz, lotSz），帶快取避免重複請求
+const _contractSpecCache = {};
+async function fetchContractSpec(instId) {
+  if (_contractSpecCache[instId]) return _contractSpecCache[instId];
+  const res = await fetch(
+    `${CONFIG.okx.baseUrl}/api/v5/public/instruments?instType=SWAP&instId=${instId}`
+  );
+  const d = await res.json();
+  const inst = d.data?.[0];
+  if (!inst) throw new Error(`找不到合約規格: ${instId}`);
+  const spec = {
+    ctVal:  parseFloat(inst.ctVal),
+    minSz:  parseFloat(inst.minSz),
+    lotSz:  parseFloat(inst.lotSz),
+  };
+  _contractSpecCache[instId] = spec;
+  return spec;
+}
+
+// 依 lotSz 精度向下取整
+function floorToLot(value, lotSz) {
+  const precision = Math.round(-Math.log10(lotSz));
+  const factor = Math.pow(10, precision);
+  return Math.floor(value * factor) / factor;
+}
+
 async function placeOKXOrder(symbol, side, sizeUSD, price, stopLossPrice) {
   const instId =
     CONFIG.tradeMode === "spot"
       ? symbol.replace("USDT", "-USDT")
       : symbol.replace("USDT", "-USDT-SWAP");
 
-  const quantity = (sizeUSD / price).toFixed(6);
+  // 合約模式：依 ctVal 計算正確張數
+  let sz;
+  if (CONFIG.tradeMode === "futures") {
+    const spec = await fetchContractSpec(instId);
+    const rawContracts = sizeUSD / (price * spec.ctVal);
+    sz = String(floorToLot(rawContracts, spec.lotSz));
+    if (parseFloat(sz) < spec.minSz) {
+      throw new Error(`倉位不足最小下單量：需 ${spec.minSz} 張，只能買 ${sz} 張 (ctVal=${spec.ctVal})`);
+    }
+    console.log(`  合約規格: ctVal=${spec.ctVal}, 張數=${sz} (原始=${rawContracts.toFixed(4)})`);
+  } else {
+    sz = (sizeUSD / price).toFixed(6);
+  }
+
   const timestamp = new Date().toISOString();
   const path = "/api/v5/trade/order";
 
   const bodyObj =
     CONFIG.tradeMode === "spot"
-      ? { instId, tdMode: "cash", side, ordType: "market", sz: quantity }
+      ? { instId, tdMode: "cash", side, ordType: "market", sz }
       : {
           instId,
           tdMode: "isolated",
@@ -493,7 +481,7 @@ async function placeOKXOrder(symbol, side, sizeUSD, price, stopLossPrice) {
           side,
           posSide: side === "buy" ? "long" : "short",
           ordType: "market",
-          sz: quantity,
+          sz,
         };
 
   const body = JSON.stringify(bodyObj);
@@ -516,22 +504,31 @@ async function placeOKXOrder(symbol, side, sizeUSD, price, stopLossPrice) {
 
   const order = data.data[0];
 
-  // 合約模式：同步掛止損 algo 單（防爆倉）
+  // 合約模式：同步掛止損+止盈 algo 單（OKX conditional，一單雙向）
+  // 策略A SL = VWAP ± ATR×0.15；TP = 進場價 ± |進場-SL| × 2（2:1 R:R）
   if (CONFIG.tradeMode === "futures" && stopLossPrice) {
-    const slSide = side === "buy" ? "sell" : "buy";
-    const slPosSide = side === "buy" ? "long" : "short";
-    const slTs = new Date().toISOString();
+    const exitSide    = side === "buy" ? "sell" : "buy";
+    const exitPosSide = side === "buy" ? "long" : "short";
+    // OKX 市價單回應不含 avgPx，用下單時的 price 估算（誤差極小）
+    const tpPx = side === "buy"
+      ? price + Math.abs(price - stopLossPrice) * 2
+      : price - Math.abs(price - stopLossPrice) * 2;
+
+    const slTs   = new Date().toISOString();
     const slPath = "/api/v5/trade/order-algo";
     const slBody = JSON.stringify({
       instId,
       tdMode: "isolated",
-      side: slSide,
-      posSide: slPosSide,
+      side: exitSide,
+      posSide: exitPosSide,
       ordType: "conditional",
-      sz: quantity,
-      slTriggerPx: stopLossPrice.toFixed(8),
-      slOrdPx: "-1", // market price
+      sz,
+      slTriggerPx:   stopLossPrice.toFixed(8),
+      slOrdPx:       "-1",
       slTriggerPxType: "last",
+      tpTriggerPx:   tpPx.toFixed(8),
+      tpOrdPx:       "-1",
+      tpTriggerPxType: "last",
     });
     const slSig = signOKX(slTs, "POST", slPath, slBody);
     const slRes = await fetch(`${CONFIG.okx.baseUrl}${slPath}`, {
@@ -547,13 +544,61 @@ async function placeOKXOrder(symbol, side, sizeUSD, price, stopLossPrice) {
     });
     const slData = await slRes.json();
     if (slData.code === "0") {
-      console.log(`  🛡️ 止損單已掛 → 觸發價 ${stopLossPrice.toFixed(6)}`);
+      order.algoId = slData.data?.[0]?.algoId;
+      console.log(`  🛡️ SL:${stopLossPrice.toFixed(6)} | 🎯 TP:${tpPx.toFixed(6)}`);
     } else {
-      console.log(`  ⚠️ 止損單失敗 — ${slData.msg}`);
+      console.log(`  ⚠️ SL/TP 掛單失敗 — ${slData.msg}`);
     }
   }
 
   return order;
+}
+
+// 真實交易平倉：取消 algo 單 + 下市價平倉單
+async function closeOKXPosition(position) {
+  const instId    = position.symbol.replace("USDT", "-USDT-SWAP");
+  const exitSide  = position.side === "long" ? "sell" : "buy";
+  const exitPosSide = position.side === "long" ? "long" : "short";
+
+  // 先取消 SL/TP algo 單（若有記錄 algoId）
+  if (position.algoId) {
+    const ts   = new Date().toISOString();
+    const path = "/api/v5/trade/cancel-algos";
+    const body = JSON.stringify([{ algoId: position.algoId, instId }]);
+    await fetch(`${CONFIG.okx.baseUrl}${path}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "OK-ACCESS-KEY": CONFIG.okx.apiKey,
+        "OK-ACCESS-SIGN": signOKX(ts, "POST", path, body),
+        "OK-ACCESS-TIMESTAMP": ts,
+        "OK-ACCESS-PASSPHRASE": CONFIG.okx.passphrase,
+      },
+      body,
+    });
+  }
+
+  // 計算平倉張數
+  const spec = await fetchContractSpec(instId);
+  const sz   = String(floorToLot(position.quantity / spec.ctVal, spec.lotSz));
+
+  const ts   = new Date().toISOString();
+  const path = "/api/v5/trade/order";
+  const body = JSON.stringify({ instId, tdMode: "isolated", side: exitSide, posSide: exitPosSide, ordType: "market", sz });
+  const res  = await fetch(`${CONFIG.okx.baseUrl}${path}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "OK-ACCESS-KEY": CONFIG.okx.apiKey,
+      "OK-ACCESS-SIGN": signOKX(ts, "POST", path, body),
+      "OK-ACCESS-TIMESTAMP": ts,
+      "OK-ACCESS-PASSPHRASE": CONFIG.okx.passphrase,
+    },
+    body,
+  });
+  const data = await res.json();
+  if (data.code !== "0") throw new Error(`OKX 平倉失敗: ${data.msg}`);
+  return data.data[0];
 }
 
 // OKX 實際持倉對帳：若 OKX 止損已觸發，同步本地 positions
@@ -575,13 +620,49 @@ async function reconcileWithOKX(positions) {
     if (data.code !== "0") { console.log(`  ⚠️ OKX 對帳失敗: ${data.msg}`); return; }
     const okxOpen = new Set(data.data.map(p => p.instId.replace("-USDT-SWAP", "USDT")));
     const removed = [];
-    positions.open = positions.open.filter(p => {
-      if (okxOpen.has(p.symbol)) return true;
-      console.log(`  🔔 [對帳] ${p.symbol} 已在OKX平倉（止損觸發），同步本地狀態`);
-      positions.closed.push({ ...p, exitTime: new Date().toISOString(), exitReason: "OKX止損觸發", pnl: null });
+    for (const p of [...positions.open]) {
+      if (okxOpen.has(p.symbol)) continue;
+
+      // 查 OKX 歷史平倉取得實際出場價和 P&L
+      let exitPrice = null, realPnl = null;
+      try {
+        const instId   = p.symbol.replace("USDT", "-USDT-SWAP");
+        const hTs      = new Date().toISOString();
+        const hPath    = `/api/v5/account/positions-history?instType=SWAP&instId=${instId}&limit=1`;
+        const hSig     = signOKX(hTs, "GET", hPath);
+        const hRes     = await fetch(`${CONFIG.okx.baseUrl}${hPath}`, {
+          headers: { "OK-ACCESS-KEY": CONFIG.okx.apiKey, "OK-ACCESS-SIGN": hSig,
+            "OK-ACCESS-TIMESTAMP": hTs, "OK-ACCESS-PASSPHRASE": CONFIG.okx.passphrase },
+        });
+        const hData = await hRes.json();
+        if (hData.code === "0" && hData.data?.[0]) {
+          exitPrice = parseFloat(hData.data[0].closeAvgPx);
+          realPnl   = parseFloat(hData.data[0].realizedPnl);
+        }
+      } catch (_) {}
+
+      const exitReason = "OKX SL/TP 觸發";
+      console.log(`  🔔 [對帳] ${p.symbol} 已平倉 | 出場$${exitPrice?.toFixed(4) ?? "?"} | P&L $${realPnl?.toFixed(4) ?? "?"}`);
+      positions.closed.push({ ...p, exitPrice, exitTime: new Date().toISOString(), exitReason, pnl: realPnl });
       removed.push(p.symbol);
-      return false;
-    });
+
+      // 補寫出場 CSV
+      if (exitPrice !== null) {
+        const now = new Date();
+        appendFileSync(CSV_FILE, [
+          now.toISOString().slice(0, 10), now.toISOString().slice(11, 19),
+          "OKX", p.symbol, p.side === "long" ? "SELL" : "BUY",
+          p.quantity.toFixed(6), exitPrice.toFixed(4),
+          Math.abs(realPnl + p.tradeSize).toFixed(2),
+          (Math.abs(realPnl + p.tradeSize) * 0.001).toFixed(4),
+          realPnl.toFixed(4),
+          `EXIT-OKX-${Date.now()}`,
+          "LIVE",
+          `"${exitReason}"`,
+        ].join(",") + "\n");
+      }
+    }
+    positions.open = positions.open.filter(p => !removed.includes(p.symbol));
     if (removed.length) savePositions(positions);
   } catch (e) {
     console.log(`  ⚠️ OKX 對帳例外: ${e.message}`);
@@ -679,7 +760,6 @@ function writeTradeCsv(logEntry) {
   }
 
   appendFileSync(CSV_FILE, row + "\n");
-  console.log(`Tax record saved → ${CSV_FILE}`);
 }
 
 // Tax summary command: node bot.js --tax-summary
@@ -713,53 +793,45 @@ function generateTaxSummary() {
 // ─── Main ────────────────────────────────────────────────────────────────────
 
 async function runSymbol(symbol, rules, log, positions) {
-  console.log(`\n${"─".repeat(57)}`);
-  console.log(`  ${symbol}`);
-  console.log(`${"─".repeat(57)}`);
-
-  console.log("\n── Fetching market data from Binance ───────────────────\n");
   const candles = await fetchCandles(symbol, CONFIG.timeframe, 500);
   const closes = candles.map((c) => c.close);
   const price = closes[closes.length - 1];
-  console.log(`  Current price: $${price.toFixed(4)}`);
-
   const ema8 = calcEMA(closes, 8);
   const vwap = calcVWAP(candles);
   const rsi3 = calcRSI(closes, 3);
 
-  console.log(`  EMA(8):  $${ema8.toFixed(4)}`);
-  console.log(`  VWAP:    $${vwap ? vwap.toFixed(4) : "N/A"}`);
-  console.log(`  RSI(3):  ${rsi3 ? rsi3.toFixed(2) : "N/A"}`);
+  if (!vwap || !rsi3) return false;
 
-  if (!vwap || !rsi3) {
-    console.log("\n⚠️  指標數據不足，跳過。");
-    return false;
-  }
-
-  // ── 出場邏輯：先檢查是否有持倉需要平倉 ──────────────────
+  // ── 出場邏輯 ────────────────────────────────────────────
   const openPos = positions.open.find((p) => p.symbol === symbol);
 
   if (openPos) {
-    // 追蹤止損：先更新 stopLoss 再判斷出場
     const newStop = updateTrailingStop(openPos, price);
     if (newStop !== null) {
-      console.log(`  📈 追蹤止損更新：$${openPos.stopLoss.toFixed(6)} → $${newStop.toFixed(6)}`);
+      console.log(`  📈 [${symbol}] 追蹤止損更新：$${openPos.stopLoss.toFixed(6)} → $${newStop.toFixed(6)}`);
       openPos.stopLoss = newStop;
       savePositions(positions);
     }
 
-    console.log(`\n── 持倉檢查 (${openPos.side.toUpperCase()} 進場價: $${openPos.entryPrice.toFixed(4)} | 止損: $${openPos.stopLoss.toFixed(6)}) ──\n`);
     const { exit, reason } = checkExitConditions(openPos, price, ema8, vwap, rsi3);
 
     if (exit) {
-      const pnl =
-        openPos.side === "long"
-          ? (price - openPos.entryPrice) * openPos.quantity
-          : (openPos.entryPrice - price) * openPos.quantity;
+      // 真實交易：先在 OKX 平倉，再更新本地狀態
+      if (!CONFIG.paperTrading) {
+        try {
+          await closeOKXPosition(openPos);
+          console.log(`  📤 [${symbol}] OKX平倉送出`);
+        } catch (err) {
+          console.log(`  ⚠️ [${symbol}] OKX平倉失敗 — ${err.message}（本地狀態仍會更新）`);
+        }
+      }
+
+      const pnl = openPos.side === "long"
+        ? (price - openPos.entryPrice) * openPos.quantity
+        : (openPos.entryPrice - price) * openPos.quantity;
       const win = pnl > 0;
 
-      console.log(`  ${win ? "✅" : "🔴"} 出場訊號：${reason}`);
-      console.log(`  損益：$${pnl.toFixed(4)} (${win ? "獲利" : "虧損"})`);
+      console.log(`  ${win ? "✅" : "🔴"} [${symbol}] 出場：${reason} | P&L $${pnl.toFixed(4)}`);
 
       const closedTrade = {
         ...openPos,
@@ -775,14 +847,12 @@ async function runSymbol(symbol, rules, log, positions) {
       positions.closed.push(closedTrade);
       savePositions(positions);
 
-      // 寫入 CSV
       appendFileSync(
         CSV_FILE,
         [
           new Date().toISOString().slice(0, 10),
           new Date().toISOString().slice(11, 19),
-          "OKX",
-          symbol,
+          "OKX", symbol,
           openPos.side === "long" ? "SELL" : "BUY",
           openPos.quantity.toFixed(6),
           price.toFixed(4),
@@ -794,101 +864,82 @@ async function runSymbol(symbol, rules, log, positions) {
           `"出場: ${reason} | P&L: $${pnl.toFixed(4)}"`,
         ].join(",") + "\n"
       );
-      console.log(`  記錄已儲存 → ${CSV_FILE}`);
-    } else {
-      console.log(`  持倉中，尚未達出場條件，繼續持有。`);
     }
     return false;
   }
 
-  // ── 進場邏輯：沒有持倉才找新進場機會 ────────────────────
-  const withinLimits = checkTradeLimits(log);
-  if (!withinLimits) {
-    console.log("  跳過 — 今日交易次數已達上限。");
+  // ── 進場邏輯 ────────────────────────────────────────────
+  const todayCount = countTodaysTrades(log);
+  if (todayCount >= CONFIG.maxTradesPerDay) return false;
+  if (price < 0.001) return false;
+
+  if (recentlyClosed(symbol, positions, 4)) {
+    console.log(`  ⏳ [${symbol}] 4h冷卻，跳過`);
     return false;
   }
 
   const { results, allPass } = runSafetyCheck(price, ema8, vwap, rsi3, rules);
-
-  // 判斷方向
   const side = price > vwap && price > ema8 ? "long" : "short";
-
-  // 策略A 止損：VWAP 另一側（跌破VWAP = 多頭論點失效）+ ATR buffer 避免雜訊觸發
   const atr14 = calcATR(candles, 14);
-  const buffer = atr14 * 0.3;
-  const stopLossPrice = side === "long"
-    ? vwap - buffer          // 多單：VWAP 下方 0.3 ATR
-    : vwap + buffer;         // 空單：VWAP 上方 0.3 ATR
+  const stopLossPrice = side === "long" ? vwap - atr14 * 0.15 : vwap + atr14 * 0.15;
+  const slPct = Math.abs(price - stopLossPrice) / price * 100;
 
-  // 動態風險倉位：PF 加權 × 1%基礎風險，止損距離反推
-  const pfMult       = getPFMultiplier(symbol);
-  const riskAmount   = CONFIG.portfolioValue * 0.01 * pfMult;
-  const stopLossPct  = Math.abs(price - stopLossPrice) / price;
-  const maxLeverage  = parseFloat(process.env.LEVERAGE || "1");
-  const rawSize      = stopLossPct > 0.001 ? riskAmount / stopLossPct : riskAmount * 3;
-  const tradeSize    = Math.min(rawSize, CONFIG.portfolioValue * maxLeverage, CONFIG.maxTradeSizeUSD);
-  const quantity     = tradeSize / price;
+  if (allPass && (slPct < 0.2 || slPct > 1.5)) return false;
 
-  console.log("\n── 決策 ─────────────────────────────────────────────────\n");
+  const pfMult      = getPFMultiplier(symbol);
+  const riskAmount  = CONFIG.portfolioValue * 0.01 * pfMult;
+  const stopLossPct = Math.abs(price - stopLossPrice) / price;
+  const maxLeverage = parseFloat(process.env.LEVERAGE || "1");
+  const rawSize     = stopLossPct > 0.001 ? riskAmount / stopLossPct : riskAmount * 3;
+  const tradeSize   = Math.min(rawSize, CONFIG.portfolioValue * maxLeverage, CONFIG.maxTradeSizeUSD);
+  const quantity    = tradeSize / price;
 
   const logEntry = {
     timestamp: new Date().toISOString(),
-    symbol,
-    timeframe: CONFIG.timeframe,
-    price,
+    symbol, timeframe: CONFIG.timeframe, price,
     indicators: { ema8, vwap, rsi3 },
-    conditions: results,
-    allPass,
-    tradeSize,
-    orderPlaced: false,
-    orderId: null,
+    conditions: results, allPass, tradeSize,
+    orderPlaced: false, orderId: null,
     paperTrading: CONFIG.paperTrading,
-    limits: {
-      maxTradeSizeUSD: CONFIG.maxTradeSizeUSD,
-      maxTradesPerDay: CONFIG.maxTradesPerDay,
-      tradesToday: countTodaysTrades(log),
-    },
+    limits: { maxTradeSizeUSD: CONFIG.maxTradeSizeUSD, maxTradesPerDay: CONFIG.maxTradesPerDay, tradesToday: todayCount },
   };
 
   if (!allPass) {
-    const failed = results.filter((r) => !r.pass).map((r) => r.label);
-    console.log(`🚫 不進場`);
-    failed.forEach((f) => console.log(`   - ${f}`));
+    // 靜默跳過，不印出
   } else {
-    console.log(`✅ 所有條件符合 — ${side.toUpperCase()} ${symbol}`);
+    console.log(`✅ 信號 — ${side.toUpperCase()} ${symbol} | 價$${price.toFixed(4)} | RSI:${rsi3.toFixed(1)} | SL:$${stopLossPrice.toFixed(4)}`);
 
     if (CONFIG.paperTrading) {
-      console.log(`\n📋 紙上交易 — ${side} ${symbol}`);
-      console.log(`   倉位: $${tradeSize.toFixed(2)} | 風險: $${riskAmount.toFixed(2)} (本金1%) | 止損: ${stopLossPrice.toFixed(6)}`);
+      console.log(`   📋 模擬 $${tradeSize.toFixed(2)}`);
       logEntry.orderPlaced = true;
       logEntry.orderId = `PAPER-${Date.now()}`;
     } else {
-      console.log(`\n🔴 實際下單 — $${tradeSize.toFixed(2)} ${side.toUpperCase()} ${symbol}`);
       try {
         const order = await placeOKXOrder(symbol, side === "long" ? "buy" : "sell", tradeSize, price, stopLossPrice);
         logEntry.orderPlaced = true;
-        logEntry.orderId = order.orderId;
-        console.log(`✅ 訂單成立 — ${order.orderId}`);
+        logEntry.orderId = order.ordId;
+        logEntry.algoId = order.algoId;
+        console.log(`   🔴 下單成功 — ordId:${order.ordId}`);
+
+        const tp = side === "long" ? price + Math.abs(price - stopLossPrice) * 2 : price - Math.abs(price - stopLossPrice) * 2;
+        spawn("node", ["tv_mark_trade.js", symbol, side, String(price), String(stopLossPrice), String(tp)],
+          { detached: true, stdio: "ignore" }).unref();
       } catch (err) {
-        console.log(`❌ 下單失敗 — ${err.message}`);
+        console.log(`   ❌ 下單失敗 — ${err.message}`);
         logEntry.error = err.message;
       }
     }
 
     if (logEntry.orderPlaced) {
       positions.open.push({
-        symbol,
-        side,
-        entryPrice: price,
+        symbol, side, entryPrice: price,
         entryTime: new Date().toISOString(),
-        tradeSize,
-        quantity,
+        tradeSize, quantity,
         orderId: logEntry.orderId,
-        stopLoss: stopLossPrice,
-        riskAmount,
+        algoId: logEntry.algoId,
+        stopLoss: stopLossPrice, riskAmount,
       });
       savePositions(positions);
-      console.log(`  持倉已記錄 → ${POSITIONS_FILE}`);
     }
   }
 
@@ -902,52 +953,29 @@ async function runSymbol(symbol, rules, log, positions) {
 async function run() {
   checkOnboarding();
   initCsv();
-  console.log("═══════════════════════════════════════════════════════════");
-  console.log("  Claude Trading Bot");
-  console.log(`  ${new Date().toISOString()}`);
-  console.log(`  Mode: ${CONFIG.paperTrading ? "📋 PAPER TRADING" : "🔴 LIVE TRADING"}`);
-  console.log("═══════════════════════════════════════════════════════════");
 
   const rules = JSON.parse(readFileSync(RULES_A_FILE, "utf8"));
   const watchlist = rules.watchlist || [CONFIG.symbol];
-
-  console.log(`\nStrategy: ${rules.strategy.name}`);
-  console.log(`Watchlist: ${watchlist.join(", ")}`);
-  console.log(`Timeframe: ${CONFIG.timeframe}`);
-
   const log = loadLog();
   const positions = loadPositions();
 
-  // OKX 持倉對帳：修正 OKX 已止損但本地未更新的狀態
+  console.log(`[A] ${new Date().toISOString()} | ${CONFIG.paperTrading ? "PAPER" : "LIVE"} | ${watchlist.length}幣 | ${CONFIG.timeframe} | 持倉:${positions.open.length}`);
+
   await reconcileWithOKX(positions);
 
-  // 顯示目前持倉狀況
-  if (positions.open.length > 0) {
-    console.log(`\n目前持倉: ${positions.open.map((p) => `${p.side.toUpperCase()} ${p.symbol}`).join(", ")}`);
-  }
-
-  // 先管理不在當前名單的孤立持倉（避免踢出名單後止損失效）
   const orphans = positions.open.filter(p => !watchlist.includes(p.symbol));
-  if (orphans.length > 0) {
-    console.log(`\n[A] 孤立持倉管理: ${orphans.map(p => p.symbol).join(", ")}`);
-    for (const p of orphans) await runSymbol(p.symbol, log, positions);
-  }
+  for (const p of orphans) await runSymbol(p.symbol, rules, log, positions);
 
   for (const symbol of watchlist) {
     const todayCount = countTodaysTrades(log);
     const hasOpenPosition = positions.open.some((p) => p.symbol === symbol);
-    // 有持倉的幣種不受每日交易次數限制（需要檢查出場）
     if (!hasOpenPosition && todayCount >= CONFIG.maxTradesPerDay) {
-      console.log(`\n🚫 今日交易次數已達上限 (${CONFIG.maxTradesPerDay})，停止尋找新進場。`);
-      // 但仍繼續檢查有持倉的幣種
       if (!positions.open.some((p) => watchlist.slice(watchlist.indexOf(symbol)).includes(p.symbol))) break;
     }
     await runSymbol(symbol, rules, log, positions);
   }
 
-  console.log("\n═══════════════════════════════════════════════════════════");
-  console.log(`  Scan complete. Decision log → ${LOG_FILE}`);
-  console.log("═══════════════════════════════════════════════════════════\n");
+  console.log(`[A] 掃描完成`);
 }
 
 if (process.argv.includes("--tax-summary")) {
