@@ -83,7 +83,7 @@ function runBBSafetyCheck(candles) {
   const sma20Prev = calcSMA(closes.slice(0, -5), 20);
   const avgVol  = calcAvgVolume(volumes, 20);
   const volRatio = last.volume / avgVol;
-  const smaTrend = sma20 > sma20Prev * 1.0005 ? "rising" : sma20 < sma20Prev * 0.9995 ? "falling" : "flat";
+  const smaTrend = sma20 > sma20Prev * 1.001 ? "rising" : sma20 < sma20Prev * 0.999 ? "falling" : "flat";
   const atrExpanding = atr > atrAvg * 1.05;
 
   // 有效突破：收盤站穩（不只影線碰觸）
