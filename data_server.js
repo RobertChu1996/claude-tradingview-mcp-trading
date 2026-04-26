@@ -93,6 +93,86 @@ function todaySummary() {
   };
 }
 
+// 單一策略統計：從 CSV + positions JSON 計算全期及今日績效
+function strategyStats(csvFile, posFile, label) {
+  const today = new Date().toISOString().slice(0, 10);
+  const csv   = readFile(`${D}/${csvFile}`);
+  const exits = csv
+    ? parseCsv(csv).filter(r => r.orderId && r.orderId.startsWith("EXIT-"))
+    : [];
+
+  const all       = exits;
+  const todayEx   = exits.filter(r => r.date === today);
+  const paper     = exits.filter(r => r.mode === "PAPER");
+  const live      = exits.filter(r => r.mode === "LIVE");
+
+  function calcStats(rows) {
+    if (!rows.length) return { trades: 0, wins: 0, losses: 0, winRate: "N/A", totalPnl: 0, avgWin: 0, avgLoss: 0, best: null, worst: null };
+    const wins   = rows.filter(r => r.pnl > 0);
+    const losses = rows.filter(r => r.pnl <= 0);
+    const pnls   = rows.map(r => r.pnl);
+    const best   = rows.reduce((a, b) => a.pnl > b.pnl ? a : b);
+    const worst  = rows.reduce((a, b) => a.pnl < b.pnl ? a : b);
+    return {
+      trades:   rows.length,
+      wins:     wins.length,
+      losses:   losses.length,
+      winRate:  ((wins.length / rows.length) * 100).toFixed(1) + "%",
+      totalPnl: pnls.reduce((s, v) => s + v, 0).toFixed(4),
+      avgWin:   wins.length ? (wins.reduce((s, r) => s + r.pnl, 0) / wins.length).toFixed(4) : "0",
+      avgLoss:  losses.length ? (losses.reduce((s, r) => s + r.pnl, 0) / losses.length).toFixed(4) : "0",
+      best:     { symbol: best.symbol, pnl: best.pnl.toFixed(4), date: best.date },
+      worst:    { symbol: worst.symbol, pnl: worst.pnl.toFixed(4), date: worst.date },
+    };
+  }
+
+  const pos = posFile ? JSON.parse(readFile(`${D}/${posFile}`) || '{"open":[],"closed":[]}') : { open: [], closed: [] };
+
+  return {
+    label,
+    mode:    live.length > 0 ? "LIVE" : "PAPER",
+    overall: calcStats(all),
+    today:   calcStats(todayEx),
+    openPositions: (pos.open || []).map(p => ({
+      symbol: p.symbol, side: p.side,
+      entry: p.entryPrice, sl: p.stopLoss,
+      since: p.entryTime?.slice(0, 16),
+    })),
+  };
+}
+
+function fullReport() {
+  const today = new Date().toISOString().slice(0, 10);
+  const strategies = [
+    strategyStats("trades.csv",     "positions.json",     "A: VWAP+RSI(3)+EMA  [15m]"),
+    strategyStats("trades_bb.csv",  "positions_bb.json",  "B: BB Breakout+ATR  [1H]"),
+    strategyStats("trades_dmc.csv", "positions_dmc.json", "C: DMC-Inspired     [15m]"),
+    strategyStats("trades_orb.csv", "positions_orb.json", "D: Opening Range    [15m]"),
+  ];
+
+  // 全策略合計（今日）
+  let totPnl = 0, totWins = 0, totLosses = 0;
+  for (const s of strategies) {
+    totPnl    += parseFloat(s.today.totalPnl) || 0;
+    totWins   += s.today.wins;
+    totLosses += s.today.losses;
+  }
+  const totTrades = totWins + totLosses;
+
+  return {
+    reportDate: today,
+    generatedAt: new Date().toISOString(),
+    todayCombined: {
+      trades:  totTrades,
+      wins:    totWins,
+      losses:  totLosses,
+      winRate: totTrades > 0 ? ((totWins / totTrades) * 100).toFixed(1) + "%" : "N/A",
+      totalPnl: totPnl.toFixed(4),
+    },
+    strategies,
+  };
+}
+
 const asyncRoutes = {
   // OKX 即時倉位（地面真相）
   "/okx": async () => {
@@ -148,6 +228,7 @@ const asyncRoutes = {
 
 const routes = {
   "/":             () => JSON.stringify(todaySummary(), null, 2),
+  "/report":       () => JSON.stringify(fullReport(), null, 2),
   "/trades":       () => readFile(`${D}/trades.csv`)     || "no data",
   "/trades_bb":    () => readFile(`${D}/trades_bb.csv`)  || "no data",
   "/trades_dmc":   () => readFile(`${D}/trades_dmc.csv`) || "no data",
