@@ -93,11 +93,8 @@ function getPFMultiplier(symbol) {
   try {
     if (!existsSync(PF_FILE)) return 1.0;
     const pf = JSON.parse(readFileSync(PF_FILE,"utf8"))?.A?.[symbol];
-    if (!pf) return 1.0;
-    if (pf >= 3.5) return 2.0;
-    if (pf >= 2.0) return 1.5;
-    if (pf >= 1.2) return 1.0;
-    return 0.5;
+    if (!pf || pf < 1.2) return 0.5;
+    return 1.0; // 上限 1x，每筆最多虧本金 1%
   } catch { return 1.0; }
 }
 
@@ -604,7 +601,7 @@ async function closeOKXPosition(position) {
 // OKX 實際持倉對帳：雙向同步
 // 1. 本地有但 OKX 無 → 已被 SL/TP 觸發，寫出場記錄
 // 2. OKX 有但本地無 → 補回 positions.json（重部署或遷移後復原）
-async function reconcileWithOKX(positions) {
+async function reconcileWithOKX(positions, watchlist = []) {
   if (CONFIG.paperTrading) return;
   const ts = new Date().toISOString();
   const path = "/api/v5/account/positions?instType=SWAP";
@@ -670,9 +667,10 @@ async function reconcileWithOKX(positions) {
     }
     positions.open = positions.open.filter(p => !removed.includes(p.symbol));
 
-    // 2. OKX 有但本地無 → 補回（重部署或遷移後復原）
+    // 2. OKX 有但本地無 → 補回（重部署或遷移後復原，限 watchlist 幣種）
     for (const okxPos of okxPositions) {
       const symbol = okxPos.instId.replace("-USDT-SWAP", "USDT");
+      if (watchlist.length > 0 && !watchlist.includes(symbol)) continue; // 非本策略幣種跳過
       if (positions.open.some(p => p.symbol === symbol)) continue;
       const entryPrice = parseFloat(okxPos.avgPx);
       const side = okxPos.posSide; // "long" or "short"
@@ -831,6 +829,10 @@ async function runSymbol(symbol, rules, log, positions) {
   const openPos = positions.open.find((p) => p.symbol === symbol);
 
   if (openPos) {
+    // 幽靈持倉：qty=0 表示由 reconcile 從 OKX 同步進來，沒有本地數量紀錄
+    // 直接跳過，讓 OKX 的 SL/TP 處理；reconcile 會在下次偵測到平倉
+    if (!openPos.quantity || openPos.quantity === 0) return false;
+
     const newStop = updateTrailingStop(openPos, price);
     if (newStop !== null) {
       console.log(`  📈 [${symbol}] 追蹤止損更新：$${openPos.stopLoss.toFixed(6)} → $${newStop.toFixed(6)}`);
@@ -909,8 +911,8 @@ async function runSymbol(symbol, rules, log, positions) {
   }
 
   const adx14 = calcADX(candles, 14);
-  if (adx14 < 20) {
-    console.log(`  📉 [${symbol}] ADX=${adx14.toFixed(1)} < 20，趨勢不足，跳過`);
+  if (adx14 < 25) {
+    console.log(`  📉 [${symbol}] ADX=${adx14.toFixed(1)} < 25，趨勢不足，跳過`);
     return false;
   }
 
@@ -997,7 +999,18 @@ async function run() {
 
   console.log(`[A] ${new Date().toISOString()} | ${CONFIG.paperTrading ? "PAPER" : "LIVE"} | ${watchlist.length}幣 | ${CONFIG.timeframe} | 持倉:${positions.open.length}`);
 
-  await reconcileWithOKX(positions);
+  await reconcileWithOKX(positions, watchlist);
+
+  // 日熔斷：當日已實現虧損超過本金 5% 則停止入場
+  const today = new Date().toISOString().slice(0, 10);
+  const todayPnl = positions.closed
+    .filter(t => t.exitTime?.startsWith(today) && t.pnl !== null)
+    .reduce((sum, t) => sum + (t.pnl || 0), 0);
+  const circuitBreakerThreshold = -(CONFIG.portfolioValue * 0.05);
+  if (todayPnl < circuitBreakerThreshold) {
+    console.log(`⚡ [熔斷] 今日已虧 $${Math.abs(todayPnl).toFixed(2)}，超過本金 5%，暫停入場`);
+    return;
+  }
 
   const orphans = positions.open.filter(p => !watchlist.includes(p.symbol));
   for (const p of orphans) await runSymbol(p.symbol, rules, log, positions);
