@@ -385,6 +385,176 @@ function exitD(pos, candles) {
   return null;
 }
 
+// ─── Strategy E: EMA Trend Pullback (1H) ─────────────────────────────────────
+// 邏輯：EMA21>EMA50 確認趨勢，RSI14 拉回到 35-52 超賣區，bullish K棒進場
+// 只留 SL + 2:1 TP
+
+function signalE(candles) {
+  if (candles.length < 55) return null;
+  const closes = candles.map(c => c.close);
+  const price  = closes[closes.length - 1];
+  const e21    = ema(closes, 21);
+  const e50    = ema(closes, 50);
+  const r14    = rsi(closes, 14);
+  const last   = candles[candles.length - 1];
+  const atrVal = atr(candles, 14);
+  if (!r14 || !atrVal || price < 0.001) return null;
+
+  if (e21 > e50 && price > e50 && r14 >= 35 && r14 <= 52 && last.close > last.open) {
+    const sl    = swingLow(candles, 8) - atrVal * 0.1;
+    const slPct = Math.abs(price - sl) / price * 100;
+    if (slPct < 0.3 || slPct > 3) return null;
+    return { side: "long", stopLoss: sl };
+  }
+  if (e21 < e50 && price < e50 && r14 >= 48 && r14 <= 65 && last.close < last.open) {
+    const sl    = swingHigh(candles, 8) + atrVal * 0.1;
+    const slPct = Math.abs(price - sl) / price * 100;
+    if (slPct < 0.3 || slPct > 3) return null;
+    return { side: "short", stopLoss: sl };
+  }
+  return null;
+}
+
+function exitE(pos, candles) {
+  const closes = candles.map(c => c.close);
+  const price  = closes[closes.length - 1];
+  const sl     = calcTrailingStop(pos, price);
+  const risk   = Math.abs(pos.entryPrice - pos.stopLoss);
+  const tp     = pos.side === "long" ? pos.entryPrice + risk * 2 : pos.entryPrice - risk * 2;
+  if (pos.side === "long") {
+    if (price <= sl) return `止損 $${sl.toFixed(4)}`;
+    if (price >= tp) return "2:1止盈達成";
+  } else {
+    if (price >= sl) return `止損 $${sl.toFixed(4)}`;
+    if (price <= tp) return "2:1止盈達成";
+  }
+  return null;
+}
+
+// ─── Strategy F: Supertrend 趨勢跟隨 (4H) ────────────────────────────────────
+// 邏輯：Supertrend(14, 3) 翻轉方向時進場，SL 放在 Supertrend 線，3:1 TP
+
+function calcSupertrendSeries(candles, period = 14, mult = 3) {
+  if (candles.length < period + 2) return [];
+  const trs = candles.slice(1).map((c, i) => Math.max(
+    c.high - c.low,
+    Math.abs(c.high - candles[i].close),
+    Math.abs(c.low  - candles[i].close)
+  ));
+  let atrSmooth = trs.slice(0, period).reduce((a, b) => a + b) / period;
+  const atrs = [atrSmooth];
+  for (let i = period; i < trs.length; i++) {
+    atrSmooth = (atrSmooth * (period - 1) + trs[i]) / period;
+    atrs.push(atrSmooth);
+  }
+  const result = [];
+  let upper = 0, lower = 0, dir = 1;
+  for (let i = 0; i < atrs.length; i++) {
+    const c        = candles[i + 1];
+    const prevClose = i > 0 ? candles[i].close : c.open;
+    const hl2      = (c.high + c.low) / 2;
+    const bu       = hl2 + mult * atrs[i];
+    const bl       = hl2 - mult * atrs[i];
+    const newUpper = bu < upper || prevClose > upper ? bu : upper;
+    const newLower = bl > lower || prevClose < lower ? bl : lower;
+    const prevDir  = dir;
+    if (i === 0)        dir = c.close >= hl2 ? 1 : -1;
+    else if (dir === 1) dir = c.close < newLower ? -1 : 1;
+    else                dir = c.close > newUpper ?  1 : -1;
+    upper = newUpper; lower = newLower;
+    result.push({ dir, value: dir === 1 ? newLower : newUpper, prevDir });
+  }
+  return result;
+}
+
+function signalF(candles) {
+  if (candles.length < 20) return null;
+  const series = calcSupertrendSeries(candles, 14, 3);
+  if (series.length < 2) return null;
+  const curr = series[series.length - 1];
+  const prev = series[series.length - 2];
+  if (curr.dir === prev.dir) return null; // 只在翻轉時進場
+  const price  = candles[candles.length - 1].close;
+  const atrVal = atr(candles, 14);
+  if (price < 0.001) return null;
+  if (curr.dir === 1) { // 翻多
+    const sl    = curr.value - atrVal * 0.1;
+    const slPct = Math.abs(price - sl) / price * 100;
+    if (slPct < 0.3 || slPct > 6) return null;
+    return { side: "long", stopLoss: sl };
+  } else { // 翻空
+    const sl    = curr.value + atrVal * 0.1;
+    const slPct = Math.abs(price - sl) / price * 100;
+    if (slPct < 0.3 || slPct > 6) return null;
+    return { side: "short", stopLoss: sl };
+  }
+}
+
+function exitF(pos, candles) {
+  const series = calcSupertrendSeries(candles, 14, 3);
+  if (!series.length) return null;
+  const curr  = series[series.length - 1];
+  const price = candles[candles.length - 1].close;
+  const sl    = calcTrailingStop(pos, price);
+  const risk  = Math.abs(pos.entryPrice - pos.stopLoss);
+  const tp    = pos.side === "long" ? pos.entryPrice + risk * 3 : pos.entryPrice - risk * 3;
+  if (pos.side === "long") {
+    if (price <= sl)   return `止損 $${sl.toFixed(4)}`;
+    if (price >= tp)   return "3:1止盈達成";
+    if (curr.dir === -1) return "Supertrend翻空（出場）";
+  } else {
+    if (price >= sl)   return `止損 $${sl.toFixed(4)}`;
+    if (price <= tp)   return "3:1止盈達成";
+    if (curr.dir === 1)  return "Supertrend翻多（出場）";
+  }
+  return null;
+}
+
+// ─── Strategy G: 多時框 RSI 共振 (1H) ────────────────────────────────────────
+// 邏輯：RSI14 + RSI56（≈4H RSI14）雙重超賣/超買才進場，EMA50 確認趨勢方向
+// 訊號稀少但品質高，TP 放 3:1
+
+function signalG(candles) {
+  if (candles.length < 60) return null;
+  const closes = candles.map(c => c.close);
+  const price  = closes[closes.length - 1];
+  const r14    = rsi(closes, 14);  // 1H RSI
+  const r56    = rsi(closes, 56);  // 近似 4H RSI（14×4）
+  const e50    = ema(closes, 50);
+  const atrVal = atr(candles, 14);
+  if (!r14 || !r56 || !atrVal || price < 0.001) return null;
+
+  if (r14 < 40 && r56 < 48 && price > e50) {
+    const sl    = swingLow(candles, 8) - atrVal * 0.1;
+    const slPct = Math.abs(price - sl) / price * 100;
+    if (slPct < 0.3 || slPct > 4) return null;
+    return { side: "long", stopLoss: sl };
+  }
+  if (r14 > 65 && r56 > 58 && price < e50) {
+    const sl    = swingHigh(candles, 8) + atrVal * 0.1;
+    const slPct = Math.abs(price - sl) / price * 100;
+    if (slPct < 0.3 || slPct > 4) return null;
+    return { side: "short", stopLoss: sl };
+  }
+  return null;
+}
+
+function exitG(pos, candles) {
+  const closes = candles.map(c => c.close);
+  const price  = closes[closes.length - 1];
+  const sl     = calcTrailingStop(pos, price);
+  const risk   = Math.abs(pos.entryPrice - pos.stopLoss);
+  const tp     = pos.side === "long" ? pos.entryPrice + risk * 3 : pos.entryPrice - risk * 3;
+  if (pos.side === "long") {
+    if (price <= sl) return `止損 $${sl.toFixed(4)}`;
+    if (price >= tp) return "3:1止盈達成";
+  } else {
+    if (price >= sl) return `止損 $${sl.toFixed(4)}`;
+    if (price <= tp) return "3:1止盈達成";
+  }
+  return null;
+}
+
 // ─── Backtester Core ──────────────────────────────────────────────────────────
 
 async function backtestStrategy(name, symbols, interval, signalFn, exitFn) {
@@ -515,10 +685,13 @@ async function main() {
   console.log("═".repeat(60));
 
   const strategies = {
-    A: { interval: "1h",  signalFn: signalA, exitFn: exitA }, // 1H（原15m）
-    B: { interval: "1h",  signalFn: signalB, exitFn: exitB }, // 1H（原15m）
+    A: { interval: "1h",  signalFn: signalA, exitFn: exitA },
+    B: { interval: "1h",  signalFn: signalB, exitFn: exitB },
     C: { interval: "1h",  signalFn: signalC, exitFn: exitC },
     D: { interval: "15m", signalFn: signalD, exitFn: exitD },
+    E: { interval: "1h",  signalFn: signalE, exitFn: exitE }, // EMA 趨勢拉回
+    F: { interval: "4h",  signalFn: signalF, exitFn: exitF }, // Supertrend
+    G: { interval: "1h",  signalFn: signalG, exitFn: exitG }, // 多時框 RSI 共振
   };
 
   const toRun = STRATEGY === "ALL" ? Object.keys(strategies) : [STRATEGY];

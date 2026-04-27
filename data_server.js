@@ -144,10 +144,10 @@ function strategyStats(csvFile, posFile, label) {
 function fullReport() {
   const today = new Date().toISOString().slice(0, 10);
   const strategies = [
-    strategyStats("trades.csv",     "positions.json",     "A: VWAP+RSI(3)+EMA  [15m]"),
-    strategyStats("trades_bb.csv",  "positions_bb.json",  "B: BB Breakout+ATR  [1H]"),
-    strategyStats("trades_dmc.csv", "positions_dmc.json", "C: DMC-Inspired     [15m]"),
-    strategyStats("trades_orb.csv", "positions_orb.json", "D: Opening Range    [15m]"),
+    strategyStats("trades.csv",     "positions.json",     "A: VWAP+RSI(3)+EMA  [1H]"),
+    strategyStats("trades_dmc.csv", "positions_dmc.json", "B: DMC-Inspired     [1H]"),
+    strategyStats("trades_bb.csv",  "positions_bb.json",  "C: BB Breakout+ATR  [1H]"),
+    strategyStats("trades_e.csv",   "positions_e.json",   "E: EMA Trend Pullback [1H]"),
   ];
 
   // 全策略合計（今日）
@@ -235,6 +235,8 @@ const routes = {
   "/trades_orb":   () => readFile(`${D}/trades_orb.csv`) || "no data",
   "/positions":    () => readFile(`${D}/positions.json`)    || "{}",
   "/positions_bb": () => readFile(`${D}/positions_bb.json`) || "{}",
+  "/positions_e":  () => readFile(`${D}/positions_e.json`)  || "{}",
+  "/trades_e":     () => readFile(`${D}/trades_e.csv`)      || "no data",
   "/log":          () => readFile(`${D}/safety-check-log.json`) || "{}",
 };
 
