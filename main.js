@@ -40,8 +40,9 @@ async function runBot() {
   await spawnBot("策略 B：DMC-Inspired             [1H]", "bot_dmc.js");
   await spawnBot("策略 C：BB Breakout + ATR Stop   [1H]", "bot_bb.js");
   await spawnBot("策略 E：EMA Trend Pullback        [1H]", "bot_e.js");
+  await spawnBot("策略 K：Keltner Channel Breakout  [1H]", "bot_k.js");
 
-  console.log("\n✅ 四策略掃描完成\n");
+  console.log("\n✅ 五策略掃描完成\n");
 }
 
 // 立即跑一次，之後每 15 分鐘

@@ -20,6 +20,7 @@ export const POSITIONS_BB_FILE  = join(D, "positions_bb.json");
 export const POSITIONS_DMC_FILE = join(D, "positions_dmc.json");
 export const POSITIONS_ORB_FILE = join(D, "positions_orb.json");
 export const POSITIONS_E_FILE   = join(D, "positions_e.json");
+export const POSITIONS_K_FILE   = join(D, "positions_k.json");
 
 export const STATS_FILE = join(D, "symbol_stats.json");
 
@@ -28,15 +29,17 @@ export const LOG_BB_FILE  = join(D, "safety-check-log-bb.json");
 export const LOG_DMC_FILE = join(D, "safety-check-log-dmc.json");
 export const LOG_ORB_FILE = join(D, "safety-check-log-orb.json");
 export const LOG_E_FILE   = join(D, "safety-check-log-e.json");
+export const LOG_K_FILE   = join(D, "safety-check-log-k.json");
 
 export const CSV_FILE     = join(D, "trades.csv");
 export const CSV_BB_FILE  = join(D, "trades_bb.csv");
 export const CSV_DMC_FILE = join(D, "trades_dmc.csv");
 export const CSV_ORB_FILE = join(D, "trades_orb.csv");
 export const CSV_E_FILE   = join(D, "trades_e.csv");
+export const CSV_K_FILE   = join(D, "trades_k.csv");
 
 // ── Rules files (git seed → volume) ─────────────────────────────────────────
-const RULES = ["rules.json", "rules_dmc.json", "rules_bb.json", "rules_orb.json", "rules_e.json"];
+const RULES = ["rules.json", "rules_dmc.json", "rules_bb.json", "rules_orb.json", "rules_e.json", "rules_k.json"];
 
 function seedRules() {
   if (D === ".") return; // local dev: use cwd directly
@@ -55,3 +58,4 @@ export const RULES_B_FILE   = existsSync(join(D, "rules_dmc.json")) ? join(D, "r
 export const RULES_BB_FILE  = existsSync(join(D, "rules_bb.json"))  ? join(D, "rules_bb.json")  : "rules_bb.json";
 export const RULES_ORB_FILE = existsSync(join(D, "rules_orb.json")) ? join(D, "rules_orb.json") : "rules_orb.json";
 export const RULES_E_FILE   = existsSync(join(D, "rules_e.json"))   ? join(D, "rules_e.json")   : "rules_e.json";
+export const RULES_K_FILE   = existsSync(join(D, "rules_k.json"))   ? join(D, "rules_k.json")   : "rules_k.json";

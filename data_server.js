@@ -147,7 +147,8 @@ function fullReport() {
     strategyStats("trades.csv",     "positions.json",     "A: VWAP+RSI(3)+EMA  [1H]"),
     strategyStats("trades_dmc.csv", "positions_dmc.json", "B: DMC-Inspired     [1H]"),
     strategyStats("trades_bb.csv",  "positions_bb.json",  "C: BB Breakout+ATR  [1H]"),
-    strategyStats("trades_e.csv",   "positions_e.json",   "E: EMA Trend Pullback [1H]"),
+    strategyStats("trades_e.csv",   "positions_e.json",   "E: EMA Trend Pullback   [1H] 起:2026-04-27"),
+    strategyStats("trades_k.csv",   "positions_k.json",   "K: Keltner Breakout     [1H] 起:2026-04-28"),
   ];
 
   // 全策略合計（今日）
@@ -237,6 +238,8 @@ const routes = {
   "/positions_bb": () => readFile(`${D}/positions_bb.json`) || "{}",
   "/positions_e":  () => readFile(`${D}/positions_e.json`)  || "{}",
   "/trades_e":     () => readFile(`${D}/trades_e.csv`)      || "no data",
+  "/positions_k":  () => readFile(`${D}/positions_k.json`)  || "{}",
+  "/trades_k":     () => readFile(`${D}/trades_k.csv`)      || "no data",
   "/log":          () => readFile(`${D}/safety-check-log.json`) || "{}",
 };
 

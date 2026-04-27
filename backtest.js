@@ -385,6 +385,251 @@ function exitD(pos, candles) {
   return null;
 }
 
+// ─── Indicator Helpers (H/I/J/K) ─────────────────────────────────────────────
+
+function calcMACDObj(closes) {
+  if (closes.length < 36) return null;
+  const emaArr = (arr, p) => {
+    const k = 2 / (p + 1);
+    let v = arr.slice(0, p).reduce((a, b) => a + b) / p;
+    const out = [v];
+    for (let i = p; i < arr.length; i++) { v = arr[i] * k + v * (1 - k); out.push(v); }
+    return out;
+  };
+  const fast = emaArr(closes, 12);
+  const slow = emaArr(closes, 26);
+  const macdLine = slow.map((s, i) => fast[fast.length - slow.length + i] - s);
+  const k9 = 2 / 10;
+  let sig = macdLine.slice(0, 9).reduce((a, b) => a + b) / 9;
+  const sigArr = [sig];
+  for (let i = 9; i < macdLine.length; i++) { sig = macdLine[i] * k9 + sig * (1 - k9); sigArr.push(sig); }
+  return {
+    macd: macdLine[macdLine.length - 1], signal: sigArr[sigArr.length - 1],
+    prevMacd: macdLine[macdLine.length - 2], prevSignal: sigArr[sigArr.length - 2],
+  };
+}
+
+function calcStochK(candles, period = 14, smooth = 3) {
+  if (candles.length < period + smooth) return null;
+  const rawKs = [];
+  for (let i = candles.length - smooth; i < candles.length; i++) {
+    const sl = candles.slice(i - period + 1, i + 1);
+    const lo = Math.min(...sl.map(c => c.low));
+    const hi = Math.max(...sl.map(c => c.high));
+    rawKs.push(hi === lo ? 50 : (candles[i].close - lo) / (hi - lo) * 100);
+  }
+  return rawKs.reduce((a, b) => a + b) / rawKs.length;
+}
+
+function calcIchimoku(candles) {
+  if (candles.length < 80) return null;
+  const mid = (arr, n) => {
+    const sl = arr.slice(-n);
+    return (Math.max(...sl.map(c => c.high)) + Math.min(...sl.map(c => c.low))) / 2;
+  };
+  const tenkan = mid(candles, 9);
+  const kijun  = mid(candles, 26);
+  const past   = candles.slice(0, -26);
+  const spanA  = (mid(past, 9) + mid(past, 26)) / 2;
+  const spanB  = mid(past, 52);
+  const prev   = candles.slice(0, -1);
+  return {
+    tenkan, kijun,
+    cloudTop: Math.max(spanA, spanB), cloudBottom: Math.min(spanA, spanB),
+    prevTenkan: mid(prev, 9), prevKijun: mid(prev, 26),
+  };
+}
+
+function calcKeltner(candles, emaPeriod = 20, atrPeriod = 14, mult = 2) {
+  if (candles.length < emaPeriod) return null;
+  const closes = candles.map(c => c.close);
+  const k = 2 / (emaPeriod + 1);
+  let mid = closes.slice(0, emaPeriod).reduce((a, b) => a + b) / emaPeriod;
+  for (let i = emaPeriod; i < closes.length; i++) mid = closes[i] * k + mid * (1 - k);
+  const a = atr(candles, atrPeriod);
+  return { upper: mid + mult * a, middle: mid, lower: mid - mult * a };
+}
+
+// ─── Strategy H: MACD + EMA50 趨勢過濾 (1H) ──────────────────────────────────
+// EMA50 決定方向，MACD 線穿越訊號線時進場，2:1 TP
+
+function signalH(candles) {
+  if (candles.length < 60) return null;
+  const closes = candles.map(c => c.close);
+  const price  = closes[closes.length - 1];
+  const e50    = ema(closes, 50);
+  const atrVal = atr(candles, 14);
+  const macd   = calcMACDObj(closes);
+  if (!macd || !atrVal || price < 0.001) return null;
+
+  if (price > e50 && macd.prevMacd < macd.prevSignal && macd.macd > macd.signal) {
+    const sl    = swingLow(candles, 8) - atrVal * 0.1;
+    const slPct = Math.abs(price - sl) / price * 100;
+    if (slPct < 0.3 || slPct > 4 || sl >= price) return null;
+    return { side: "long", stopLoss: sl };
+  }
+  if (price < e50 && macd.prevMacd > macd.prevSignal && macd.macd < macd.signal) {
+    const sl    = swingHigh(candles, 8) + atrVal * 0.1;
+    const slPct = Math.abs(price - sl) / price * 100;
+    if (slPct < 0.3 || slPct > 4 || sl <= price) return null;
+    return { side: "short", stopLoss: sl };
+  }
+  return null;
+}
+
+function exitH(pos, candles) {
+  const price = candles[candles.length - 1].close;
+  const sl    = calcTrailingStop(pos, price);
+  const risk  = Math.abs(pos.entryPrice - pos.stopLoss);
+  const tp    = pos.side === "long" ? pos.entryPrice + risk * 2 : pos.entryPrice - risk * 2;
+  if (pos.side === "long") {
+    if (price <= sl) return `止損 $${sl.toFixed(4)}`;
+    if (price >= tp) return "2:1止盈達成";
+  } else {
+    if (price >= sl) return `止損 $${sl.toFixed(4)}`;
+    if (price <= tp) return "2:1止盈達成";
+  }
+  return null;
+}
+
+// ─── Strategy I: Stochastic + EMA 趨勢 (1H) ──────────────────────────────────
+// EMA21/50 確認趨勢，Stochastic %K 超賣/超買區進場，2:1 TP
+
+function signalI(candles) {
+  if (candles.length < 60) return null;
+  const closes = candles.map(c => c.close);
+  const price  = closes[closes.length - 1];
+  const e21    = ema(closes, 21);
+  const e50    = ema(closes, 50);
+  const atrVal = atr(candles, 14);
+  const stoch  = calcStochK(candles, 14, 3);
+  const last   = candles[candles.length - 1];
+  if (stoch === null || !atrVal || price < 0.001) return null;
+
+  if (e21 > e50 && price > e50 && stoch < 25 && last.close > last.open) {
+    const sl    = swingLow(candles, 8) - atrVal * 0.1;
+    const slPct = Math.abs(price - sl) / price * 100;
+    if (slPct < 0.3 || slPct > 3 || sl >= price) return null;
+    return { side: "long", stopLoss: sl };
+  }
+  if (e21 < e50 && price < e50 && stoch > 75 && last.close < last.open) {
+    const sl    = swingHigh(candles, 8) + atrVal * 0.1;
+    const slPct = Math.abs(price - sl) / price * 100;
+    if (slPct < 0.3 || slPct > 3 || sl <= price) return null;
+    return { side: "short", stopLoss: sl };
+  }
+  return null;
+}
+
+function exitI(pos, candles) {
+  const price = candles[candles.length - 1].close;
+  const sl    = calcTrailingStop(pos, price);
+  const risk  = Math.abs(pos.entryPrice - pos.stopLoss);
+  const tp    = pos.side === "long" ? pos.entryPrice + risk * 2 : pos.entryPrice - risk * 2;
+  if (pos.side === "long") {
+    if (price <= sl) return `止損 $${sl.toFixed(4)}`;
+    if (price >= tp) return "2:1止盈達成";
+  } else {
+    if (price >= sl) return `止損 $${sl.toFixed(4)}`;
+    if (price <= tp) return "2:1止盈達成";
+  }
+  return null;
+}
+
+// ─── Strategy J: Ichimoku Cloud (1H) ─────────────────────────────────────────
+// 價格在雲上/下，Tenkan 穿越 Kijun 進場，2:1 TP
+
+function signalJ(candles) {
+  if (candles.length < 85) return null;
+  const closes = candles.map(c => c.close);
+  const price  = closes[closes.length - 1];
+  const atrVal = atr(candles, 14);
+  const ichi   = calcIchimoku(candles);
+  if (!ichi || !atrVal || price < 0.001) return null;
+  const { tenkan, kijun, cloudTop, cloudBottom, prevTenkan, prevKijun } = ichi;
+
+  if (price > cloudTop && prevTenkan <= prevKijun && tenkan > kijun) {
+    const sl    = Math.min(kijun, cloudTop) - atrVal * 0.1;
+    const slPct = Math.abs(price - sl) / price * 100;
+    if (slPct < 0.3 || slPct > 5 || sl >= price) return null;
+    return { side: "long", stopLoss: sl };
+  }
+  if (price < cloudBottom && prevTenkan >= prevKijun && tenkan < kijun) {
+    const sl    = Math.max(kijun, cloudBottom) + atrVal * 0.1;
+    const slPct = Math.abs(price - sl) / price * 100;
+    if (slPct < 0.3 || slPct > 5 || sl <= price) return null;
+    return { side: "short", stopLoss: sl };
+  }
+  return null;
+}
+
+function exitJ(pos, candles) {
+  const price = candles[candles.length - 1].close;
+  const sl    = calcTrailingStop(pos, price);
+  const risk  = Math.abs(pos.entryPrice - pos.stopLoss);
+  const tp    = pos.side === "long" ? pos.entryPrice + risk * 2 : pos.entryPrice - risk * 2;
+  if (pos.side === "long") {
+    if (price <= sl) return `止損 $${sl.toFixed(4)}`;
+    if (price >= tp) return "2:1止盈達成";
+  } else {
+    if (price >= sl) return `止損 $${sl.toFixed(4)}`;
+    if (price <= tp) return "2:1止盈達成";
+  }
+  return null;
+}
+
+// ─── Strategy K: Keltner Channel 突破 (1H) ───────────────────────────────────
+// Keltner Channel 突破 + 成交量確認 + SMA20 趨勢，比 BB 假突破少，2:1 TP
+
+function signalK(candles) {
+  if (candles.length < 25) return null;
+  const closes   = candles.map(c => c.close);
+  const price    = closes[closes.length - 1];
+  const prevClose = closes[closes.length - 2];
+  const atrVal   = atr(candles, 14);
+  const kc       = calcKeltner(candles, 20, 14, 2);
+  const volR     = candles[candles.length - 1].volume / avgVol(candles, 20);
+  const s20now   = sma(closes, 20);
+  const s20prev  = sma(closes.slice(0, -1), 20);
+  if (!kc || !atrVal || price < 0.001) return null;
+
+  const trendUp   = s20now > s20prev * 1.001;
+  const trendDown = s20now < s20prev * 0.999;
+
+  if (price > kc.upper && prevClose <= kc.upper && volR > 1.5 && trendUp) {
+    const sl    = candles[candles.length - 1].low - atrVal * 0.5;
+    const slPct = Math.abs(price - sl) / price * 100;
+    if (slPct < 0.5 || slPct > 5 || sl >= price) return null;
+    return { side: "long", stopLoss: sl };
+  }
+  if (price < kc.lower && prevClose >= kc.lower && volR > 1.5 && trendDown) {
+    const sl    = candles[candles.length - 1].high + atrVal * 0.5;
+    const slPct = Math.abs(price - sl) / price * 100;
+    if (slPct < 0.5 || slPct > 5 || sl <= price) return null;
+    return { side: "short", stopLoss: sl };
+  }
+  return null;
+}
+
+function exitK(pos, candles) {
+  const closes = candles.map(c => c.close);
+  const price  = closes[closes.length - 1];
+  const kc     = calcKeltner(candles, 20, 14, 2);
+  const sl     = calcTrailingStop(pos, price);
+  const risk   = Math.abs(pos.entryPrice - pos.stopLoss);
+  const tp     = pos.side === "long" ? pos.entryPrice + risk * 2 : pos.entryPrice - risk * 2;
+  if (pos.side === "long") {
+    if (price <= sl) return `止損 $${sl.toFixed(4)}`;
+    if (price >= tp) return "2:1止盈達成";
+    if (kc && price < kc.upper && closes[closes.length - 2] > kc.upper) return "突破失效";
+  } else {
+    if (price >= sl) return `止損 $${sl.toFixed(4)}`;
+    if (price <= tp) return "2:1止盈達成";
+    if (kc && price > kc.lower && closes[closes.length - 2] < kc.lower) return "突破失效";
+  }
+  return null;
+}
+
 // ─── Strategy E: EMA Trend Pullback (1H) ─────────────────────────────────────
 // 邏輯：EMA21>EMA50 確認趨勢，RSI14 拉回到 35-52 超賣區，bullish K棒進場
 // 只留 SL + 2:1 TP
@@ -692,6 +937,10 @@ async function main() {
     E: { interval: "1h",  signalFn: signalE, exitFn: exitE }, // EMA 趨勢拉回
     F: { interval: "4h",  signalFn: signalF, exitFn: exitF }, // Supertrend
     G: { interval: "1h",  signalFn: signalG, exitFn: exitG }, // 多時框 RSI 共振
+    H: { interval: "1h",  signalFn: signalH, exitFn: exitH }, // MACD + EMA50
+    I: { interval: "1h",  signalFn: signalI, exitFn: exitI }, // Stochastic + EMA
+    J: { interval: "1h",  signalFn: signalJ, exitFn: exitJ }, // Ichimoku Cloud
+    K: { interval: "1h",  signalFn: signalK, exitFn: exitK }, // Keltner Channel
   };
 
   const toRun = STRATEGY === "ALL" ? Object.keys(strategies) : [STRATEGY];
