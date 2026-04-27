@@ -381,6 +381,11 @@ async function runSymbol(symbol, log, positions) {
     return false;
   }
 
+  if (positions.open.length >= 4) {
+    console.log(`  🚫 [${symbol}] 已達最大持倉數(4)，跳過`);
+    return false;
+  }
+
   const { results, allPass, side } = runDMCSafetyCheck(candles);
 
   // 策略B 止損：最近8根擺動低/高點下方（結構破壞才出場）

@@ -395,6 +395,11 @@ async function runSymbol(symbol, log, positions) {
     return false;
   }
 
+  if (positions.open.length >= 4) {
+    console.log(`  🚫 [${symbol}] 已達最大持倉數(4)，跳過`);
+    return false;
+  }
+
   const { results, allPass, side, atr } = runORBCheck(candles, orb);
 
   // 止損：區間另一側 + 0.5 ATR buffer（結構性止損）

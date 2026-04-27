@@ -526,6 +526,10 @@ async function runSymbol(symbol, log, positions) {
   }
 
   if (countTodaysTrades(log) >= CONFIG.maxTradesPerDay) return false;
+  if (positions.open.length >= 4) {
+    console.log(`  🚫 [${symbol}] 已達最大持倉數(4)，跳過`);
+    return false;
+  }
   if (price < 0.001) return false;
 
   const { results, allPass, side, atr } = runBBSafetyCheck(candles);
