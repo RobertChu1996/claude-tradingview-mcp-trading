@@ -16,7 +16,7 @@ const CONFIG = {
   portfolioValue: parseFloat(process.env.PORTFOLIO_VALUE_USD || "1000"),
   maxTradeSizeUSD: parseFloat(process.env.MAX_TRADE_SIZE_USD || "100"),
   maxTradesPerDay: parseInt(process.env.MAX_TRADES_PER_DAY || "20"),
-  paperTrading: process.env.PAPER_TRADING !== "false",
+  paperTrading: process.env.DMC_PAPER_TRADING !== "false",
   okx: {
     apiKey: process.env.OKX_API_KEY,
     secretKey: process.env.OKX_SECRET_KEY,
@@ -471,6 +471,16 @@ async function run() {
 
   if (positions.open.length > 0)
     console.log(`\n目前持倉: ${positions.open.map((p) => `${p.side.toUpperCase()} ${p.symbol}`).join(", ")}`);
+
+  // 日熔斷：當日已實現虧損超過本金 5% 則停止入場
+  const today = new Date().toISOString().slice(0, 10);
+  const todayPnl = positions.closed
+    .filter(t => t.exitTime?.startsWith(today) && t.pnl !== null)
+    .reduce((sum, t) => sum + (t.pnl || 0), 0);
+  if (todayPnl < -(CONFIG.portfolioValue * 0.05)) {
+    console.log(`⚡ [B熔斷] 今日已虧 $${Math.abs(todayPnl).toFixed(2)}，超過本金 5%，暫停入場`);
+    return;
+  }
 
   for (const symbol of watchlist) {
     const hasOpen    = positions.open.some((p) => p.symbol === symbol);
