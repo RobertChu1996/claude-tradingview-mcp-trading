@@ -144,17 +144,20 @@ function checkBBExit(position, candles) {
   const price  = closes[closes.length - 1];
   const bb     = calcBB(closes, 20, 2);
   const { side, entryPrice, stopLoss } = position;
+  const risk   = Math.abs(entryPrice - stopLoss);
+  const tp     = side === "long" ? entryPrice + risk * 2 : entryPrice - risk * 2;
 
   if (side === "long") {
-    if (price <= stopLoss)   return { exit: true, reason: `ATR 動態止損 ($${stopLoss.toFixed(4)})` };
-    if (price <= bb.middle)  return { exit: true, reason: "回到 BB 中軌（止盈）" };
+    if (price <= stopLoss)  return { exit: true, reason: `ATR 止損 ($${stopLoss.toFixed(4)})` };
+    if (price >= tp)        return { exit: true, reason: `2:1止盈達成 $${tp.toFixed(4)}` };
+    // 突破失效：前根收盤在帶外，當根收回帶內
     if (price < bb.upper && candles[candles.length-2].close > bb.upper)
-                             return { exit: true, reason: "重新跌回 BB 帶內（突破失效）" };
+                            return { exit: true, reason: "重新跌回 BB 帶內（突破失效）" };
   } else {
-    if (price >= stopLoss)   return { exit: true, reason: `ATR 動態止損 ($${stopLoss.toFixed(4)})` };
-    if (price >= bb.middle)  return { exit: true, reason: "回到 BB 中軌（止盈）" };
+    if (price >= stopLoss)  return { exit: true, reason: `ATR 止損 ($${stopLoss.toFixed(4)})` };
+    if (price <= tp)        return { exit: true, reason: `2:1止盈達成 $${tp.toFixed(4)}` };
     if (price > bb.lower && candles[candles.length-2].close < bb.lower)
-                             return { exit: true, reason: "重新漲回 BB 帶內（突破失效）" };
+                            return { exit: true, reason: "重新漲回 BB 帶內（突破失效）" };
   }
   return { exit: false };
 }

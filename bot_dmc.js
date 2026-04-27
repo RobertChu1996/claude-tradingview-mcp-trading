@@ -12,7 +12,7 @@ import { LOG_DMC_FILE as LOG_FILE, POSITIONS_DMC_FILE as POSITIONS_FILE, CSV_DMC
 // ─── Config ──────────────────────────────────────────────────────────────────
 
 const CONFIG = {
-  timeframe: "15m",
+  timeframe: "1H",
   portfolioValue: parseFloat(process.env.PORTFOLIO_VALUE_USD || "1000"),
   maxTradeSizeUSD: parseFloat(process.env.MAX_TRADE_SIZE_USD || "100"),
   maxTradesPerDay: parseInt(process.env.MAX_TRADES_PER_DAY || "20"),
@@ -174,20 +174,18 @@ function updateTrailingStop(position, currentPrice) {
 
 function checkDMCExit(position, candles) {
   const closes = candles.map((c) => c.close);
-  const last   = candles[candles.length - 1];
-  const price  = last.close;
-  const sma20  = calcSMA(closes, 20);
-  const strength = calcCandleStrength(last);
-  const { side, stopLoss } = position;
+  const price  = closes[closes.length - 1];
+  const { side, stopLoss, entryPrice } = position;
+  const risk   = Math.abs(entryPrice - stopLoss);
+  const tp     = side === "long" ? entryPrice + risk * 2 : entryPrice - risk * 2;
 
+  // 只留 SL + 2:1 TP，避免 SMA20 / 強勢K棒過早踢出
   if (side === "long") {
-    if (price <= stopLoss)                        return { exit: true, reason: `止損觸發 $${stopLoss.toFixed(6)}` };
-    if (price < sma20)                            return { exit: true, reason: "價格跌破 SMA20（結構破壞）" };
-    if (last.close < last.open && strength > 0.6) return { exit: true, reason: "強勢空頭K棒出現（反轉訊號）" };
+    if (price <= stopLoss) return { exit: true, reason: `止損觸發 $${stopLoss.toFixed(6)}` };
+    if (price >= tp)       return { exit: true, reason: `2:1止盈達成 $${tp.toFixed(6)}` };
   } else {
-    if (price >= stopLoss)                        return { exit: true, reason: `止損觸發 $${stopLoss.toFixed(6)}` };
-    if (price > sma20)                            return { exit: true, reason: "價格突破 SMA20（結構破壞）" };
-    if (last.close > last.open && strength > 0.6) return { exit: true, reason: "強勢多頭K棒出現（反轉訊號）" };
+    if (price >= stopLoss) return { exit: true, reason: `止損觸發 $${stopLoss.toFixed(6)}` };
+    if (price <= tp)       return { exit: true, reason: `2:1止盈達成 $${tp.toFixed(6)}` };
   }
   return { exit: false };
 }

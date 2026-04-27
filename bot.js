@@ -74,7 +74,7 @@ function checkOnboarding() {
 
 const CONFIG = {
   symbol: process.env.SYMBOL || "BTCUSDT",
-  timeframe: process.env.TIMEFRAME || "1m",
+  timeframe: process.env.TIMEFRAME || "1H",
   portfolioValue: parseFloat(process.env.PORTFOLIO_VALUE_USD || "1000"),
   maxTradeSizeUSD: parseFloat(process.env.MAX_TRADE_SIZE_USD || "100"),
   maxTradesPerDay: parseInt(process.env.MAX_TRADES_PER_DAY || "20"),
@@ -143,28 +143,13 @@ function checkExitConditions(position, price, ema8, vwap, rsi3) {
   const initialRisk = Math.abs(entryPrice - stopLoss);
   const tp = side === "long" ? entryPrice + initialRisk * 2 : entryPrice - initialRisk * 2;
 
+  // 只留 SL 和 2:1 TP，移除中途出場條件避免過早出場
   if (side === "long") {
-    if (price <= stopLoss)
-      return { exit: true, reason: `止損觸發 $${stopLoss.toFixed(6)}` };
-    if (price >= tp)
-      return { exit: true, reason: `2:1止盈達成 $${tp.toFixed(6)}` };
-    if (price <= vwap)
-      return { exit: true, reason: "價格跌破 VWAP（多頭論點失效）" };
-    if (price < ema8)
-      return { exit: true, reason: "價格跌破 EMA(8)（趨勢轉弱）" };
-    if (rsi3 > 50)
-      return { exit: true, reason: "RSI(3) 穿越 50（動能出場）" };
+    if (price <= stopLoss) return { exit: true, reason: `止損觸發 $${stopLoss.toFixed(6)}` };
+    if (price >= tp)       return { exit: true, reason: `2:1止盈達成 $${tp.toFixed(6)}` };
   } else {
-    if (price >= stopLoss)
-      return { exit: true, reason: `止損觸發 $${stopLoss.toFixed(6)}` };
-    if (price <= tp)
-      return { exit: true, reason: `2:1止盈達成 $${tp.toFixed(6)}` };
-    if (price >= vwap)
-      return { exit: true, reason: "價格突破 VWAP（空頭論點失效）" };
-    if (price > ema8)
-      return { exit: true, reason: "價格突破 EMA(8)（趨勢轉弱）" };
-    if (rsi3 < 50)
-      return { exit: true, reason: "RSI(3) 穿越 50（動能出場）" };
+    if (price >= stopLoss) return { exit: true, reason: `止損觸發 $${stopLoss.toFixed(6)}` };
+    if (price <= tp)       return { exit: true, reason: `2:1止盈達成 $${tp.toFixed(6)}` };
   }
 
   return { exit: false };
@@ -372,12 +357,12 @@ function runSafetyCheck(price, ema8, vwap, rsi3, rules) {
   if (bullishBias) {
     check("Price above VWAP (buyers in control)", `> ${vwap.toFixed(2)}`, price.toFixed(2), price > vwap);
     check("Price above EMA(8) (uptrend confirmed)", `> ${ema8.toFixed(2)}`, price.toFixed(2), price > ema8);
-    check("RSI(3) below 30 (snap-back setup in uptrend)", "< 30", rsi3.toFixed(2), rsi3 < 30);
+    check("RSI(3) below 20 (strong oversold snap-back in uptrend)", "< 20", rsi3.toFixed(2), rsi3 < 20);
     check("Price within 1.5% of VWAP (not overextended)", "< 1.5%", `${distFromVWAP.toFixed(2)}%`, distFromVWAP < 1.5);
   } else if (bearishBias) {
     check("Price below VWAP (sellers in control)", `< ${vwap.toFixed(2)}`, price.toFixed(2), price < vwap);
     check("Price below EMA(8) (downtrend confirmed)", `< ${ema8.toFixed(2)}`, price.toFixed(2), price < ema8);
-    check("RSI(3) above 70 (reversal setup in downtrend)", "> 70", rsi3.toFixed(2), rsi3 > 70);
+    check("RSI(3) above 80 (strong overbought reversal in downtrend)", "> 80", rsi3.toFixed(2), rsi3 > 80);
     check("Price within 1.5% of VWAP (not overextended)", "< 1.5%", `${distFromVWAP.toFixed(2)}%`, distFromVWAP < 1.5);
   } else {
     results.push({ label: "Market bias", required: "Bullish or bearish", actual: "Neutral", pass: false });
