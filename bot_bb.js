@@ -616,6 +616,16 @@ async function run() {
 
   await reconcileWithOKX(positions);
 
+  // 日熔斷：當日已實現虧損超過本金 5% 則停止入場
+  const today = new Date().toISOString().slice(0, 10);
+  const todayPnl = positions.closed
+    .filter(t => t.exitTime?.startsWith(today) && t.pnl !== null)
+    .reduce((sum, t) => sum + (t.pnl || 0), 0);
+  if (todayPnl < -(CONFIG.portfolioValue * 0.05)) {
+    console.log(`⚡ [C熔斷] 今日已虧 $${Math.abs(todayPnl).toFixed(2)}，超過本金 5%，暫停入場`);
+    return;
+  }
+
   const orphans = positions.open.filter(p => !watchlist.includes(p.symbol));
   for (const p of orphans) await runSymbol(p.symbol, log, positions);
 
