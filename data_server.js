@@ -60,7 +60,7 @@ function parseCsv(csv) {
 
 function todaySummary() {
   const today = new Date().toISOString().slice(0, 10);
-  const files = ["trades.csv", "trades_bb.csv", "trades_dmc.csv", "trades_orb.csv"];
+  const files = ["trades.csv", "trades_bb.csv", "trades_orb.csv"];
   let totalPnl = 0, wins = 0, losses = 0, trades = [];
 
   for (const f of files) {
@@ -145,7 +145,6 @@ function fullReport() {
   const today = new Date().toISOString().slice(0, 10);
   const strategies = [
     strategyStats("trades.csv",     "positions.json",     "A: VWAP+RSI(3)+EMA  [1H]"),
-    strategyStats("trades_dmc.csv", "positions_dmc.json", "B: DMC-Inspired     [1H]"),
     strategyStats("trades_bb.csv",  "positions_bb.json",  "C: BB Breakout+ATR  [1H]"),
     strategyStats("trades_e.csv",   "positions_e.json",   "E: EMA Trend Pullback   [1H] 起:2026-04-27"),
     strategyStats("trades_k.csv",   "positions_k.json",   "K: Keltner Breakout     [1H] 起:2026-04-28"),
