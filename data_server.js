@@ -174,6 +174,21 @@ function fullReport() {
 }
 
 const asyncRoutes = {
+  // OKX 帳戶餘額
+  "/balance": async () => {
+    const r = await okxGet("/api/v5/account/balance");
+    const details = (r.data?.[0]?.details || []).filter(d => parseFloat(d.cashBal) > 0);
+    const totalEq = parseFloat(r.data?.[0]?.totalEq || 0);
+    return JSON.stringify({
+      asOf: new Date().toISOString(),
+      totalEquityUSD: totalEq.toFixed(2),
+      assets: details.map(d => ({
+        currency: d.ccy,
+        balance: parseFloat(d.cashBal).toFixed(4),
+        usdValue: parseFloat(d.eqUsd || 0).toFixed(2),
+      })),
+    }, null, 2);
+  },
   // OKX 即時倉位（地面真相）
   "/okx": async () => {
     // 取得開倉
