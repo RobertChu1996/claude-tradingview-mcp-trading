@@ -451,6 +451,17 @@ async function run() {
 
   console.log(`[K] ${new Date().toISOString()} | ${CONFIG.paperTrading ? "PAPER" : "LIVE"} | ${watchlist.length}幣 | 持倉:${positions.open.length}`);
 
+  // 偵測 PAPER→LIVE 切換：清除舊模擬持倉並跳過本輪進場，避免立刻開真實單
+  if (!CONFIG.paperTrading) {
+    const paperOpen = positions.open.filter(p => p.orderId?.startsWith("K-PAPER-"));
+    if (paperOpen.length > 0) {
+      console.log(`⚠️ [K] 偵測到 PAPER→LIVE 切換，清除 ${paperOpen.length} 筆模擬持倉，本輪跳過進場`);
+      positions.open = positions.open.filter(p => !p.orderId?.startsWith("K-PAPER-"));
+      savePositions(positions);
+      return;
+    }
+  }
+
   // 日熔斷
   const today = new Date().toISOString().slice(0, 10);
   const todayPnl = positions.closed

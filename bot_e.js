@@ -513,6 +513,17 @@ async function run() {
 
   console.log(`[E] ${new Date().toISOString()} | ${CONFIG.paperTrading ? "PAPER" : "LIVE"} | ${watchlist.length}幣 | 持倉:${positions.open.length}`);
 
+  // 偵測 PAPER→LIVE 切換：清除舊模擬持倉並跳過本輪進場，避免立刻開真實單
+  if (!CONFIG.paperTrading) {
+    const paperOpen = positions.open.filter(p => p.orderId?.startsWith("E-PAPER-"));
+    if (paperOpen.length > 0) {
+      console.log(`⚠️ [E] 偵測到 PAPER→LIVE 切換，清除 ${paperOpen.length} 筆模擬持倉，本輪跳過進場`);
+      positions.open = positions.open.filter(p => !p.orderId?.startsWith("E-PAPER-"));
+      savePositions(positions);
+      return;
+    }
+  }
+
   await reconcileWithOKX(positions, watchlist);
 
   const today = new Date().toISOString().slice(0, 10);

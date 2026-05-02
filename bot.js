@@ -986,6 +986,17 @@ async function run() {
 
   console.log(`[A] ${new Date().toISOString()} | ${CONFIG.paperTrading ? "PAPER" : "LIVE"} | ${watchlist.length}幣 | ${CONFIG.timeframe} | 持倉:${positions.open.length}`);
 
+  // 偵測 PAPER→LIVE 切換：清除舊模擬持倉並跳過本輪進場，避免立刻開真實單
+  if (!CONFIG.paperTrading) {
+    const paperOpen = positions.open.filter(p => p.orderId?.startsWith("PAPER-"));
+    if (paperOpen.length > 0) {
+      console.log(`⚠️ [A] 偵測到 PAPER→LIVE 切換，清除 ${paperOpen.length} 筆模擬持倉，本輪跳過進場`);
+      positions.open = positions.open.filter(p => !p.orderId?.startsWith("PAPER-"));
+      savePositions(positions);
+      return;
+    }
+  }
+
   await reconcileWithOKX(positions, watchlist);
 
   // 日熔斷：當日已實現虧損超過本金 5% 則停止入場
