@@ -145,11 +145,11 @@ function checkExitConditions(position, price, ema8, vwap, rsi3) {
 
   // 只留 SL 和 2:1 TP，移除中途出場條件避免過早出場
   if (side === "long") {
-    if (price <= stopLoss) return { exit: true, reason: `止損觸發 $${stopLoss.toFixed(6)}` };
-    if (price >= tp)       return { exit: true, reason: `2:1止盈達成 $${tp.toFixed(6)}` };
+    if (price <= stopLoss) return { exit: true, reason: `止損觸發 $${stopLoss.toFixed(6)}`, exitPrice: stopLoss };
+    if (price >= tp)       return { exit: true, reason: `2:1止盈達成 $${tp.toFixed(6)}`, exitPrice: tp };
   } else {
-    if (price >= stopLoss) return { exit: true, reason: `止損觸發 $${stopLoss.toFixed(6)}` };
-    if (price <= tp)       return { exit: true, reason: `2:1止盈達成 $${tp.toFixed(6)}` };
+    if (price >= stopLoss) return { exit: true, reason: `止損觸發 $${stopLoss.toFixed(6)}`, exitPrice: stopLoss };
+    if (price <= tp)       return { exit: true, reason: `2:1止盈達成 $${tp.toFixed(6)}`, exitPrice: tp };
   }
 
   return { exit: false };
@@ -825,7 +825,7 @@ async function runSymbol(symbol, rules, log, positions) {
       savePositions(positions);
     }
 
-    const { exit, reason } = checkExitConditions(openPos, price, ema8, vwap, rsi3);
+    const { exit, reason, exitPrice: intendedEp } = checkExitConditions(openPos, price, ema8, vwap, rsi3);
 
     if (exit) {
       // 真實交易：先在 OKX 平倉，再更新本地狀態
@@ -838,16 +838,18 @@ async function runSymbol(symbol, rules, log, positions) {
         }
       }
 
+      // paper trading 用預定出場價（SL/TP），避免 15 分鐘輪詢 gap 導致損失高估
+      const ep = CONFIG.paperTrading ? (intendedEp ?? price) : price;
       const pnl = openPos.side === "long"
-        ? (price - openPos.entryPrice) * openPos.quantity
-        : (openPos.entryPrice - price) * openPos.quantity;
+        ? (ep - openPos.entryPrice) * openPos.quantity
+        : (openPos.entryPrice - ep) * openPos.quantity;
       const win = pnl > 0;
 
       console.log(`  ${win ? "✅" : "🔴"} [${symbol}] 出場：${reason} | P&L $${pnl.toFixed(4)}`);
 
       const closedTrade = {
         ...openPos,
-        exitPrice: price,
+        exitPrice: ep,
         exitTime: new Date().toISOString(),
         exitReason: reason,
         pnl,

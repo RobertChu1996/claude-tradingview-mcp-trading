@@ -148,16 +148,15 @@ function checkBBExit(position, candles) {
   const tp     = side === "long" ? entryPrice + risk * 2 : entryPrice - risk * 2;
 
   if (side === "long") {
-    if (price <= stopLoss)  return { exit: true, reason: `ATR 止損 ($${stopLoss.toFixed(4)})` };
-    if (price >= tp)        return { exit: true, reason: `2:1止盈達成 $${tp.toFixed(4)}` };
-    // 突破失效：前根收盤在帶外，當根收回帶內
+    if (price <= stopLoss)  return { exit: true, reason: `ATR 止損 ($${stopLoss.toFixed(4)})`, exitPrice: stopLoss };
+    if (price >= tp)        return { exit: true, reason: `2:1止盈達成 $${tp.toFixed(4)}`, exitPrice: tp };
     if (price < bb.upper && candles[candles.length-2].close > bb.upper)
-                            return { exit: true, reason: "重新跌回 BB 帶內（突破失效）" };
+                            return { exit: true, reason: "重新跌回 BB 帶內（突破失效）", exitPrice: price };
   } else {
-    if (price >= stopLoss)  return { exit: true, reason: `ATR 止損 ($${stopLoss.toFixed(4)})` };
-    if (price <= tp)        return { exit: true, reason: `2:1止盈達成 $${tp.toFixed(4)}` };
+    if (price >= stopLoss)  return { exit: true, reason: `ATR 止損 ($${stopLoss.toFixed(4)})`, exitPrice: stopLoss };
+    if (price <= tp)        return { exit: true, reason: `2:1止盈達成 $${tp.toFixed(4)}`, exitPrice: tp };
     if (price > bb.lower && candles[candles.length-2].close < bb.lower)
-                            return { exit: true, reason: "重新漲回 BB 帶內（突破失效）" };
+                            return { exit: true, reason: "重新漲回 BB 帶內（突破失效）", exitPrice: price };
   }
   return { exit: false };
 }
@@ -492,7 +491,7 @@ async function runSymbol(symbol, log, positions) {
       openPos.stopLoss = newStop;
       savePositions(positions);
     }
-    const { exit, reason } = checkBBExit(openPos, candles);
+    const { exit, reason, exitPrice: intendedEp } = checkBBExit(openPos, candles);
     if (exit) {
       if (!CONFIG.paperTrading) {
         try {
@@ -503,16 +502,17 @@ async function runSymbol(symbol, log, positions) {
         }
       }
 
+      const ep = CONFIG.paperTrading ? (intendedEp ?? price) : price;
       const pnl = openPos.side === "long"
-        ? (price - openPos.entryPrice) * openPos.quantity
-        : (openPos.entryPrice - price) * openPos.quantity;
+        ? (ep - openPos.entryPrice) * openPos.quantity
+        : (openPos.entryPrice - ep) * openPos.quantity;
       const win = pnl > 0;
       console.log(`  ${win ? "✅" : "🔴"} [BB:${symbol}] 出場：${reason} | P&L: $${pnl.toFixed(4)}`);
       const symStats = updateSymbolStats(symbol, win);
       if (!win && symStats.consecutiveLosses >= MAX_CONSEC_LOSSES)
         console.log(`  ⚠️  [BB:${symbol}] 連虧${symStats.consecutiveLosses}次，暫停`);
       positions.open = positions.open.filter((p) => p.symbol !== symbol);
-      positions.closed.push({ ...openPos, exitPrice: price, exitTime: new Date().toISOString(), exitReason: reason, pnl, win, paperTrading: CONFIG.paperTrading });
+      positions.closed.push({ ...openPos, exitPrice: ep, exitTime: new Date().toISOString(), exitReason: reason, pnl, win, paperTrading: CONFIG.paperTrading });
       savePositions(positions);
       appendFileSync(CSV_FILE, [
         new Date().toISOString().slice(0,10), new Date().toISOString().slice(11,19),

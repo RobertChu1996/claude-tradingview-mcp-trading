@@ -138,11 +138,11 @@ function checkExit(position, price) {
   const tp   = side === "long" ? entryPrice + risk * 2 : entryPrice - risk * 2;
 
   if (side === "long") {
-    if (price <= stopLoss) return { exit: true, reason: `止損 $${stopLoss.toFixed(6)}` };
-    if (price >= tp)       return { exit: true, reason: `2:1止盈達成 $${tp.toFixed(6)}` };
+    if (price <= stopLoss) return { exit: true, reason: `止損 $${stopLoss.toFixed(6)}`, exitPrice: stopLoss };
+    if (price >= tp)       return { exit: true, reason: `2:1止盈達成 $${tp.toFixed(6)}`, exitPrice: tp };
   } else {
-    if (price >= stopLoss) return { exit: true, reason: `止損 $${stopLoss.toFixed(6)}` };
-    if (price <= tp)       return { exit: true, reason: `2:1止盈達成 $${tp.toFixed(6)}` };
+    if (price >= stopLoss) return { exit: true, reason: `止損 $${stopLoss.toFixed(6)}`, exitPrice: stopLoss };
+    if (price <= tp)       return { exit: true, reason: `2:1止盈達成 $${tp.toFixed(6)}`, exitPrice: tp };
   }
   return { exit: false };
 }
@@ -398,7 +398,7 @@ async function runSymbol(symbol, log, positions) {
       savePositions(positions);
     }
 
-    const { exit, reason } = checkExit(openPos, price);
+    const { exit, reason, exitPrice: intendedEp } = checkExit(openPos, price);
     if (exit) {
       if (!CONFIG.paperTrading) {
         try {
@@ -408,13 +408,14 @@ async function runSymbol(symbol, log, positions) {
           console.log(`  ⚠️ [E:${symbol}] OKX平倉失敗 — ${err.message}（本地狀態仍會更新）`);
         }
       }
+      const ep = CONFIG.paperTrading ? (intendedEp ?? price) : price;
       const pnl = openPos.side === "long"
-        ? (price - openPos.entryPrice) * openPos.quantity
-        : (openPos.entryPrice - price) * openPos.quantity;
+        ? (ep - openPos.entryPrice) * openPos.quantity
+        : (openPos.entryPrice - ep) * openPos.quantity;
       const win = pnl > 0;
       console.log(`  ${win ? "✅" : "🔴"} [E:${symbol}] 出場：${reason} | P&L: $${pnl.toFixed(4)}`);
       positions.open = positions.open.filter((p) => p.symbol !== symbol);
-      positions.closed.push({ ...openPos, exitPrice: price, exitTime: new Date().toISOString(), exitReason: reason, pnl, win, paperTrading: CONFIG.paperTrading });
+      positions.closed.push({ ...openPos, exitPrice: ep, exitTime: new Date().toISOString(), exitReason: reason, pnl, win, paperTrading: CONFIG.paperTrading });
       savePositions(positions);
       appendFileSync(CSV_FILE, [
         new Date().toISOString().slice(0, 10), new Date().toISOString().slice(11, 19),
