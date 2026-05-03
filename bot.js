@@ -503,7 +503,7 @@ async function placeOKXOrder(symbol, side, sizeUSD, price, stopLossPrice) {
       tdMode: "isolated",
       side: exitSide,
       posSide: exitPosSide,
-      ordType: "conditional",
+      ordType: "oco",
       sz,
       slTriggerPx:   stopLossPrice.toFixed(8),
       slOrdPx:       "-1",

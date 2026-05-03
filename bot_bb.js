@@ -308,7 +308,7 @@ async function placeOKXOrder(symbol, side, sizeUSD, price, stopLossPrice) {
     const slBody = JSON.stringify({
       instId, tdMode: "isolated", side: exitSide,
       posSide: exitPosSide,
-      ordType: "conditional", sz,
+      ordType: "oco", sz,
       slTriggerPx: stopLossPrice.toFixed(8), slOrdPx: "-1", slTriggerPxType: "last",
       tpTriggerPx: tpPx.toFixed(8),          tpOrdPx: "-1", tpTriggerPxType: "last",
     });
