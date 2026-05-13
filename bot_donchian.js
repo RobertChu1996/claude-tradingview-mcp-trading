@@ -12,6 +12,7 @@ import {
   POSITIONS_DN_FILE as POSITIONS_FILE,
   LOG_DN_FILE       as LOG_FILE,
   CSV_DN_FILE       as CSV_FILE,
+  WATCHLIST_DN_FILE,
 } from "./paths.js";
 
 // ─── 策略參數 ─────────────────────────────────────────────────────────────────
@@ -35,21 +36,33 @@ const CONFIG = {
   },
 };
 
-// ─── 幣種清單（59幣，對應回測）────────────────────────────────────────────────
-const SYMBOLS = [
+// ─── 幣種清單（動態讀取，每週由 optimize_dn.js 更新）─────────────────────────
+const FALLBACK_SYMBOLS = [
   "BTCUSDT","ETHUSDT","BNBUSDT","SOLUSDT","XRPUSDT",
   "ADAUSDT","AVAXUSDT","DOGEUSDT","DOTUSDT","LINKUSDT",
   "LTCUSDT","NEARUSDT","UNIUSDT","AAVEUSDT","ATOMUSDT",
   "FILUSDT","ETCUSDT","XLMUSDT","ALGOUSDT",
   "CRVUSDT","INJUSDT","APTUSDT","ARBUSDT","OPUSDT",
   "LDOUSDT","RUNEUSDT","SEIUSDT","SUIUSDT","TIAUSDT",
-  "STXUSDT","ORDIUSDT","WLDUSDT","BLURUSDT","PENDLEUSDT",
-  "FETUSDT","RENDERUSDT","JUPUSDT","ENAUSDT","EIGENUSDT",
+  "STXUSDT","ORDIUSDT","WLDUSDT","PENDLEUSDT",
+  "FETUSDT","RENDERUSDT","JUPUSDT","ENAUSDT",
   "BCHUSDT","TRXUSDT","ICPUSDT","HBARUSDT","VETUSDT",
-  "SANDUSDT","MANAUSDT","AXSUSDT","GALAUSDT",
-  "DYDXUSDT","ENSUSDT","GMXUSDT","SNXUSDT","YFIUSDT",
-  "COMPUSDT","SUSHIUSDT","1INCHUSDT","ZECUSDT",
+  "DYDXUSDT","GMXUSDT","ZECUSDT",
 ];
+
+function loadSymbols() {
+  if (existsSync(WATCHLIST_DN_FILE)) {
+    try {
+      const wl = JSON.parse(readFileSync(WATCHLIST_DN_FILE, "utf8"));
+      if (Array.isArray(wl.symbols) && wl.symbols.length > 0) {
+        log(`[DN] 動態清單 ${wl.symbols.length} 幣（更新於 ${wl.updatedAt?.slice(0,10)}）`);
+        return wl.symbols;
+      }
+    } catch {}
+  }
+  log(`[DN] 使用靜態兜底清單 ${FALLBACK_SYMBOLS.length} 幣`);
+  return FALLBACK_SYMBOLS;
+}
 
 const CSV_HEADERS = "Date,Time(UTC),Symbol,Side,Entry,Exit,PnL,Reason,Mode,OrderID";
 
@@ -420,6 +433,7 @@ async function run() {
   // BTC 趨勢判斷
   const bull = await isBtcBull();
   const direction = bull ? "long" : "short";
+  const SYMBOLS = loadSymbols();
   log(`[DN] BTC ${bull ? "牛市→做多" : "熊市→做空"}，掃描 ${SYMBOLS.length} 幣種...`);
 
   for (const symbol of SYMBOLS) {
