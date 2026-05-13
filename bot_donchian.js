@@ -1,8 +1,9 @@
 /**
- * Strategy DN: Donchian Breakout (日線)
- * 牛市（BTC > MA200）：日線收盤突破 N30 最高 → 做多，SL = N15日最低（上移）
- * 熊市（BTC < MA200）：日線收盤突破 N30 最低 → 做空，SL = N15日最高（下移）
- * 止盈：3.0:1 R:R | 回測（3年43幣雙向）：PF 2.05，+85%，最大回撤 10.9%
+ * Strategy DN: Donchian Breakout (4H)
+ * 牛市（BTC > MA200日線）：4H收盤突破 N180根最高 → 做多，SL = N90根最低（上移）
+ * 熊市（BTC < MA200日線）：4H收盤突破 N180根最低 → 做空，SL = N90根最高（下移）
+ * N180=30天/N90=15天（4H等效日線）| 止盈 3:1 | 每15分鐘掃一次
+ * 回測（24個月43幣雙向）：PF 1.22，年化+28.3%，最大回撤 $6,284
  */
 
 import "dotenv/config";
@@ -16,8 +17,8 @@ import {
 } from "./paths.js";
 
 // ─── 策略參數 ─────────────────────────────────────────────────────────────────
-const N_HIGH      = 30;    // 突破：前N根最高
-const N_LOW       = 15;    // 止損：前N根最低
+const N_HIGH      = 180;   // 突破：前180根4H（= 30天）
+const N_LOW       = 90;    // 止損：前90根4H（= 15天）
 const TP_RATIO    = 3.0;   // 止盈比
 const BTC_MA_BARS = 200;   // BTC 趨勢過濾
 const COOLDOWN_MS = 3 * 24 * 3600 * 1000; // 3天冷卻
@@ -98,9 +99,9 @@ function appendCsv(pos, exitPrice, pnl, reason) {
   );
 }
 
-// ─── 市場資料（Binance 日線）──────────────────────────────────────────────────
-async function fetchDailyCandles(symbol, limit = 260) {
-  const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1d&limit=${limit}`;
+// ─── 市場資料 ────────────────────────────────────────────────────────────────
+async function fetchCandles(symbol, interval, limit) {
+  const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
   const res  = await fetch(url);
   if (!res.ok) throw new Error(`Binance ${res.status}`);
   return (await res.json()).map(k => ({
@@ -108,8 +109,25 @@ async function fetchDailyCandles(symbol, limit = 260) {
   }));
 }
 
-// 只取已完成的日線（排除今天開盤中的蠟燭）
-function completedCandles(candles) {
+// BTC MA200 用日線
+function fetchDailyCandles(symbol, limit = 260) {
+  return fetchCandles(symbol, "1d", limit);
+}
+
+// 信號/止損用 4H
+function fetch4HCandles(symbol, limit) {
+  return fetchCandles(symbol, "4h", limit);
+}
+
+// 排除當前未收盤的 4H K棒
+function completed4H(candles) {
+  const h4ms = 4 * 3600 * 1000;
+  const curBarOpen = Math.floor(Date.now() / h4ms) * h4ms;
+  return candles.filter(c => c.time < curBarOpen);
+}
+
+// 排除今日未收盤日線（BTC MA200 用）
+function completedDaily(candles) {
   const todayOpen = new Date().setUTCHours(0, 0, 0, 0);
   return candles.filter(c => c.time < todayOpen);
 }
@@ -126,20 +144,20 @@ function sma(closes, n) {
   return sl.reduce((a, b) => a + b, 0) / sl.length;
 }
 
-// ─── BTC 趨勢過濾 ─────────────────────────────────────────────────────────────
+// ─── BTC 趨勢過濾（日線 MA200）───────────────────────────────────────────────
 async function isBtcBull() {
   try {
-    const c = completedCandles(await fetchDailyCandles("BTCUSDT", BTC_MA_BARS + 5));
-    if (c.length < BTC_MA_BARS) return true; // 不足時放行
+    const c = completedDaily(await fetchDailyCandles("BTCUSDT", BTC_MA_BARS + 5));
+    if (c.length < BTC_MA_BARS) return true;
     const ma = sma(c.map(x => x.close), BTC_MA_BARS);
     return c[c.length - 1].close >= ma;
   } catch { return true; }
 }
 
-// ─── 進場信號 ─────────────────────────────────────────────────────────────────
+// ─── 進場信號（4H）───────────────────────────────────────────────────────────
 async function checkLongSignal(symbol) {
-  const raw = await fetchDailyCandles(symbol, N_HIGH + N_LOW + 10);
-  const c   = completedCandles(raw);
+  const raw = await fetch4HCandles(symbol, N_HIGH + N_LOW + 10);
+  const c   = completed4H(raw);
   if (c.length < N_HIGH + N_LOW) return null;
 
   const last     = c[c.length - 1];
@@ -161,8 +179,8 @@ async function checkLongSignal(symbol) {
 }
 
 async function checkShortSignal(symbol) {
-  const raw = await fetchDailyCandles(symbol, N_HIGH + N_LOW + 10);
-  const c   = completedCandles(raw);
+  const raw = await fetch4HCandles(symbol, N_HIGH + N_LOW + 10);
+  const c   = completed4H(raw);
   if (c.length < N_HIGH + N_LOW) return null;
 
   const last    = c[c.length - 1];
@@ -170,7 +188,6 @@ async function checkShortSignal(symbol) {
   const prevLow = rollingLow(prev.slice(-N_HIGH), N_HIGH);
   const curHigh = rollingHigh(c.slice(-N_LOW), N_LOW);
 
-  // 突破：昨日收盤 < 前N日最低
   if (last.close >= prevLow) return null;
 
   const entry = last.close;
@@ -185,24 +202,24 @@ async function checkShortSignal(symbol) {
   return { side: "short", entry, sl, tp, slPct, level: prevLow, candle: last };
 }
 
-// ─── 追蹤止損更新 ─────────────────────────────────────────────────────────────
+// ─── 追蹤止損更新（4H）───────────────────────────────────────────────────────
 async function calcNewLongSL(symbol, currentSL) {
   try {
-    const raw = await fetchDailyCandles(symbol, N_LOW + 5);
-    const c   = completedCandles(raw);
+    const raw = await fetch4HCandles(symbol, N_LOW + 5);
+    const c   = completed4H(raw);
     if (c.length < N_LOW) return currentSL;
     const newSL = rollingLow(c.slice(-N_LOW), N_LOW);
-    return newSL > currentSL ? newSL : currentSL; // 只能上移
+    return newSL > currentSL ? newSL : currentSL;
   } catch { return currentSL; }
 }
 
 async function calcNewShortSL(symbol, currentSL) {
   try {
-    const raw = await fetchDailyCandles(symbol, N_LOW + 5);
-    const c   = completedCandles(raw);
+    const raw = await fetch4HCandles(symbol, N_LOW + 5);
+    const c   = completed4H(raw);
     if (c.length < N_LOW) return currentSL;
     const newSL = rollingHigh(c.slice(-N_LOW), N_LOW);
-    return newSL < currentSL ? newSL : currentSL; // 只能下移
+    return newSL < currentSL ? newSL : currentSL;
   } catch { return currentSL; }
 }
 
@@ -320,11 +337,11 @@ async function checkAlgoStatus(algoId, instId) {
   return res.data?.[0]?.state; // "live" | "effective" | "filled" | "cancelled" | "stopped"
 }
 
-// ─── Paper Trading 出場模擬 ───────────────────────────────────────────────────
+// ─── Paper Trading 出場模擬（4H）────────────────────────────────────────────
 async function checkPaperExit(pos) {
   try {
-    const raw = await fetchDailyCandles(pos.symbol, 3);
-    const c   = completedCandles(raw);
+    const raw  = await fetch4HCandles(pos.symbol, 5);
+    const c    = completed4H(raw);
     if (!c.length) return null;
     const last = c[c.length - 1];
     if (pos.side === "short") {
@@ -345,13 +362,9 @@ async function run() {
   if (!positions.cooldown) positions.cooldown = {};
 
   const now       = Date.now();
-  const utcHour   = new Date(now).getUTCHours();
-  const utcMin    = new Date(now).getUTCMinutes();
-  const isDailyWin = utcHour === 0 && utcMin < 15; // 每日 UTC 00:00-00:14
-
   const longOpen  = positions.open.filter(p => p.side !== "short").length;
   const shortOpen = positions.open.filter(p => p.side === "short").length;
-  log(`[DN] 開始 | 模式:${CONFIG.paperTrading?"PAPER":"LIVE"} | 開倉:${positions.open.length}/${CONFIG.maxOpen}(多${longOpen}/空${shortOpen}) | 日線窗口:${isDailyWin}`);
+  log(`[DN] 開始 | 模式:${CONFIG.paperTrading?"PAPER":"LIVE"} | 開倉:${positions.open.length}/${CONFIG.maxOpen}(多${longOpen}/空${shortOpen})`);
 
   // Paper→Live 防衛
   if (!CONFIG.paperTrading) {
@@ -394,13 +407,7 @@ async function run() {
     }
   }
 
-  // ── Step 2：每日窗口 ─────────────────────────────────────────────────────
-  if (!isDailyWin) {
-    savePositions(positions);
-    log(`[DN] 非日線窗口，跳過信號掃描`);
-    return;
-  }
-
+  // ── Step 2：更新追蹤止損 + 掃描信號（每15分鐘）────────────────────────────
   // Step 2a：更新追蹤止損
   for (const pos of positions.open) {
     try {
