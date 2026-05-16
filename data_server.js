@@ -93,17 +93,30 @@ function todaySummary() {
   };
 }
 
-// 批次抓 Binance 即時價格
+// 批次抓 Binance 即時價格（現貨 + 合約雙重保障）
 async function fetchPrices(symbols) {
+  if (!symbols.length) return {};
+  const out = {};
   try {
-    const res  = await fetch("https://api.binance.com/api/v3/ticker/price");
-    const list = await res.json();
-    const map  = {};
-    for (const t of list) map[t.symbol] = parseFloat(t.price);
-    const out = {};
-    for (const s of symbols) if (map[s]) out[s] = map[s];
-    return out;
-  } catch { return {}; }
+    const encoded = encodeURIComponent(JSON.stringify(symbols));
+    // 先試現貨
+    const r1  = await fetch(`https://api.binance.com/api/v3/ticker/price?symbols=${encoded}`);
+    if (r1.ok) {
+      const list = await r1.json();
+      if (Array.isArray(list)) for (const t of list) out[t.symbol] = parseFloat(t.price);
+    }
+    // 缺的幣試合約（永續）
+    const missing = symbols.filter(s => !out[s]);
+    if (missing.length) {
+      const enc2 = encodeURIComponent(JSON.stringify(missing));
+      const r2   = await fetch(`https://fapi.binance.com/fapi/v1/ticker/price?symbols=${enc2}`);
+      if (r2.ok) {
+        const list2 = await r2.json();
+        if (Array.isArray(list2)) for (const t of list2) out[t.symbol] = parseFloat(t.price);
+      }
+    }
+  } catch(e) { console.error("[fetchPrices]", e.message); }
+  return out;
 }
 
 // 單一策略統計：從 CSV + positions JSON 計算全期及今日績效
