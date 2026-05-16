@@ -93,8 +93,21 @@ function todaySummary() {
   };
 }
 
+// 批次抓 Binance 即時價格
+async function fetchPrices(symbols) {
+  try {
+    const res  = await fetch("https://api.binance.com/api/v3/ticker/price");
+    const list = await res.json();
+    const map  = {};
+    for (const t of list) map[t.symbol] = parseFloat(t.price);
+    const out = {};
+    for (const s of symbols) if (map[s]) out[s] = map[s];
+    return out;
+  } catch { return {}; }
+}
+
 // 單一策略統計：從 CSV + positions JSON 計算全期及今日績效
-function strategyStats(csvFile, posFile, label) {
+function strategyStats(csvFile, posFile, label, prices = {}) {
   const today = new Date().toISOString().slice(0, 10);
   const csv   = readFile(`${D}/${csvFile}`);
   const exits = csv
@@ -128,35 +141,71 @@ function strategyStats(csvFile, posFile, label) {
 
   const pos = posFile ? JSON.parse(readFile(`${D}/${posFile}`) || '{"open":[],"closed":[]}') : { open: [], closed: [] };
 
+  const openPositions = (pos.open || []).map(p => {
+    const curPx  = prices[p.symbol];
+    const entry  = p.entryPrice;
+    const sign   = p.side === "short" ? -1 : 1;
+    const pct    = curPx && entry ? sign * (curPx - entry) / entry * 100 : null;
+    const qty    = p.quantity ?? p.qty ?? p.size ?? null;
+    const uPnl   = (pct !== null && qty) ? sign * (curPx - entry) * qty : null;
+    return {
+      symbol:       p.symbol,
+      side:         p.side,
+      entry:        entry,
+      currentPrice: curPx ?? null,
+      sl:           p.currentSL ?? p.stopLoss ?? null,
+      tp:           p.tp ?? null,
+      unrealizedPct: pct !== null ? parseFloat(pct.toFixed(2)) : null,
+      unrealizedPnl: uPnl !== null ? parseFloat(uPnl.toFixed(2)) : null,
+      since:        p.entryTime ? new Date(p.entryTime).toISOString().slice(0, 16) : undefined,
+    };
+  });
+
+  // 未實現損益加總
+  const totalUnrealized = openPositions.reduce((s, p) => s + (p.unrealizedPnl ?? 0), 0);
+
   return {
     label,
     mode:    live.length > 0 ? "LIVE" : "PAPER",
     overall: calcStats(all),
     today:   calcStats(todayEx),
-    openPositions: (pos.open || []).map(p => ({
-      symbol: p.symbol, side: p.side,
-      entry: p.entryPrice, sl: p.stopLoss,
-      since: p.entryTime ? new Date(p.entryTime).toISOString().slice(0, 16) : undefined,
-    })),
+    openPositions,
+    totalUnrealizedPnl: parseFloat(totalUnrealized.toFixed(2)),
   };
 }
 
-function fullReport() {
+async function fullReport() {
   const today = new Date().toISOString().slice(0, 10);
+
+  // 收集所有開倉幣種，一次抓價格
+  const allPosFiles = [
+    "positions.json","positions_bb.json","positions_e.json",
+    "positions_k.json","positions_dn.json",
+  ];
+  const symbols = new Set();
+  for (const f of allPosFiles) {
+    try {
+      const p = JSON.parse(readFile(`${D}/${f}`) || '{"open":[]}');
+      (p.open || []).forEach(pos => { if (pos.symbol) symbols.add(pos.symbol); });
+    } catch {}
+  }
+  const prices = await fetchPrices([...symbols]);
+
   const strategies = [
-    strategyStats("trades.csv",     "positions.json",     "A: VWAP+RSI(3)+EMA  [1H]"),
-    strategyStats("trades_bb.csv",  "positions_bb.json",  "C: BB Breakout+ATR  [1H]"),
-    strategyStats("trades_e.csv",   "positions_e.json",   "E: EMA Trend Pullback   [1H] 起:2026-04-27"),
-    strategyStats("trades_k.csv",   "positions_k.json",   "K: Keltner Breakout     [1H] 起:2026-04-28"),
-    strategyStats("trades_dn.csv",  "positions_dn.json",  "DN: Donchian Breakout   [1D] 起:2026-05-13"),
+    strategyStats("trades.csv",     "positions.json",     "A: VWAP+RSI(3)+EMA  [1H]",              prices),
+    strategyStats("trades_bb.csv",  "positions_bb.json",  "C: BB Breakout+ATR  [1H]",              prices),
+    strategyStats("trades_e.csv",   "positions_e.json",   "E: EMA Trend Pullback   [1H] 起:2026-04-27", prices),
+    strategyStats("trades_k.csv",   "positions_k.json",   "K: Keltner Breakout     [1H] 起:2026-04-28", prices),
+    strategyStats("trades_dn.csv",  "positions_dn.json",  "DN: Donchian Breakout   [4H] 起:2026-05-13", prices),
   ];
 
   // 全策略合計（今日）
-  let totPnl = 0, totWins = 0, totLosses = 0;
+  let totPnl = 0, totWins = 0, totLosses = 0, totUnrealized = 0;
   for (const s of strategies) {
-    totPnl    += parseFloat(s.today.totalPnl) || 0;
-    totWins   += s.today.wins;
-    totLosses += s.today.losses;
+    totPnl        += parseFloat(s.today.totalPnl) || 0;
+    totWins       += s.today.wins;
+    totLosses     += s.today.losses;
+    totUnrealized += s.totalUnrealizedPnl || 0;
   }
   const totTrades = totWins + totLosses;
 
@@ -169,12 +218,14 @@ function fullReport() {
       losses:  totLosses,
       winRate: totTrades > 0 ? ((totWins / totTrades) * 100).toFixed(1) + "%" : "N/A",
       totalPnl: totPnl.toFixed(4),
+      totalUnrealizedPnl: parseFloat(totUnrealized.toFixed(2)),
     },
     strategies,
   };
 }
 
 const asyncRoutes = {
+  "/report": async () => JSON.stringify(await fullReport(), null, 2),
   // OKX 帳戶餘額
   "/balance": async () => {
     const r = await okxGet("/api/v5/account/balance");
@@ -244,7 +295,6 @@ const asyncRoutes = {
 
 const routes = {
   "/":             () => JSON.stringify(todaySummary(), null, 2),
-  "/report":       () => JSON.stringify(fullReport(), null, 2),
   "/trades":       () => readFile(`${D}/trades.csv`)     || "no data",
   "/trades_bb":    () => readFile(`${D}/trades_bb.csv`)  || "no data",
   "/trades_dmc":   () => readFile(`${D}/trades_dmc.csv`) || "no data",
