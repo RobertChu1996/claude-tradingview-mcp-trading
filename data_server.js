@@ -136,7 +136,7 @@ function strategyStats(csvFile, posFile, label) {
     openPositions: (pos.open || []).map(p => ({
       symbol: p.symbol, side: p.side,
       entry: p.entryPrice, sl: p.stopLoss,
-      since: p.entryTime?.slice(0, 16),
+      since: p.entryTime ? new Date(p.entryTime).toISOString().slice(0, 16) : undefined,
     })),
   };
 }
