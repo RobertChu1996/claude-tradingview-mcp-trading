@@ -80,6 +80,7 @@ const CONFIG = {
   maxTradesPerDay: parseInt(process.env.MAX_TRADES_PER_DAY || "20"),
   paperTrading: process.env.A_PAPER_TRADING !== "false",
   tradeMode: process.env.TRADE_MODE || "spot",
+  dailyLossLimitPct: parseFloat(process.env.DAILY_LOSS_LIMIT_PCT || "0.05"),
   okx: {
     apiKey: process.env.OKX_API_KEY,
     secretKey: process.env.OKX_SECRET_KEY,
@@ -87,6 +88,17 @@ const CONFIG = {
     baseUrl: process.env.OKX_BASE_URL || "https://www.okx.com",
   },
 };
+
+// Issue 1: 資產家族（同家族最多1倉）
+const MAX_PER_FAMILY = 1;
+const ASSET_FAMILY_MAP = {
+  "ETHUSDT":    "ETH", "ETHFIUSDT":  "ETH", "RETHUSDT":   "ETH",
+  "STETHUSDT":  "ETH", "WETHUSDT":   "ETH", "CBETHUSDT":  "ETH", "WSTETHUSDT": "ETH",
+  "BTCUSDT":    "BTC", "WBTCUSDT":   "BTC",
+  "SOLUSDT":    "SOL", "MSOLUSDT":   "SOL", "JSOLUSDT":   "SOL",
+  "BNBUSDT":    "BNB",
+};
+function getFamily(symbol) { return ASSET_FAMILY_MAP[symbol] || symbol; }
 
 
 function getPFMultiplier(symbol) {
@@ -129,6 +141,43 @@ function updateTrailingStop(position, currentPrice) {
   if (side === "long" && newStop > stopLoss) return newStop;
   if (side === "short" && newStop < stopLoss) return newStop;
   return null;
+}
+
+// Issue 2: 動態投資組合價值
+async function fetchPortfolioValue() {
+  if (!CONFIG.paperTrading) {
+    try {
+      const ts   = new Date().toISOString();
+      const path = "/api/v5/account/balance";
+      const res  = await fetch(`${CONFIG.okx.baseUrl}${path}`, {
+        headers: {
+          "OK-ACCESS-KEY":        CONFIG.okx.apiKey,
+          "OK-ACCESS-SIGN":       signOKX(ts, "GET", path),
+          "OK-ACCESS-TIMESTAMP":  ts,
+          "OK-ACCESS-PASSPHRASE": CONFIG.okx.passphrase,
+        },
+      });
+      const data = await res.json();
+      const totalEq = parseFloat(data.data?.[0]?.totalEq || 0);
+      if (totalEq > 0) return totalEq;
+    } catch {}
+  }
+  const pos = loadPositions();
+  const closedPnl = (pos.closed || []).reduce((s, t) => s + (t.pnl || 0), 0);
+  return CONFIG.portfolioValue + closedPnl;
+}
+
+// Issue 4: OKX 合約清單驗證
+async function fetchOkxSwapSymbols() {
+  try {
+    const res  = await fetch("https://www.okx.com/api/v5/public/instruments?instType=SWAP");
+    const data = await res.json();
+    return new Set(
+      (data.data || [])
+        .filter(i => i.instId.endsWith("-USDT-SWAP") && i.state === "live")
+        .map(i => i.instId.replace("-USDT-SWAP", "USDT"))
+    );
+  } catch { return null; }
 }
 
 function recentlyClosed(symbol, positions, hoursBack = 4) {
@@ -800,7 +849,7 @@ function generateTaxSummary() {
 
 // ─── Main ────────────────────────────────────────────────────────────────────
 
-async function runSymbol(symbol, rules, log, positions) {
+async function runSymbol(symbol, rules, log, positions, portfolioValue) {
   const candles = await fetchCandles(symbol, CONFIG.timeframe, 500);
   const closes = candles.map((c) => c.close);
   const price = closes[closes.length - 1];
@@ -897,6 +946,14 @@ async function runSymbol(symbol, rules, log, positions) {
     return false;
   }
 
+  // Issue 1: 資產家族相關性限制
+  const family = getFamily(symbol);
+  const familyCount = positions.open.filter(p => getFamily(p.symbol) === family).length;
+  if (familyCount >= MAX_PER_FAMILY) {
+    console.log(`  🔗 [${symbol}] 同家族(${family})已有持倉，跳過`);
+    return false;
+  }
+
   const adx14 = calcADX(candles, 14);
   if (adx14 < 25) {
     console.log(`  📉 [${symbol}] ADX=${adx14.toFixed(1)} < 25，趨勢不足，跳過`);
@@ -912,11 +969,11 @@ async function runSymbol(symbol, rules, log, positions) {
   if (allPass && (slPct < 0.2 || slPct > 1.5)) return false;
 
   const pfMult      = getPFMultiplier(symbol);
-  const riskAmount  = CONFIG.portfolioValue * 0.01 * pfMult;
+  const riskAmount  = portfolioValue * 0.01 * pfMult;
   const stopLossPct = Math.abs(price - stopLossPrice) / price;
   const maxLeverage = parseFloat(process.env.LEVERAGE || "1");
   const rawSize     = stopLossPct > 0.001 ? riskAmount / stopLossPct : riskAmount * 3;
-  const tradeSize   = Math.min(rawSize, CONFIG.portfolioValue * maxLeverage, CONFIG.maxTradeSizeUSD);
+  const tradeSize   = Math.min(rawSize, portfolioValue * maxLeverage, CONFIG.maxTradeSizeUSD);
   const quantity    = tradeSize / price;
 
   const logEntry = {
@@ -980,11 +1037,21 @@ async function run() {
   initCsv();
 
   const rules = JSON.parse(readFileSync(RULES_A_FILE, "utf8"));
-  const watchlist = rules.watchlist || [CONFIG.symbol];
   const log = loadLog();
   const positions = loadPositions();
 
-  console.log(`[A] ${new Date().toISOString()} | ${CONFIG.paperTrading ? "PAPER" : "LIVE"} | ${watchlist.length}幣 | ${CONFIG.timeframe} | 持倉:${positions.open.length}`);
+  // Issue 2: 動態資產規模
+  const portfolioValue = await fetchPortfolioValue();
+
+  // Issue 4: OKX 合約驗證（只保留 OKX 有掛牌的幣）
+  const rawWatchlist = rules.watchlist || [CONFIG.symbol];
+  const okxSymbols   = await fetchOkxSwapSymbols();
+  const watchlist    = okxSymbols ? rawWatchlist.filter(s => okxSymbols.has(s)) : rawWatchlist;
+  if (okxSymbols && watchlist.length < rawWatchlist.length) {
+    console.log(`[A] OKX驗證：${rawWatchlist.length} → ${watchlist.length} 幣（排除 ${rawWatchlist.length - watchlist.length} 幣）`);
+  }
+
+  console.log(`[A] ${new Date().toISOString()} | ${CONFIG.paperTrading ? "PAPER" : "LIVE"} | ${watchlist.length}幣 | ${CONFIG.timeframe} | 持倉:${positions.open.length} | 資產:$${portfolioValue.toFixed(2)}`);
 
   // 偵測 PAPER→LIVE 切換：清除舊模擬持倉並跳過本輪進場，避免立刻開真實單
   if (!CONFIG.paperTrading) {
@@ -999,19 +1066,19 @@ async function run() {
 
   await reconcileWithOKX(positions, watchlist);
 
-  // 日熔斷：當日已實現虧損超過本金 5% 則停止入場
+  // Issue 5: 每日虧損熔斷（使用動態資產規模）
   const today = new Date().toISOString().slice(0, 10);
   const todayPnl = positions.closed
     .filter(t => t.exitTime?.startsWith(today) && t.pnl !== null)
     .reduce((sum, t) => sum + (t.pnl || 0), 0);
-  const circuitBreakerThreshold = -(CONFIG.portfolioValue * 0.05);
+  const circuitBreakerThreshold = -(portfolioValue * CONFIG.dailyLossLimitPct);
   if (todayPnl < circuitBreakerThreshold) {
-    console.log(`⚡ [熔斷] 今日已虧 $${Math.abs(todayPnl).toFixed(2)}，超過本金 5%，暫停入場`);
+    console.log(`⚡ [熔斷] 今日已虧 $${Math.abs(todayPnl).toFixed(2)} >= 限額 $${Math.abs(circuitBreakerThreshold).toFixed(2)}（${(CONFIG.dailyLossLimitPct*100).toFixed(0)}%），暫停入場`);
     return;
   }
 
   const orphans = positions.open.filter(p => !watchlist.includes(p.symbol));
-  for (const p of orphans) await runSymbol(p.symbol, rules, log, positions);
+  for (const p of orphans) await runSymbol(p.symbol, rules, log, positions, portfolioValue);
 
   for (const symbol of watchlist) {
     const todayCount = countTodaysTrades(log);
@@ -1019,7 +1086,7 @@ async function run() {
     if (!hasOpenPosition && todayCount >= CONFIG.maxTradesPerDay) {
       if (!positions.open.some((p) => watchlist.slice(watchlist.indexOf(symbol)).includes(p.symbol))) break;
     }
-    await runSymbol(symbol, rules, log, positions);
+    await runSymbol(symbol, rules, log, positions, portfolioValue);
   }
 
   console.log(`[A] 掃描完成`);
