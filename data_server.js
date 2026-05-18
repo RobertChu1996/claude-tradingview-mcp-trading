@@ -191,10 +191,7 @@ async function fullReport() {
   const today = new Date().toISOString().slice(0, 10);
 
   // 收集所有開倉幣種，一次抓價格
-  const allPosFiles = [
-    "positions.json","positions_bb.json","positions_e.json",
-    "positions_k.json","positions_dn.json",
-  ];
+  const allPosFiles = ["positions_dn.json"];
   const symbols = new Set();
   for (const f of allPosFiles) {
     try {
@@ -205,11 +202,7 @@ async function fullReport() {
   const prices = await fetchPrices([...symbols]);
 
   const strategies = [
-    strategyStats("trades.csv",     "positions.json",     "A: VWAP+RSI(3)+EMA  [1H]",              prices),
-    strategyStats("trades_bb.csv",  "positions_bb.json",  "C: BB Breakout+ATR  [1H]",              prices),
-    strategyStats("trades_e.csv",   "positions_e.json",   "E: EMA Trend Pullback   [1H] 起:2026-04-27", prices),
-    strategyStats("trades_k.csv",   "positions_k.json",   "K: Keltner Breakout     [1H] 起:2026-04-28", prices),
-    strategyStats("trades_dn.csv",  "positions_dn.json",  "DN: Donchian Breakout   [4H] 起:2026-05-13", prices),
+    strategyStats("trades_dn.csv", "positions_dn.json", "DN: Donchian Breakout [4H] 起:2026-05-13", prices),
   ];
 
   // 全策略合計（今日）
