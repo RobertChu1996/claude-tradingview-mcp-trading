@@ -1,20 +1,18 @@
 /**
  * Lightweight data API server — serves Railway Volume files over HTTP.
  * Endpoints:
- *   GET /             → status + summary
- *   GET /trades       → trades.csv (Strategy A)
- *   GET /trades_bb    → trades_bb.csv (Strategy C)
- *   GET /trades_dmc   → trades_dmc.csv
- *   GET /trades_orb   → trades_orb.csv
- *   GET /positions    → positions.json (Strategy A)
- *   GET /positions_bb → positions_bb.json
- *   GET /stats        → today's P&L summary across all strategies
+ *   GET /          → today's summary + open positions
+ *   GET /report    → full DN strategy report with unrealized PnL
+ *   GET /positions → positions_dn.json
+ *   GET /trades    → trades_dn.csv
+ *   GET /balance   → OKX account balance
+ *   GET /okx       → OKX live positions + today's closed trades
+ *   GET /log       → safety-check-log-dn.json
  */
 import { createServer } from "http";
 import { readFileSync, existsSync } from "fs";
 import crypto from "crypto";
 
-// OKX 直接查詢（Railway 上有正確的系統時鐘）
 function signOKX(ts, method, path, body = "") {
   return crypto.createHmac("sha256", process.env.OKX_SECRET_KEY || "")
     .update(`${ts}${method}${path}${body}`).digest("base64");
@@ -23,9 +21,9 @@ async function okxGet(path) {
   const ts  = new Date().toISOString();
   const res = await fetch(`${process.env.OKX_BASE_URL || "https://www.okx.com"}${path}`, {
     headers: {
-      "OK-ACCESS-KEY": process.env.OKX_API_KEY || "",
-      "OK-ACCESS-SIGN": signOKX(ts, "GET", path),
-      "OK-ACCESS-TIMESTAMP": ts,
+      "OK-ACCESS-KEY":        process.env.OKX_API_KEY || "",
+      "OK-ACCESS-SIGN":       signOKX(ts, "GET", path),
+      "OK-ACCESS-TIMESTAMP":  ts,
       "OK-ACCESS-PASSPHRASE": process.env.OKX_PASSPHRASE || "",
     },
   });
@@ -39,73 +37,17 @@ function readFile(path) {
   return existsSync(path) ? readFileSync(path, "utf8") : null;
 }
 
-function parseCsv(csv) {
-  if (!csv) return [];
-  return csv.trim().split("\n").map(line => {
-    // CSV: date,time,exchange,symbol,side,qty,price,gross,fee,pnl,orderId,mode,note
-    const parts = line.split(",");
-    return {
-      date:    parts[0],
-      time:    parts[1],
-      symbol:  parts[3],
-      side:    parts[4],
-      price:   parseFloat(parts[6]),
-      size:    parseFloat(parts[7]),
-      pnl:     parseFloat(parts[9]) || 0,
-      orderId: parts[10],
-      mode:    parts[11],
-    };
-  });
-}
-
-function todaySummary() {
-  const today = new Date().toISOString().slice(0, 10);
-  const files = ["trades.csv", "trades_bb.csv", "trades_orb.csv"];
-  let totalPnl = 0, wins = 0, losses = 0, trades = [];
-
-  for (const f of files) {
-    const csv = readFile(`${D}/${f}`);
-    if (!csv) continue;
-    // 只計算出場行（orderId 以 EXIT- 開頭）且今日且真實交易
-    const rows = parseCsv(csv).filter(r =>
-      r.date === today && r.mode === "LIVE" && r.orderId && r.orderId.startsWith("EXIT-")
-    );
-    for (const r of rows) {
-      totalPnl += r.pnl;
-      r.pnl > 0 ? wins++ : losses++;
-      trades.push(r);
-    }
-  }
-
-  const posA  = JSON.parse(readFile(`${D}/positions.json`)   || '{"open":[]}');
-  const posBB = JSON.parse(readFile(`${D}/positions_bb.json`) || '{"open":[]}');
-
-  return {
-    date: today,
-    closedTrades: wins + losses,
-    wins, losses,
-    winRate: wins + losses > 0 ? ((wins / (wins + losses)) * 100).toFixed(1) + "%" : "N/A",
-    totalPnl: totalPnl.toFixed(4),
-    openPositions: {
-      strategyA:  posA.open.map(p => ({ symbol: p.symbol, side: p.side, entry: p.entryPrice, sl: p.stopLoss })),
-      strategyBB: posBB.open.filter(p => !p.orderId?.startsWith("BB-PAPER")).map(p => ({ symbol: p.symbol, side: p.side, entry: p.entryPrice, sl: p.stopLoss })),
-    },
-  };
-}
-
 // 批次抓 Binance 即時價格（現貨 + 合約雙重保障）
 async function fetchPrices(symbols) {
   if (!symbols.length) return {};
   const out = {};
   try {
     const encoded = encodeURIComponent(JSON.stringify(symbols));
-    // 先試現貨
     const r1  = await fetch(`https://api.binance.com/api/v3/ticker/price?symbols=${encoded}`);
     if (r1.ok) {
       const list = await r1.json();
       if (Array.isArray(list)) for (const t of list) out[t.symbol] = parseFloat(t.price);
     }
-    // 缺的幣試合約（永續）
     const missing = symbols.filter(s => !out[s]);
     if (missing.length) {
       const enc2 = encodeURIComponent(JSON.stringify(missing));
@@ -119,68 +61,65 @@ async function fetchPrices(symbols) {
   return out;
 }
 
-// 單一策略統計：從 CSV + positions JSON 計算全期及今日績效
+// 單策略統計：從 CSV + positions JSON 計算全期及今日績效
 function strategyStats(csvFile, posFile, label, prices = {}) {
   const today = new Date().toISOString().slice(0, 10);
   const csv   = readFile(`${D}/${csvFile}`);
-  const exits = csv
-    ? parseCsv(csv).filter(r => r.orderId && r.orderId.startsWith("EXIT-"))
-    : [];
 
-  const all       = exits;
-  const todayEx   = exits.filter(r => r.date === today);
-  const paper     = exits.filter(r => r.mode === "PAPER");
-  const live      = exits.filter(r => r.mode === "LIVE");
+  // CSV: Date,Time(UTC),Symbol,Side,Entry,Exit,PnL,Reason,Mode,OrderID
+  function parseCsv(raw) {
+    if (!raw) return [];
+    return raw.trim().split("\n").slice(1).map(line => {
+      const p = line.split(",");
+      return { date: p[0], symbol: p[2], side: p[3], pnl: parseFloat(p[6]) || 0, reason: p[7], mode: p[8], orderId: p[9] };
+    }).filter(r => r.orderId && r.reason !== "開倉");
+  }
+
+  const exits   = parseCsv(csv);
+  const todayEx = exits.filter(r => r.date === today);
 
   function calcStats(rows) {
-    if (!rows.length) return { trades: 0, wins: 0, losses: 0, winRate: "N/A", totalPnl: 0, avgWin: 0, avgLoss: 0, best: null, worst: null };
+    if (!rows.length) return { trades: 0, wins: 0, losses: 0, winRate: "N/A", totalPnl: 0, avgWin: 0, avgLoss: 0 };
     const wins   = rows.filter(r => r.pnl > 0);
     const losses = rows.filter(r => r.pnl <= 0);
-    const pnls   = rows.map(r => r.pnl);
-    const best   = rows.reduce((a, b) => a.pnl > b.pnl ? a : b);
-    const worst  = rows.reduce((a, b) => a.pnl < b.pnl ? a : b);
     return {
       trades:   rows.length,
       wins:     wins.length,
       losses:   losses.length,
       winRate:  ((wins.length / rows.length) * 100).toFixed(1) + "%",
-      totalPnl: pnls.reduce((s, v) => s + v, 0).toFixed(4),
+      totalPnl: rows.reduce((s, r) => s + r.pnl, 0).toFixed(4),
       avgWin:   wins.length ? (wins.reduce((s, r) => s + r.pnl, 0) / wins.length).toFixed(4) : "0",
       avgLoss:  losses.length ? (losses.reduce((s, r) => s + r.pnl, 0) / losses.length).toFixed(4) : "0",
-      best:     { symbol: best.symbol, pnl: best.pnl.toFixed(4), date: best.date },
-      worst:    { symbol: worst.symbol, pnl: worst.pnl.toFixed(4), date: worst.date },
     };
   }
 
   const pos = posFile ? JSON.parse(readFile(`${D}/${posFile}`) || '{"open":[],"closed":[]}') : { open: [], closed: [] };
 
   const openPositions = (pos.open || []).map(p => {
-    const curPx  = prices[p.symbol];
-    const entry  = p.entryPrice;
-    const sign   = p.side === "short" ? -1 : 1;
-    const pct    = curPx && entry ? sign * (curPx - entry) / entry * 100 : null;
-    const qty    = p.quantity ?? p.qty ?? p.size ?? null;
-    const uPnl   = (pct !== null && qty) ? sign * (curPx - entry) * qty : null;
+    const curPx = prices[p.symbol];
+    const entry = p.entryPrice;
+    const sign  = p.side === "short" ? -1 : 1;
+    const pct   = curPx && entry ? sign * (curPx - entry) / entry * 100 : null;
+    const qty   = p.quantity ?? p.qty ?? p.size ?? null;
+    const uPnl  = (pct !== null && qty) ? sign * (curPx - entry) * qty : null;
     return {
-      symbol:       p.symbol,
-      side:         p.side,
-      entry:        entry,
-      currentPrice: curPx ?? null,
-      sl:           p.currentSL ?? p.stopLoss ?? null,
-      tp:           p.tp ?? null,
+      symbol:        p.symbol,
+      side:          p.side,
+      entry:         entry,
+      currentPrice:  curPx ?? null,
+      sl:            p.currentSL ?? p.stopLoss ?? null,
+      tp:            p.tp ?? null,
       unrealizedPct: pct !== null ? parseFloat(pct.toFixed(2)) : null,
       unrealizedPnl: uPnl !== null ? parseFloat(uPnl.toFixed(2)) : null,
-      since:        p.entryTime ? new Date(p.entryTime).toISOString().slice(0, 16) : undefined,
+      since:         p.entryTime ? new Date(p.entryTime).toISOString().slice(0, 16) : undefined,
     };
   });
 
-  // 未實現損益加總
   const totalUnrealized = openPositions.reduce((s, p) => s + (p.unrealizedPnl ?? 0), 0);
 
   return {
     label,
-    mode:    live.length > 0 ? "LIVE" : "PAPER",
-    overall: calcStats(all),
+    overall: calcStats(exits),
     today:   calcStats(todayEx),
     openPositions,
     totalUnrealizedPnl: parseFloat(totalUnrealized.toFixed(2)),
@@ -190,109 +129,89 @@ function strategyStats(csvFile, posFile, label, prices = {}) {
 async function fullReport() {
   const today = new Date().toISOString().slice(0, 10);
 
-  // 收集所有開倉幣種，一次抓價格
-  const allPosFiles = ["positions_dn.json"];
+  // 收集開倉幣種一次抓價格
   const symbols = new Set();
-  for (const f of allPosFiles) {
-    try {
-      const p = JSON.parse(readFile(`${D}/${f}`) || '{"open":[]}');
-      (p.open || []).forEach(pos => { if (pos.symbol) symbols.add(pos.symbol); });
-    } catch {}
-  }
+  try {
+    const p = JSON.parse(readFile(`${D}/positions_dn.json`) || '{"open":[]}');
+    (p.open || []).forEach(pos => { if (pos.symbol) symbols.add(pos.symbol); });
+  } catch {}
   const prices = await fetchPrices([...symbols]);
 
-  const strategies = [
-    strategyStats("trades_dn.csv", "positions_dn.json", "DN: Donchian Breakout [4H] 起:2026-05-13", prices),
-  ];
-
-  // 全策略合計（今日）
-  let totPnl = 0, totWins = 0, totLosses = 0, totUnrealized = 0;
-  for (const s of strategies) {
-    totPnl        += parseFloat(s.today.totalPnl) || 0;
-    totWins       += s.today.wins;
-    totLosses     += s.today.losses;
-    totUnrealized += s.totalUnrealizedPnl || 0;
-  }
-  const totTrades = totWins + totLosses;
+  const strategy = strategyStats("trades_dn.csv", "positions_dn.json", "DN: Donchian Breakout [4H] 起:2026-05-13", prices);
 
   return {
-    reportDate: today,
+    reportDate:  today,
     generatedAt: new Date().toISOString(),
     todayCombined: {
-      trades:  totTrades,
-      wins:    totWins,
-      losses:  totLosses,
-      winRate: totTrades > 0 ? ((totWins / totTrades) * 100).toFixed(1) + "%" : "N/A",
-      totalPnl: totPnl.toFixed(4),
-      totalUnrealizedPnl: parseFloat(totUnrealized.toFixed(2)),
+      trades:             strategy.today.trades,
+      wins:               strategy.today.wins,
+      losses:             strategy.today.losses,
+      winRate:            strategy.today.winRate,
+      totalPnl:           strategy.today.totalPnl,
+      totalUnrealizedPnl: strategy.totalUnrealizedPnl,
     },
-    strategies,
+    strategy,
   };
 }
 
 const asyncRoutes = {
   "/report": async () => JSON.stringify(await fullReport(), null, 2),
-  // OKX 帳戶餘額
+
   "/balance": async () => {
     const r = await okxGet("/api/v5/account/balance");
-    const details = (r.data?.[0]?.details || []).filter(d => parseFloat(d.cashBal) > 0);
-    const totalEq = parseFloat(r.data?.[0]?.totalEq || 0);
+    const details  = (r.data?.[0]?.details || []).filter(d => parseFloat(d.cashBal) > 0);
+    const totalEq  = parseFloat(r.data?.[0]?.totalEq || 0);
     return JSON.stringify({
       asOf: new Date().toISOString(),
       totalEquityUSD: totalEq.toFixed(2),
       assets: details.map(d => ({
         currency: d.ccy,
-        balance: parseFloat(d.cashBal).toFixed(4),
+        balance:  parseFloat(d.cashBal).toFixed(4),
         usdValue: parseFloat(d.eqUsd || 0).toFixed(2),
       })),
     }, null, 2);
   },
-  // OKX 即時倉位（地面真相）
+
   "/okx": async () => {
-    // 取得開倉
     const pos = await okxGet("/api/v5/account/positions?instType=SWAP");
 
-    // 今日開始時間戳（台灣時間 UTC+8 的 00:00）
     const now = new Date();
     const TWN_OFFSET = 8 * 60 * 60 * 1000;
     const todayTWN = new Date(now.getTime() + TWN_OFFSET);
     todayTWN.setUTCHours(0, 0, 0, 0);
-    const todayStartMs = todayTWN.getTime() - TWN_OFFSET; // 轉回 UTC ms
+    const todayStartMs = todayTWN.getTime() - TWN_OFFSET;
 
-    // OKX positions-history：用 before/after 時間戳分頁，每次最多100筆
-    // 一次拉100筆，過濾今日（TWN 00:00 = UTC-8h 之後）
     const hist = await okxGet("/api/v5/account/positions-history?instType=SWAP&limit=100");
     const allClosed = (hist.data || []).filter(p => {
       const ts = parseInt(p.uTime || p.cTime || 0);
       return ts >= todayStartMs;
     });
 
-    const wins   = allClosed.filter(p => parseFloat(p.realizedPnl) > 0).length;
-    const losses = allClosed.filter(p => parseFloat(p.realizedPnl) <= 0).length;
+    const wins    = allClosed.filter(p => parseFloat(p.realizedPnl) > 0).length;
+    const losses  = allClosed.filter(p => parseFloat(p.realizedPnl) <= 0).length;
     const totalPnl = allClosed.reduce((s, p) => s + parseFloat(p.realizedPnl), 0);
 
     return JSON.stringify({
       asOf: new Date().toISOString(),
       openOnOKX: (pos.data || []).map(p => ({
-        symbol: p.instId.replace("-USDT-SWAP", "USDT"),
-        side: p.posSide, contracts: p.pos,
-        avgPx: parseFloat(p.avgPx),
-        upl: parseFloat(p.upl),
+        symbol:    p.instId.replace("-USDT-SWAP", "USDT"),
+        side:      p.posSide, contracts: p.pos,
+        avgPx:     parseFloat(p.avgPx),
+        upl:       parseFloat(p.upl),
       })),
       todaySummary: {
-        totalTrades: allClosed.length,
-        wins, losses,
-        winRate: allClosed.length ? ((wins / allClosed.length) * 100).toFixed(1) + "%" : "N/A",
+        totalTrades: allClosed.length, wins, losses,
+        winRate:  allClosed.length ? ((wins / allClosed.length) * 100).toFixed(1) + "%" : "N/A",
         totalPnl: totalPnl.toFixed(4),
       },
       todayClosedOnOKX: allClosed.map(p => {
         const ts = p.uTime || p.cTime;
         return {
-          symbol: p.instId.replace("-USDT-SWAP", "USDT"),
-          side: p.direction,
-          closeAvgPx: parseFloat(p.closeAvgPx),
+          symbol:      p.instId.replace("-USDT-SWAP", "USDT"),
+          side:        p.direction,
+          closeAvgPx:  parseFloat(p.closeAvgPx),
           realizedPnl: parseFloat(p.realizedPnl),
-          closeTime: ts ? new Date(parseInt(ts)).toISOString() : null,
+          closeTime:   ts ? new Date(parseInt(ts)).toISOString() : null,
         };
       }).sort((a, b) => new Date(a.closeTime) - new Date(b.closeTime)),
     }, null, 2);
@@ -300,20 +219,10 @@ const asyncRoutes = {
 };
 
 const routes = {
-  "/":             () => JSON.stringify(todaySummary(), null, 2),
-  "/trades":       () => readFile(`${D}/trades.csv`)     || "no data",
-  "/trades_bb":    () => readFile(`${D}/trades_bb.csv`)  || "no data",
-  "/trades_dmc":   () => readFile(`${D}/trades_dmc.csv`) || "no data",
-  "/trades_orb":   () => readFile(`${D}/trades_orb.csv`) || "no data",
-  "/positions":    () => readFile(`${D}/positions.json`)    || "{}",
-  "/positions_bb": () => readFile(`${D}/positions_bb.json`) || "{}",
-  "/positions_e":  () => readFile(`${D}/positions_e.json`)  || "{}",
-  "/trades_e":     () => readFile(`${D}/trades_e.csv`)      || "no data",
-  "/positions_k":  () => readFile(`${D}/positions_k.json`)  || "{}",
-  "/trades_k":     () => readFile(`${D}/trades_k.csv`)      || "no data",
-  "/positions_dn": () => readFile(`${D}/positions_dn.json`) || "{}",
-  "/trades_dn":    () => readFile(`${D}/trades_dn.csv`)     || "no data",
-  "/log":          () => readFile(`${D}/safety-check-log.json`) || "{}",
+  "/":          async () => JSON.stringify(await fullReport(), null, 2),
+  "/positions": () => readFile(`${D}/positions_dn.json`) || "{}",
+  "/trades":    () => readFile(`${D}/trades_dn.csv`)     || "no data",
+  "/log":       () => readFile(`${D}/safety-check-log-dn.json`) || "{}",
 };
 
 const server = createServer(async (req, res) => {
