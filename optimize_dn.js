@@ -42,6 +42,23 @@ async function fetchTopByVolume() {
     .map(t => ({ symbol: t.symbol, volume24h: parseFloat(t.quoteVolume) }));
 }
 
+// Issue 4: OKX 合約清單驗證（只保留 OKX 上有掛牌且狀態為 live 的幣）
+async function fetchOkxSymbols() {
+  try {
+    const res = await fetchJson("https://www.okx.com/api/v5/public/instruments?instType=SWAP");
+    const ids = new Set(
+      (res.data || [])
+        .filter(i => i.instId.endsWith("-USDT-SWAP") && i.state === "live")
+        .map(i => i.instId.replace("-USDT-SWAP", "USDT"))
+    );
+    console.log(`  OKX 可交易 USDT-SWAP 合約：${ids.size} 個`);
+    return ids;
+  } catch(e) {
+    console.warn(`  ⚠️ 無法取得OKX合約清單: ${e.message}，跳過OKX過濾`);
+    return null;
+  }
+}
+
 // 日線 K 線
 async function fetchDaily(symbol, limit) {
   const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1d&limit=${limit}`;
@@ -143,13 +160,20 @@ async function run() {
   const topCoins = await fetchTopByVolume();
   console.log(`  過濾後 ${topCoins.length} 幣`);
 
+  console.log("驗證 OKX 合約清單...");
+  const okxSymbols = await fetchOkxSymbols();
+  const validCoins = okxSymbols
+    ? topCoins.filter(t => okxSymbols.has(t.symbol))
+    : topCoins;
+  if (okxSymbols) console.log(`  OKX驗證後剩 ${validCoins.length} 幣（排除 ${topCoins.length - validCoins.length} 幣）`);
+
   console.log("建立 BTC MA200 日期地圖...");
   const btcBullMap = await buildBtcBullMap();
 
   const results = [];
-  for (let i = 0; i < topCoins.length; i++) {
-    const { symbol, volume24h } = topCoins[i];
-    process.stdout.write(`  [${i+1}/${topCoins.length}] ${symbol.padEnd(12)}`);
+  for (let i = 0; i < validCoins.length; i++) {
+    const { symbol, volume24h } = validCoins[i];
+    process.stdout.write(`  [${i+1}/${validCoins.length}] ${symbol.padEnd(12)}`);
     try {
       const candles = await fetchDaily(symbol, BTC_MA_BARS + LOOKBACK_DAYS + 10);
       if (candles.length < BTC_MA_BARS + N_HIGH + N_LOW) {
@@ -178,7 +202,7 @@ async function run() {
 
   const output = {
     updatedAt: new Date().toISOString(),
-    totalScanned: topCoins.length,
+    totalScanned: validCoins.length,
     passedPF: results.length,
     symbols: final,
     detail: results.slice(0, MAX_SYMBOLS).map(r => ({

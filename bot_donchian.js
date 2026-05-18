@@ -29,6 +29,7 @@ const CONFIG = {
   maxTradeSizeUSD: parseFloat(process.env.MAX_TRADE_SIZE_USD   || "200"),
   riskPct:         parseFloat(process.env.RISK_PCT             || "0.01"),
   maxOpen:         parseInt  (process.env.DONCHIAN_MAX_OPEN    || "8"),
+  dailyLossLimitPct: parseFloat(process.env.DAILY_LOSS_LIMIT_PCT || "0.05"),
   okx: {
     apiKey:     process.env.OKX_API_KEY,
     secretKey:  process.env.OKX_SECRET_KEY,
@@ -36,6 +37,17 @@ const CONFIG = {
     baseUrl:    process.env.OKX_BASE_URL || "https://www.okx.com",
   },
 };
+
+// Issue 1: 資產家族（同家族最多1倉，避免相關性過高）
+const MAX_PER_FAMILY = 1;
+const ASSET_FAMILY_MAP = {
+  "ETHUSDT":    "ETH", "ETHFIUSDT":  "ETH", "RETHUSDT":   "ETH",
+  "STETHUSDT":  "ETH", "WETHUSDT":   "ETH", "CBETHUSDT":  "ETH", "WSTETHUSDT": "ETH",
+  "BTCUSDT":    "BTC", "WBTCUSDT":   "BTC",
+  "SOLUSDT":    "SOL", "MSOLUSDT":   "SOL", "JSOLUSDT":   "SOL",
+  "BNBUSDT":    "BNB",
+};
+function getFamily(symbol) { return ASSET_FAMILY_MAP[symbol] || symbol; }
 
 // ─── 幣種清單（動態讀取，每週由 optimize_dn.js 更新）─────────────────────────
 const FALLBACK_SYMBOLS = [
@@ -97,6 +109,39 @@ function appendCsv(pos, exitPrice, pnl, reason) {
     `${reason},${CONFIG.paperTrading ? "PAPER" : "LIVE"},${pos.orderId}\n`,
     { flag: "a" }
   );
+}
+
+// Issue 5: 今日已實現損失（讀 CSV）
+function getTodayLoss() {
+  const today = new Date().toISOString().slice(0, 10);
+  try {
+    if (!existsSync(CSV_FILE)) return 0;
+    const lines = readFileSync(CSV_FILE, "utf8").trim().split("\n").slice(1);
+    let loss = 0;
+    for (const line of lines) {
+      if (!line) continue;
+      const parts = line.split(",");
+      if (parts[0] !== today) continue;
+      if (parts[7] === "開倉") continue; // Reason欄（index 7）
+      const pnl = parseFloat(parts[6]);  // PnL欄（index 6）
+      if (!isNaN(pnl) && pnl < 0) loss += Math.abs(pnl);
+    }
+    return loss;
+  } catch { return 0; }
+}
+
+// Issue 2: 動態投資組合價值（Paper=初始+已實現PnL；Live=OKX帳戶淨值）
+async function fetchPortfolioValue() {
+  if (!CONFIG.paperTrading) {
+    try {
+      const r = await okxGet("/api/v5/account/balance");
+      const totalEq = parseFloat(r.data?.[0]?.totalEq || 0);
+      if (totalEq > 0) return totalEq;
+    } catch {}
+  }
+  const pos = loadPositions();
+  const closedPnl = (pos.closed || []).reduce((s, t) => s + (t.pnl || 0), 0);
+  return CONFIG.portfolioValue + closedPnl;
 }
 
 // ─── 市場資料 ────────────────────────────────────────────────────────────────
@@ -273,10 +318,10 @@ function floorLot(v, lotSz) {
 }
 
 // ─── 下單：市場進場 + OCO（SL + TP）─────────────────────────────────────────
-async function placeEntry(symbol, sig) {
+async function placeEntry(symbol, sig, portfolioValue) {
   const instId  = symbol.replace("USDT", "-USDT-SWAP");
   const spec    = await fetchSpec(instId);
-  const riskUSD = CONFIG.portfolioValue * CONFIG.riskPct;
+  const riskUSD = portfolioValue * CONFIG.riskPct;
   const rawSz   = riskUSD / sig.slPct / sig.entry / spec.ctVal;
   const sz      = String(floorLot(Math.min(rawSz, CONFIG.maxTradeSizeUSD / sig.entry / spec.ctVal), spec.lotSz));
 
@@ -338,19 +383,29 @@ async function checkAlgoStatus(algoId, instId) {
 }
 
 // ─── Paper Trading 出場模擬（4H）────────────────────────────────────────────
+// Issue 3: 同根K棒同時觸SL和TP時，按K棒方向決定先後順序
+//   上漲棒（close>open）→ 多: TP先; 空: SL先
+//   下跌棒（close<open）→ 多: SL先; 空: TP先
 async function checkPaperExit(pos) {
   try {
     const raw  = await fetch4HCandles(pos.symbol, 5);
     const c    = completed4H(raw);
     if (!c.length) return null;
-    const last = c[c.length - 1];
-    if (pos.side === "short") {
-      if (last.high >= pos.currentSL) return { reason: "止損", price: pos.currentSL };
-      if (last.low  <= pos.tp)        return { reason: "止盈", price: pos.tp };
-    } else {
-      if (last.low  <= pos.currentSL) return { reason: "止損", price: pos.currentSL };
-      if (last.high >= pos.tp)        return { reason: "止盈", price: pos.tp };
+    const last    = c[c.length - 1];
+    const isShort = pos.side === "short";
+
+    const slHit = isShort ? last.high >= pos.currentSL : last.low  <= pos.currentSL;
+    const tpHit = isShort ? last.low  <= pos.tp        : last.high >= pos.tp;
+
+    if (slHit && tpHit) {
+      const isUpBar = last.close > last.open;
+      const tpFirst = isShort ? !isUpBar : isUpBar;
+      return tpFirst
+        ? { reason: "止盈", price: pos.tp }
+        : { reason: "止損", price: pos.currentSL };
     }
+    if (slHit) return { reason: "止損", price: pos.currentSL };
+    if (tpHit) return { reason: "止盈", price: pos.tp };
     return null;
   } catch { return null; }
 }
@@ -364,7 +419,10 @@ async function run() {
   const now       = Date.now();
   const longOpen  = positions.open.filter(p => p.side !== "short").length;
   const shortOpen = positions.open.filter(p => p.side === "short").length;
-  log(`[DN] 開始 | 模式:${CONFIG.paperTrading?"PAPER":"LIVE"} | 開倉:${positions.open.length}/${CONFIG.maxOpen}(多${longOpen}/空${shortOpen})`);
+
+  // Issue 2: 動態資產規模
+  const portfolioValue = await fetchPortfolioValue();
+  log(`[DN] 開始 | 模式:${CONFIG.paperTrading?"PAPER":"LIVE"} | 開倉:${positions.open.length}/${CONFIG.maxOpen}(多${longOpen}/空${shortOpen}) | 資產:$${portfolioValue.toFixed(2)}`);
 
   // Paper→Live 防衛
   if (!CONFIG.paperTrading) {
@@ -437,11 +495,20 @@ async function run() {
     return;
   }
 
+  // Issue 5: 每日虧損熔斷
+  const todayLoss     = getTodayLoss();
+  const dailyLossLimit = portfolioValue * CONFIG.dailyLossLimitPct;
+  if (todayLoss >= dailyLossLimit) {
+    log(`[DN] ⚠️ 每日虧損熔斷 $${todayLoss.toFixed(2)} >= 限額 $${dailyLossLimit.toFixed(2)}（${(CONFIG.dailyLossLimitPct*100).toFixed(0)}%），今日停止開倉`);
+    savePositions(positions);
+    return;
+  }
+
   // BTC 趨勢判斷
   const bull = await isBtcBull();
   const direction = bull ? "long" : "short";
   const SYMBOLS = loadSymbols();
-  log(`[DN] BTC ${bull ? "牛市→做多" : "熊市→做空"}，掃描 ${SYMBOLS.length} 幣種...`);
+  log(`[DN] BTC ${bull ? "牛市→做多" : "熊市→做空"}，掃描 ${SYMBOLS.length} 幣種... 今日損失 $${todayLoss.toFixed(2)}/${dailyLossLimit.toFixed(2)}`);
 
   for (const symbol of SYMBOLS) {
     if (positions.open.length >= CONFIG.maxOpen) break;
@@ -450,13 +517,19 @@ async function run() {
     const lastExit = positions.cooldown[symbol];
     if (lastExit && now - lastExit < COOLDOWN_MS) continue;
 
+    // Issue 1: 資產家族相關性限制
+    const family = getFamily(symbol);
+    const familyCount = positions.open.filter(p => getFamily(p.symbol) === family).length;
+    if (familyCount >= MAX_PER_FAMILY) continue;
+
     try {
       const sig = bull ? await checkLongSignal(symbol) : await checkShortSignal(symbol);
       if (!sig) continue;
 
       log(`[DN] 信號 ${symbol}(${sig.side}) | 突破 $${sig.level.toFixed(4)} | SL $${sig.sl.toFixed(4)} | TP $${sig.tp.toFixed(4)} | 止損% ${(sig.slPct*100).toFixed(2)}%`);
 
-      const riskUSD  = CONFIG.portfolioValue * CONFIG.riskPct;
+      // Issue 2: 使用動態資產規模計算倉位
+      const riskUSD  = portfolioValue * CONFIG.riskPct;
       const quantity = Math.min(riskUSD / sig.slPct, CONFIG.maxTradeSizeUSD) / sig.entry;
 
       const pos = {
@@ -475,7 +548,7 @@ async function run() {
         pos.algoId  = null;
         log(`[DN][PAPER] 開倉 ${symbol}(${sig.side}) | 進場 $${sig.entry.toFixed(4)} | SL $${sig.sl.toFixed(4)} | TP $${sig.tp.toFixed(4)}`);
       } else {
-        const { orderId, algoId, sz } = await placeEntry(symbol, sig);
+        const { orderId, algoId, sz } = await placeEntry(symbol, sig, portfolioValue);
         pos.orderId   = orderId;
         pos.algoId    = algoId;
         pos.sizeUSD   = sz;
