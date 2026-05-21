@@ -1,0 +1,87 @@
+name: DN Trading Bot
+
+on:
+  schedule:
+    - cron: '0,15,30,45 * * * *'   # 每15分鐘
+  workflow_dispatch:                  # 允許手動觸發
+
+permissions:
+  contents: write
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Restore state from state branch
+        run: |
+          git fetch origin state --depth=1 2>/dev/null || echo "No state branch yet, starting fresh"
+          git show origin/state:positions_dn.json      > positions_dn.json      2>/dev/null || echo '{"open":[],"closed":[],"cooldown":{}}' > positions_dn.json
+          git show origin/state:trades_dn.csv          > trades_dn.csv          2>/dev/null || true
+          git show origin/state:watchlist_dn.json      > watchlist_dn.json      2>/dev/null || true
+          git show origin/state:last_optimized_dn.txt  > last_optimized_dn.txt  2>/dev/null || true
+          git show origin/state:safety-check-log-dn.json > safety-check-log-dn.json 2>/dev/null || true
+          echo "State restored"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run DN bot
+        env:
+          DATA_DIR: "."
+          OKX_API_KEY:             ${{ secrets.OKX_API_KEY }}
+          OKX_SECRET_KEY:          ${{ secrets.OKX_SECRET_KEY }}
+          OKX_PASSPHRASE:          ${{ secrets.OKX_PASSPHRASE }}
+          DONCHIAN_PAPER_TRADING:  ${{ vars.DONCHIAN_PAPER_TRADING }}
+          PORTFOLIO_VALUE_USD:     ${{ vars.PORTFOLIO_VALUE_USD }}
+          MAX_TRADE_SIZE_USD:      ${{ vars.MAX_TRADE_SIZE_USD }}
+          RISK_PCT:                ${{ vars.RISK_PCT }}
+          DONCHIAN_MAX_OPEN:       ${{ vars.DONCHIAN_MAX_OPEN }}
+          DAILY_LOSS_LIMIT_PCT:    ${{ vars.DAILY_LOSS_LIMIT_PCT }}
+        run: node bot_donchian.js
+
+      - name: Generate report
+        env:
+          DATA_DIR: "."
+          OKX_API_KEY:    ${{ secrets.OKX_API_KEY }}
+          OKX_SECRET_KEY: ${{ secrets.OKX_SECRET_KEY }}
+          OKX_PASSPHRASE: ${{ secrets.OKX_PASSPHRASE }}
+        run: node generate_report.js
+        continue-on-error: true
+
+      - name: Save state to state branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # 用 git 底層指令建立 state branch 的 commit，不切換工作目錄的 branch
+          git fetch origin state:refs/heads/state 2>/dev/null || true
+
+          git read-tree --empty
+          for f in positions_dn.json trades_dn.csv watchlist_dn.json last_optimized_dn.txt safety-check-log-dn.json report.json; do
+            [ -f "$f" ] && git update-index --add "$f"
+          done
+
+          TREE=$(git write-tree)
+          PARENT=$(git rev-parse refs/heads/state 2>/dev/null || echo "")
+          MSG="state: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+
+          if [ -n "$PARENT" ]; then
+            COMMIT=$(git commit-tree "$TREE" -p "$PARENT" -m "$MSG")
+          else
+            COMMIT=$(git commit-tree "$TREE" -m "$MSG")
+          fi
+
+          git push origin "$COMMIT:refs/heads/state"
+          echo "State saved: $MSG"
