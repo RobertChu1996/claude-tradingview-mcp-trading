@@ -74,7 +74,7 @@ jobs:
           done
 
           TREE=$(git write-tree)
-          PARENT=$(git rev-parse refs/heads/state 2>/dev/null || echo "")
+          PARENT=$(git rev-parse --verify refs/heads/state 2>/dev/null || echo "")
           MSG="state: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 
           if [ -n "$PARENT" ]; then
