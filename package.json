@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "Automated trading bot — Claude + TradingView strategy + BitGet execution",
   "type": "module",
-  "main": "bot.js",
+  "main": "main.js",
   "scripts": {
-    "start": "node bot.js",
-    "dev": "node bot.js"
+    "start": "node main.js",
+    "dev": "node main.js"
   },
   "dependencies": {
     "dotenv": "^16.4.5",

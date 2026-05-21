@@ -155,6 +155,7 @@ async function fullReport() {
 }
 
 const asyncRoutes = {
+  "/":       async () => JSON.stringify(await fullReport(), null, 2),
   "/report": async () => JSON.stringify(await fullReport(), null, 2),
 
   "/balance": async () => {
@@ -219,7 +220,6 @@ const asyncRoutes = {
 };
 
 const routes = {
-  "/":          async () => JSON.stringify(await fullReport(), null, 2),
   "/positions": () => readFile(`${D}/positions_dn.json`) || "{}",
   "/trades":    () => readFile(`${D}/trades_dn.csv`)     || "no data",
   "/log":       () => readFile(`${D}/safety-check-log-dn.json`) || "{}",
