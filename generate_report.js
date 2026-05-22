@@ -7,26 +7,29 @@ import { existsSync, readFileSync, writeFileSync } from "fs";
 
 const D = process.env.DATA_DIR || ".";
 
+function toOkxInstId(sym) {
+  for (const q of ["USDT", "USDC", "BTC", "ETH"]) {
+    if (sym.endsWith(q)) return `${sym.slice(0, -q.length)}-${q}`;
+  }
+  return sym;
+}
+
 async function fetchPrices(symbols) {
   if (!symbols.length) return {};
   const out = {};
-  try {
-    const encoded = encodeURIComponent(JSON.stringify(symbols));
-    const r1 = await fetch(`https://api.binance.com/api/v3/ticker/price?symbols=${encoded}`);
-    if (r1.ok) {
-      const list = await r1.json();
-      if (Array.isArray(list)) for (const t of list) out[t.symbol] = parseFloat(t.price);
-    }
-    const missing = symbols.filter(s => !out[s]);
-    if (missing.length) {
-      const enc2 = encodeURIComponent(JSON.stringify(missing));
-      const r2 = await fetch(`https://fapi.binance.com/fapi/v1/ticker/price?symbols=${enc2}`);
-      if (r2.ok) {
-        const list2 = await r2.json();
-        if (Array.isArray(list2)) for (const t of list2) out[t.symbol] = parseFloat(t.price);
+  await Promise.all(symbols.map(async (sym) => {
+    const instId = toOkxInstId(sym);
+    try {
+      const r = await fetch(`https://www.okx.com/api/v5/market/ticker?instId=${instId}`);
+      if (r.ok) {
+        const data = await r.json();
+        if (data.data?.[0]?.last) out[sym] = parseFloat(data.data[0].last);
+        else console.error(`fetchPrices ${sym}: no data`, JSON.stringify(data).slice(0, 100));
+      } else {
+        console.error(`fetchPrices ${sym}: HTTP ${r.status}`);
       }
-    }
-  } catch(e) { console.error("fetchPrices:", e.message); }
+    } catch(e) { console.error(`fetchPrices ${sym}:`, e.message); }
+  }));
   return out;
 }
 
