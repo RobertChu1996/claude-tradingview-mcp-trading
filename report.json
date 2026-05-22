@@ -1,13 +1,13 @@
 {
   "reportDate": "2026-05-22",
-  "generatedAt": "2026-05-22T08:02:32.981Z",
+  "generatedAt": "2026-05-22T11:17:18.860Z",
   "todayCombined": {
     "trades": 0,
     "wins": 0,
     "losses": 0,
     "winRate": "N/A",
     "totalPnl": "0.0000",
-    "totalUnrealizedPnl": 1.07
+    "totalUnrealizedPnl": 1.28
   },
   "strategy": {
     "label": "DN: Donchian Breakout [4H] 起:2026-05-13",
@@ -30,36 +30,36 @@
         "symbol": "ETHUSDT",
         "side": "short",
         "entry": 2194.81,
-        "currentPrice": 2130.09,
+        "currentPrice": 2121.77,
         "sl": 2423.74,
         "tp": 1508.02,
-        "unrealizedPct": 2.95,
-        "unrealizedPnl": 0.93,
+        "unrealizedPct": 3.33,
+        "unrealizedPnl": 1.05,
         "since": "2025-05-16T00:00"
       },
       {
         "symbol": "ETHFIUSDT",
         "side": "short",
         "entry": 0.394,
-        "currentPrice": 0.388,
+        "currentPrice": 0.3863,
         "sl": 0.479,
         "tp": 0.139,
-        "unrealizedPct": 1.52,
-        "unrealizedPnl": 0.23,
+        "unrealizedPct": 1.95,
+        "unrealizedPnl": 0.29,
         "since": "2025-05-16T00:00"
       },
       {
         "symbol": "SHIBUSDT",
         "side": "short",
         "entry": 0.00000582,
-        "currentPrice": 0.000005842,
+        "currentPrice": 0.000005836,
         "sl": 0.0000067,
         "tp": 0.00000318,
-        "unrealizedPct": -0.38,
-        "unrealizedPnl": -0.09,
+        "unrealizedPct": -0.27,
+        "unrealizedPnl": -0.06,
         "since": "2025-05-17T00:00"
       }
     ],
-    "totalUnrealizedPnl": 1.07
+    "totalUnrealizedPnl": 1.28
   }
 }
