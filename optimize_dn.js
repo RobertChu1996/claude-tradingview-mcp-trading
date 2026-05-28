@@ -32,17 +32,27 @@ async function fetchJson(url) {
   return res.json();
 }
 
-// Binance 24h 成交量排行
-async function fetchTopByVolume() {
-  const tickers = await fetchJson("https://api.binance.com/api/v3/ticker/24hr");
-  return tickers
-    .filter(t => t.symbol.endsWith("USDT") && !EXCLUDE_PATTERN.test(t.symbol.replace("USDT", "")))
-    .sort((a, b) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume))
-    .slice(0, TOP_VOL)
-    .map(t => ({ symbol: t.symbol, volume24h: parseFloat(t.quoteVolume) }));
+function toOkxInstId(sym) {
+  for (const q of ["USDT", "USDC", "BTC", "ETH"]) {
+    if (sym.endsWith(q)) return `${sym.slice(0, -q.length)}-${q}`;
+  }
+  return sym;
 }
 
-// Issue 4: OKX 合約清單驗證（只保留 OKX 上有掛牌且狀態為 live 的幣）
+// OKX SWAP 24h 成交量排行（直接只看 OKX 上有的幣）
+async function fetchTopByVolume() {
+  const data = await fetchJson("https://www.okx.com/api/v5/market/tickers?instType=SWAP");
+  return (data.data || [])
+    .filter(t => t.instId.endsWith("-USDT-SWAP") && !EXCLUDE_PATTERN.test(t.instId.replace("-USDT-SWAP", "")))
+    .sort((a, b) => parseFloat(b.volCcy24h) - parseFloat(a.volCcy24h))
+    .slice(0, TOP_VOL)
+    .map(t => ({
+      symbol: t.instId.replace("-USDT-SWAP", "USDT"),
+      volume24h: parseFloat(t.volCcy24h),
+    }));
+}
+
+// OKX 合約清單驗證（只保留 OKX 上有掛牌且狀態為 live 的幣）
 async function fetchOkxSymbols() {
   try {
     const res = await fetchJson("https://www.okx.com/api/v5/public/instruments?instType=SWAP");
@@ -59,11 +69,25 @@ async function fetchOkxSymbols() {
   }
 }
 
-// 日線 K 線
+// OKX 日線 K 線（支援 >300 根的分頁請求）
 async function fetchDaily(symbol, limit) {
-  const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1d&limit=${limit}`;
-  const raw = await fetchJson(url);
-  return raw.map(k => ({ time: +k[0], high: +k[2], low: +k[3], close: +k[4] }));
+  const instId = toOkxInstId(symbol);
+  const rows = [];
+
+  // 第一批：最近 300 根
+  const r1 = await fetchJson(`https://www.okx.com/api/v5/market/candles?instId=${instId}&bar=1D&limit=300`);
+  rows.push(...(r1.data || []));
+
+  // 若需要更多，用 history-candles 往前補
+  if (limit > 300 && rows.length > 0) {
+    const oldest = rows[rows.length - 1][0];
+    const r2 = await fetchJson(`https://www.okx.com/api/v5/market/history-candles?instId=${instId}&bar=1D&limit=100&after=${oldest}`);
+    rows.push(...(r2.data || []));
+  }
+
+  if (!rows.length) throw new Error(`OKX no data for ${symbol}`);
+  // OKX 最新在前，反轉後欄位：[ts, o, h, l, c, ...]
+  return rows.reverse().map(k => ({ time: +k[0], high: +k[2], low: +k[3], close: +k[4] }));
 }
 
 // BTC MA200（用來決定回測期間每天的方向）

@@ -3,6 +3,7 @@ name: DN Trading Bot
 on:
   schedule:
     - cron: '0,15,30,45 * * * *'   # 每15分鐘
+    - cron: '0 0 * * 0'            # 每週日 00:00 UTC 跑幣種優化
   workflow_dispatch:                  # 允許手動觸發
 
 permissions:
@@ -37,6 +38,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run optimizer (weekly, Sunday only)
+        if: github.event.schedule == '0 0 * * 0' || github.event_name == 'workflow_dispatch'
+        env:
+          DATA_DIR: "."
+        run: node optimize_dn.js
+        continue-on-error: true
+
       - name: Run DN bot
         env:
           DATA_DIR: "."
@@ -69,7 +77,7 @@ jobs:
           git fetch origin state:refs/heads/state 2>/dev/null || true
 
           git read-tree --empty
-          for f in positions_dn.json trades_dn.csv watchlist_dn.json last_optimized_dn.txt safety-check-log-dn.json report.json; do
+          for f in positions_dn.json trades_dn.csv watchlist_dn.json last_optimized_dn.txt safety-check-log-dn.json report.json optimize_dn_detail.json; do
             [ -f "$f" ] && git update-index --add "$f"
           done
 
