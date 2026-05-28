@@ -145,11 +145,25 @@ async function fetchPortfolioValue() {
 }
 
 // ─── 市場資料 ────────────────────────────────────────────────────────────────
+function toOkxInstId(sym) {
+  for (const q of ["USDT", "USDC", "BTC", "ETH"]) {
+    if (sym.endsWith(q)) return `${sym.slice(0, -q.length)}-${q}`;
+  }
+  return sym;
+}
+
+const OKX_BAR = { "4h": "4H", "1d": "1D" };
+
 async function fetchCandles(symbol, interval, limit) {
-  const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
-  const res  = await fetch(url);
-  if (!res.ok) throw new Error(`Binance ${res.status}`);
-  return (await res.json()).map(k => ({
+  const instId = toOkxInstId(symbol);
+  const bar    = OKX_BAR[interval] || interval;
+  const url    = `https://www.okx.com/api/v5/market/candles?instId=${instId}&bar=${bar}&limit=${Math.min(limit, 300)}`;
+  const res    = await fetch(url);
+  if (!res.ok) throw new Error(`OKX ${res.status}`);
+  const data = await res.json();
+  if (!data.data?.length) throw new Error(`OKX no data for ${symbol}`);
+  // OKX 回傳最新在前，需反轉；欄位: [ts, o, h, l, c, vol, ...]
+  return data.data.reverse().map(k => ({
     time: +k[0], open: +k[1], high: +k[2], low: +k[3], close: +k[4],
   }));
 }
