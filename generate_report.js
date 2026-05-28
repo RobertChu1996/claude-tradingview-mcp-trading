@@ -44,21 +44,31 @@ async function main() {
   const prices  = await fetchPrices(symbols);
 
   const openPositions = (pos.open || []).map(p => {
-    const curPx = prices[p.symbol];
-    const entry = p.entryPrice;
-    const sign  = p.side === "short" ? -1 : 1;
-    const pct   = curPx && entry ? sign * (curPx - entry) / entry * 100 : null;
-    const qty   = p.quantity ?? null;
-    const uPnl  = (pct !== null && qty) ? sign * (curPx - entry) * qty : null;
+    const curPx  = prices[p.symbol];
+    const entry  = p.entryPrice;
+    const sl     = p.currentSL ?? p.stopLoss ?? null;
+    const tp     = p.tp ?? null;
+    const sign   = p.side === "short" ? -1 : 1;
+    const pct    = curPx && entry ? sign * (curPx - entry) / entry * 100 : null;
+    const qty    = p.quantity ?? null;
+    const uPnl   = (pct !== null && qty) ? sign * (curPx - entry) * qty : null;
+    const slDist = (curPx && sl) ? (p.side === "short" ? (sl - curPx) / curPx * 100 : (curPx - sl) / curPx * 100) : null;
+    const tpDist = (curPx && tp) ? (p.side === "short" ? (curPx - tp) / curPx * 100 : (tp - curPx) / curPx * 100) : null;
+    const tpPnl  = (entry && sl && qty) ? Math.abs(entry - tp) * qty : null;
+    const slPnl  = (entry && sl && qty) ? -Math.abs(entry - sl) * qty : null;
     return {
       symbol:        p.symbol,
       side:          p.side,
       entry,
       currentPrice:  curPx ?? null,
-      sl:            p.currentSL ?? p.stopLoss ?? null,
-      tp:            p.tp ?? null,
-      unrealizedPct: pct !== null ? parseFloat(pct.toFixed(2)) : null,
-      unrealizedPnl: uPnl !== null ? parseFloat(uPnl.toFixed(2)) : null,
+      sl,
+      tp,
+      slDistPct:     slDist !== null ? parseFloat(slDist.toFixed(2)) : null,
+      tpDistPct:     tpDist !== null ? parseFloat(tpDist.toFixed(2)) : null,
+      unrealizedPct: pct    !== null ? parseFloat(pct.toFixed(2))    : null,
+      unrealizedPnl: uPnl   !== null ? parseFloat(uPnl.toFixed(2))   : null,
+      tpPnl:         tpPnl  !== null ? parseFloat(tpPnl.toFixed(2))  : null,
+      slPnl:         slPnl  !== null ? parseFloat(slPnl.toFixed(2))  : null,
       since:         p.entryTime ? new Date(p.entryTime).toISOString().slice(0, 16) : undefined,
     };
   });
