@@ -59,6 +59,21 @@ jobs:
           DAILY_LOSS_LIMIT_PCT:    ${{ vars.DAILY_LOSS_LIMIT_PCT }}
         run: node bot_donchian.js
 
+      - name: Run DMC bot (Strategy B)
+        env:
+          DATA_DIR: "."
+          OKX_API_KEY:          ${{ secrets.OKX_API_KEY }}
+          OKX_SECRET_KEY:       ${{ secrets.OKX_SECRET_KEY }}
+          OKX_PASSPHRASE:       ${{ secrets.OKX_PASSPHRASE }}
+          DMC_PAPER_TRADING:    "true"
+          PORTFOLIO_VALUE_USD:  ${{ vars.PORTFOLIO_VALUE_USD }}
+          MAX_TRADE_SIZE_USD:   ${{ vars.MAX_TRADE_SIZE_USD }}
+          RISK_PCT:             ${{ vars.RISK_PCT }}
+          DMC_MAX_OPEN:         ${{ vars.DMC_MAX_OPEN }}
+          DAILY_LOSS_LIMIT_PCT: ${{ vars.DAILY_LOSS_LIMIT_PCT }}
+        run: node bot_dmc.js
+        continue-on-error: true
+
       - name: Generate report
         env:
           DATA_DIR: "."
@@ -77,7 +92,7 @@ jobs:
           git fetch origin state:refs/heads/state 2>/dev/null || true
 
           git read-tree --empty
-          for f in positions_dn.json trades_dn.csv watchlist_dn.json last_optimized_dn.txt safety-check-log-dn.json report.json optimize_dn_detail.json; do
+          for f in positions_dn.json trades_dn.csv watchlist_dn.json last_optimized_dn.txt safety-check-log-dn.json report.json optimize_dn_detail.json positions_dmc.json trades_dmc.csv safety-check-log-dmc.json; do
             [ -f "$f" ] && git update-index --add "$f"
           done
 
