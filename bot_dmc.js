@@ -17,13 +17,15 @@ import {
 } from "./paths.js";
 
 // ─── 策略參數（優化後）────────────────────────────────────────────────────────
-const SMA_PERIOD = 25;
-const VOL_RATIO  = 1.5;
-const STRENGTH   = 0.7;
-const SWING_LB   = 8;
-const ATR_MULT   = 0.05;
-const TP_RATIO   = 3.0;
-const SMA_PREV_OFFSET = 5; // 用幾根前的SMA判斷趨勢方向
+const SMA_PERIOD      = 25;
+const VOL_RATIO       = 1.5;
+const STRENGTH        = 0.7;
+const SWING_LB        = 8;
+const ATR_MULT        = 0.05;
+const TP_RATIO        = 3.0;
+const SMA_PREV_OFFSET = 5;   // 用幾根前的SMA判斷趨勢方向
+const COOLDOWN_BARS   = 2;   // 止損/止盈後冷卻 2 根4H棒（= 8小時）
+const MIN_PRICE       = 0.001; // 微價幣過濾（PEPE/SHIB等浮點問題）
 
 const CONFIG = {
   paperTrading:    process.env.DMC_PAPER_TRADING !== "false",
@@ -170,6 +172,9 @@ function checkSignal(candles) {
   const rec3    = closes.slice(-3).reduce((a,b)=>a+b,0)/3;
   const prev3   = closes.slice(-6,-3).reduce((a,b)=>a+b,0)/3;
   const atr     = atrOf(candles, 14);
+
+  // 微價幣過濾
+  if (price < MIN_PRICE) return null;
 
   // Long
   if (smaNow > smaPrev && price > smaNow && volR > VOL_RATIO &&
@@ -427,9 +432,15 @@ async function run() {
   const SYMBOLS = loadSymbols();
   log(`[DMC] 掃描 ${SYMBOLS.length} 幣種... 今日損失 $${todayLoss.toFixed(2)}/$${dailyLossLimit.toFixed(2)}`);
 
+  const cooldownMs = COOLDOWN_BARS * 4 * 3600 * 1000;
+
   for (const symbol of SYMBOLS) {
     if (positions.open.length >= CONFIG.maxOpen) break;
     if (positions.open.some(p=>p.symbol===symbol)) continue;
+
+    // 冷卻期：止損/止盈後 COOLDOWN_BARS 根4H棒內不重進
+    const lastExit = positions.cooldown[symbol];
+    if (lastExit && now - lastExit < cooldownMs) continue;
 
     try {
       const raw = await fetchCandles4H(symbol, SMA_PERIOD + SMA_PREV_OFFSET + 30);
