@@ -1,65 +1,137 @@
 {
   "reportDate": "2026-05-28",
-  "generatedAt": "2026-05-28T17:32:49.650Z",
+  "generatedAt": "2026-05-28T17:51:19.976Z",
   "todayCombined": {
-    "trades": 0,
+    "trades": 2,
     "wins": 0,
-    "losses": 0,
-    "winRate": "N/A",
-    "totalPnl": "0.0000",
-    "totalUnrealizedPnl": 4.94
+    "losses": 2,
+    "winRate": "0.0%",
+    "totalPnl": "-8.2700",
+    "totalUnrealizedPnl": 20.17
   },
   "strategy": {
     "label": "DN: Donchian Breakout [4H] 起:2026-05-13",
     "overall": {
-      "trades": 0,
+      "trades": 4,
       "wins": 0,
-      "losses": 0,
-      "winRate": "N/A",
-      "totalPnl": "0.0000"
+      "losses": 4,
+      "winRate": "0.0%",
+      "totalPnl": "-24.2300"
     },
     "today": {
-      "trades": 0,
+      "trades": 2,
       "wins": 0,
-      "losses": 0,
-      "winRate": "N/A",
-      "totalPnl": "0.0000"
+      "losses": 2,
+      "winRate": "0.0%",
+      "totalPnl": "-8.2700"
     },
     "openPositions": [
       {
         "symbol": "ETHUSDT",
         "side": "short",
         "entry": 2194.81,
-        "currentPrice": 2016.09,
+        "currentPrice": 2022.74,
         "sl": 2319.26,
         "tp": 1508.02,
-        "unrealizedPct": 8.14,
-        "unrealizedPnl": 2.57,
+        "slDistPct": 14.66,
+        "tpDistPct": 25.45,
+        "unrealizedPct": 7.84,
+        "unrealizedPnl": 2.48,
+        "tpPnl": 9.89,
+        "slPnl": -1.79,
         "since": "2025-05-16T00:00"
       },
       {
         "symbol": "ETHFIUSDT",
         "side": "short",
         "entry": 0.394,
-        "currentPrice": 0.3808,
+        "currentPrice": 0.3846,
         "sl": 0.4637,
         "tp": 0.139,
-        "unrealizedPct": 3.35,
-        "unrealizedPnl": 0.51,
+        "slDistPct": 20.57,
+        "tpDistPct": 63.86,
+        "unrealizedPct": 2.39,
+        "unrealizedPnl": 0.36,
+        "tpPnl": 9.77,
+        "slPnl": -2.67,
         "since": "2025-05-16T00:00"
       },
       {
         "symbol": "SHIBUSDT",
         "side": "short",
         "entry": 0.00000582,
-        "currentPrice": 0.000005354,
+        "currentPrice": 0.000005374,
         "sl": 0.000006485,
         "tp": 0.00000318,
-        "unrealizedPct": 8.01,
-        "unrealizedPnl": 1.86,
+        "slDistPct": 20.67,
+        "tpDistPct": 40.83,
+        "unrealizedPct": 7.66,
+        "unrealizedPnl": 1.78,
+        "tpPnl": 10.56,
+        "slPnl": -2.66,
         "since": "2025-05-17T00:00"
+      },
+      {
+        "symbol": "BCHUSDT",
+        "side": "short",
+        "entry": 404.8,
+        "currentPrice": 302.8,
+        "sl": 438.7,
+        "tp": 151.89999999999998,
+        "slDistPct": 44.88,
+        "tpDistPct": 49.83,
+        "unrealizedPct": 25.2,
+        "unrealizedPnl": 12.1,
+        "tpPnl": 29.99,
+        "slPnl": -4.02,
+        "since": "2026-05-17T20:00"
+      },
+      {
+        "symbol": "LTCUSDT",
+        "side": "short",
+        "entry": 53.74,
+        "currentPrice": 52.06,
+        "sl": 59.54,
+        "tp": 33.22000000000001,
+        "slDistPct": 14.37,
+        "tpDistPct": 36.19,
+        "unrealizedPct": 3.13,
+        "unrealizedPnl": 2.46,
+        "tpPnl": 30,
+        "slPnl": -8.48,
+        "since": "2026-05-18T04:00"
+      },
+      {
+        "symbol": "XRPUSDT",
+        "side": "short",
+        "entry": 1.3387,
+        "currentPrice": 1.3251,
+        "sl": 1.5502,
+        "tp": 0.7041999999999999,
+        "slDistPct": 16.99,
+        "tpDistPct": 46.86,
+        "unrealizedPct": 1.02,
+        "unrealizedPnl": 0.64,
+        "tpPnl": 30,
+        "slPnl": -10,
+        "since": "2026-05-22T16:00"
+      },
+      {
+        "symbol": "UNIUSDT",
+        "side": "short",
+        "entry": 3.096,
+        "currentPrice": 3.07,
+        "sl": 3.815,
+        "tp": 0.8430000000000004,
+        "slDistPct": 24.27,
+        "tpDistPct": 72.54,
+        "unrealizedPct": 0.84,
+        "unrealizedPnl": 0.35,
+        "tpPnl": 30,
+        "slPnl": -9.57,
+        "since": "2026-05-27T20:00"
       }
     ],
-    "totalUnrealizedPnl": 4.94
+    "totalUnrealizedPnl": 20.17
   }
 }
