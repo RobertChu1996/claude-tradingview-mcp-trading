@@ -7,7 +7,6 @@ import { existsSync, readFileSync, writeFileSync } from "fs";
 
 const D = process.env.DATA_DIR || ".";
 const STRATEGIES = [
-  { key: "dn",  posFile: "positions_dn.json",  csvFile: "trades_dn.csv",  label: "DN: Donchian Breakout [4H] 起:2026-05-13" },
   { key: "dmc", posFile: "positions_dmc.json", csvFile: "trades_dmc.csv", label: "B: DMC/SMA25 [4H] 起:2026-05-29" },
 ];
 
@@ -142,8 +141,7 @@ async function main() {
       totalUnrealizedPnl: parseFloat(totalUnrealizedAll.toFixed(2)),
     },
     strategies: stratReports,
-    // 向下相容舊格式（保留 strategy 欄位指向 DN）
-    strategy: stratReports["dn"],
+    strategy: stratReports["dmc"],
   };
 
   writeFileSync(`${D}/report.json`, JSON.stringify(report, null, 2));

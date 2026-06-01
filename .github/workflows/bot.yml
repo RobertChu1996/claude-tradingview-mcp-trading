@@ -1,9 +1,8 @@
-name: DN Trading Bot
+name: DMC Trading Bot
 
 on:
   schedule:
     - cron: '0,15,30,45 * * * *'   # 每15分鐘
-    - cron: '0 0 * * 0'            # 每週日 00:00 UTC 跑幣種優化
   workflow_dispatch:                  # 允許手動觸發
 
 permissions:
@@ -22,11 +21,10 @@ jobs:
       - name: Restore state from state branch
         run: |
           git fetch origin state --depth=1 2>/dev/null || echo "No state branch yet, starting fresh"
-          git show origin/state:positions_dn.json      > positions_dn.json      2>/dev/null || echo '{"open":[],"closed":[],"cooldown":{}}' > positions_dn.json
-          git show origin/state:trades_dn.csv          > trades_dn.csv          2>/dev/null || true
-          git show origin/state:watchlist_dn.json      > watchlist_dn.json      2>/dev/null || true
-          git show origin/state:last_optimized_dn.txt  > last_optimized_dn.txt  2>/dev/null || true
-          git show origin/state:safety-check-log-dn.json > safety-check-log-dn.json 2>/dev/null || true
+          git show origin/state:positions_dmc.json > positions_dmc.json 2>/dev/null || echo '{"open":[],"closed":[],"cooldown":{}}' > positions_dmc.json
+          git show origin/state:trades_dmc.csv     > trades_dmc.csv     2>/dev/null || true
+          git show origin/state:safety-check-log-dmc.json > safety-check-log-dmc.json 2>/dev/null || true
+          git show origin/state:report.json        > report.json        2>/dev/null || true
           echo "State restored"
 
       - name: Setup Node.js
@@ -37,27 +35,6 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-
-      - name: Run optimizer (weekly, Sunday only)
-        if: github.event.schedule == '0 0 * * 0' || github.event_name == 'workflow_dispatch'
-        env:
-          DATA_DIR: "."
-        run: node optimize_dn.js
-        continue-on-error: true
-
-      - name: Run DN bot
-        env:
-          DATA_DIR: "."
-          OKX_API_KEY:             ${{ secrets.OKX_API_KEY }}
-          OKX_SECRET_KEY:          ${{ secrets.OKX_SECRET_KEY }}
-          OKX_PASSPHRASE:          ${{ secrets.OKX_PASSPHRASE }}
-          DONCHIAN_PAPER_TRADING:  ${{ vars.DONCHIAN_PAPER_TRADING }}
-          PORTFOLIO_VALUE_USD:     ${{ vars.PORTFOLIO_VALUE_USD }}
-          MAX_TRADE_SIZE_USD:      ${{ vars.MAX_TRADE_SIZE_USD }}
-          RISK_PCT:                ${{ vars.RISK_PCT }}
-          DONCHIAN_MAX_OPEN:       ${{ vars.DONCHIAN_MAX_OPEN }}
-          DAILY_LOSS_LIMIT_PCT:    ${{ vars.DAILY_LOSS_LIMIT_PCT }}
-        run: node bot_donchian.js
 
       - name: Run DMC bot (Strategy B)
         env:
@@ -92,7 +69,7 @@ jobs:
           git fetch origin state:refs/heads/state 2>/dev/null || true
 
           git read-tree --empty
-          for f in positions_dn.json trades_dn.csv watchlist_dn.json last_optimized_dn.txt safety-check-log-dn.json report.json optimize_dn_detail.json positions_dmc.json trades_dmc.csv safety-check-log-dmc.json; do
+          for f in positions_dmc.json trades_dmc.csv safety-check-log-dmc.json report.json; do
             [ -f "$f" ] && git update-index --add "$f"
           done
 
