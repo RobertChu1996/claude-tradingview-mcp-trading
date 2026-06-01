@@ -1,13 +1,13 @@
 {
   "reportDate": "2026-06-01",
-  "generatedAt": "2026-06-01T12:49:14.116Z",
+  "generatedAt": "2026-06-01T18:34:36.922Z",
   "todayCombined": {
     "trades": 0,
     "wins": 0,
     "losses": 0,
     "winRate": "N/A",
     "totalPnl": "0.0000",
-    "totalUnrealizedPnl": -2.08
+    "totalUnrealizedPnl": 5.51
   },
   "strategies": {
     "dmc": {
@@ -31,13 +31,13 @@
           "symbol": "ONEUSDT",
           "side": "long",
           "entry": 0.001987,
-          "currentPrice": 0.001994,
+          "currentPrice": 0.002023,
           "sl": 0.0018190035714285714,
           "tp": 0.0024909892857142863,
-          "slDistPct": 8.78,
-          "tpDistPct": 24.92,
-          "unrealizedPct": 0.35,
-          "unrealizedPnl": 0.42,
+          "slDistPct": 10.08,
+          "tpDistPct": 23.13,
+          "unrealizedPct": 1.81,
+          "unrealizedPnl": 2.14,
           "tpPnl": 30,
           "slPnl": -10,
           "since": "2026-06-01T07:09"
@@ -46,19 +46,49 @@
           "symbol": "TONUSDT",
           "side": "long",
           "entry": 2.001,
-          "currentPrice": 1.946,
+          "currentPrice": 2.207,
           "sl": 1.781025,
           "tp": 2.6609249999999993,
-          "slDistPct": 8.48,
-          "tpDistPct": 36.74,
-          "unrealizedPct": -2.75,
-          "unrealizedPnl": -2.5,
+          "slDistPct": 19.3,
+          "tpDistPct": 20.57,
+          "unrealizedPct": 10.29,
+          "unrealizedPnl": 9.36,
           "tpPnl": 30,
           "slPnl": -10,
           "since": "2026-06-01T07:09"
+        },
+        {
+          "symbol": "BTCUSDT",
+          "side": "short",
+          "entry": 71130.6,
+          "currentPrice": 71623.5,
+          "sl": 74251.8075,
+          "tp": 61766.97750000004,
+          "slDistPct": 3.67,
+          "tpDistPct": 13.76,
+          "unrealizedPct": -0.69,
+          "unrealizedPnl": -1.39,
+          "tpPnl": 26.33,
+          "slPnl": -8.78,
+          "since": "2026-06-01T18:34"
+        },
+        {
+          "symbol": "DOTUSDT",
+          "side": "short",
+          "entry": 1.131,
+          "currentPrice": 1.166,
+          "sl": 1.2071178571428571,
+          "tp": 0.9026464285714286,
+          "slDistPct": 3.53,
+          "tpDistPct": 22.59,
+          "unrealizedPct": -3.09,
+          "unrealizedPnl": -4.6,
+          "tpPnl": 30,
+          "slPnl": -10,
+          "since": "2026-06-01T18:34"
         }
       ],
-      "totalUnrealizedPnl": -2.08
+      "totalUnrealizedPnl": 5.51
     }
   },
   "strategy": {
@@ -82,13 +112,13 @@
         "symbol": "ONEUSDT",
         "side": "long",
         "entry": 0.001987,
-        "currentPrice": 0.001994,
+        "currentPrice": 0.002023,
         "sl": 0.0018190035714285714,
         "tp": 0.0024909892857142863,
-        "slDistPct": 8.78,
-        "tpDistPct": 24.92,
-        "unrealizedPct": 0.35,
-        "unrealizedPnl": 0.42,
+        "slDistPct": 10.08,
+        "tpDistPct": 23.13,
+        "unrealizedPct": 1.81,
+        "unrealizedPnl": 2.14,
         "tpPnl": 30,
         "slPnl": -10,
         "since": "2026-06-01T07:09"
@@ -97,18 +127,48 @@
         "symbol": "TONUSDT",
         "side": "long",
         "entry": 2.001,
-        "currentPrice": 1.946,
+        "currentPrice": 2.207,
         "sl": 1.781025,
         "tp": 2.6609249999999993,
-        "slDistPct": 8.48,
-        "tpDistPct": 36.74,
-        "unrealizedPct": -2.75,
-        "unrealizedPnl": -2.5,
+        "slDistPct": 19.3,
+        "tpDistPct": 20.57,
+        "unrealizedPct": 10.29,
+        "unrealizedPnl": 9.36,
         "tpPnl": 30,
         "slPnl": -10,
         "since": "2026-06-01T07:09"
+      },
+      {
+        "symbol": "BTCUSDT",
+        "side": "short",
+        "entry": 71130.6,
+        "currentPrice": 71623.5,
+        "sl": 74251.8075,
+        "tp": 61766.97750000004,
+        "slDistPct": 3.67,
+        "tpDistPct": 13.76,
+        "unrealizedPct": -0.69,
+        "unrealizedPnl": -1.39,
+        "tpPnl": 26.33,
+        "slPnl": -8.78,
+        "since": "2026-06-01T18:34"
+      },
+      {
+        "symbol": "DOTUSDT",
+        "side": "short",
+        "entry": 1.131,
+        "currentPrice": 1.166,
+        "sl": 1.2071178571428571,
+        "tp": 0.9026464285714286,
+        "slDistPct": 3.53,
+        "tpDistPct": 22.59,
+        "unrealizedPct": -3.09,
+        "unrealizedPnl": -4.6,
+        "tpPnl": 30,
+        "slPnl": -10,
+        "since": "2026-06-01T18:34"
       }
     ],
-    "totalUnrealizedPnl": -2.08
+    "totalUnrealizedPnl": 5.51
   }
 }
