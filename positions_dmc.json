@@ -1,18 +1,6 @@
 {
   "open": [
     {
-      "symbol": "ONEUSDT",
-      "side": "long",
-      "entryPrice": 0.001987,
-      "initialSL": 0.0018190035714285714,
-      "currentSL": 0.0018190035714285714,
-      "tp": 0.0024909892857142863,
-      "quantity": 59525.07493781752,
-      "entryTime": 1780297782633,
-      "orderId": "DMC-PAPER-1780297792332",
-      "algoId": null
-    },
-    {
       "symbol": "TONUSDT",
       "side": "long",
       "entryPrice": 2.001,
@@ -29,7 +17,7 @@
       "side": "short",
       "entryPrice": 71130.6,
       "initialSL": 74251.8075,
-      "currentSL": 74251.8075,
+      "currentSL": 71130.6,
       "tp": 61766.97750000004,
       "quantity": 0.0028117294104084596,
       "entryTime": 1780338873747,
@@ -47,8 +35,38 @@
       "entryTime": 1780338873747,
       "orderId": "DMC-PAPER-1780338876413",
       "algoId": null
+    },
+    {
+      "symbol": "XRPUSDT",
+      "side": "short",
+      "entryPrice": 1.2219,
+      "initialSL": 1.3343285714285713,
+      "currentSL": 1.3343285714285713,
+      "tp": 0.884614285714286,
+      "quantity": 88.94536213468878,
+      "entryTime": 1780426429222,
+      "orderId": "DMC-PAPER-1780426431493",
+      "algoId": null
     }
   ],
-  "closed": [],
-  "cooldown": {}
+  "closed": [
+    {
+      "symbol": "ONEUSDT",
+      "side": "long",
+      "entryPrice": 0.001987,
+      "initialSL": 0.0018190035714285714,
+      "currentSL": 0.0018190035714285714,
+      "tp": 0.0024909892857142863,
+      "quantity": 59525.07493781752,
+      "entryTime": 1780297782633,
+      "orderId": "DMC-PAPER-1780297792332",
+      "algoId": null,
+      "exitTime": 1780426429222,
+      "exitPrice": 0.0018190035714285714,
+      "pnl": -10
+    }
+  ],
+  "cooldown": {
+    "ONEUSDT": 1780426429222
+  }
 }
