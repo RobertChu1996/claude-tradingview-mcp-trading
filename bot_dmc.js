@@ -10,10 +10,10 @@ import "dotenv/config";
 import { readFileSync, writeFileSync, existsSync, appendFileSync } from "fs";
 import crypto from "crypto";
 import {
-  POSITIONS_DMC_FILE as POSITIONS_FILE,
-  LOG_DMC_FILE       as LOG_FILE,
-  CSV_DMC_FILE       as CSV_FILE,
-  WATCHLIST_DN_FILE,
+  POSITIONS_DMC_FILE  as POSITIONS_FILE,
+  LOG_DMC_FILE        as LOG_FILE,
+  CSV_DMC_FILE        as CSV_FILE,
+  WATCHLIST_DMC_FILE,
 } from "./paths.js";
 
 // ─── 策略參數（優化後）────────────────────────────────────────────────────────
@@ -52,9 +52,9 @@ const FALLBACK_SYMBOLS = [
 ];
 
 function loadSymbols() {
-  if (existsSync(WATCHLIST_DN_FILE)) {
+  if (existsSync(WATCHLIST_DMC_FILE)) {
     try {
-      const wl = JSON.parse(readFileSync(WATCHLIST_DN_FILE, "utf8"));
+      const wl = JSON.parse(readFileSync(WATCHLIST_DMC_FILE, "utf8"));
       if (Array.isArray(wl.symbols) && wl.symbols.length > 0) {
         log(`[DMC] 動態清單 ${wl.symbols.length} 幣（更新於 ${wl.updatedAt?.slice(0,10)}）`);
         return wl.symbols;
