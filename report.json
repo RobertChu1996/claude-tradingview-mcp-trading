@@ -1,13 +1,13 @@
 {
-  "reportDate": "2026-06-04",
-  "generatedAt": "2026-06-04T23:35:56.105Z",
+  "reportDate": "2026-06-05",
+  "generatedAt": "2026-06-05T01:52:44.686Z",
   "todayCombined": {
-    "trades": 2,
-    "wins": 1,
-    "losses": 1,
-    "winRate": "50.0%",
-    "totalPnl": "16.3300",
-    "totalUnrealizedPnl": 17.97
+    "trades": 0,
+    "wins": 0,
+    "losses": 0,
+    "winRate": "N/A",
+    "totalPnl": "0.0000",
+    "totalUnrealizedPnl": 18.23
   },
   "strategies": {
     "dmc": {
@@ -20,24 +20,24 @@
         "totalPnl": "7.0549"
       },
       "today": {
-        "trades": 2,
-        "wins": 1,
-        "losses": 1,
-        "winRate": "50.0%",
-        "totalPnl": "16.3300"
+        "trades": 0,
+        "wins": 0,
+        "losses": 0,
+        "winRate": "N/A",
+        "totalPnl": "0.0000"
       },
       "openPositions": [
         {
           "symbol": "DOTUSDT",
           "side": "short",
           "entry": 1.131,
-          "currentPrice": 1.032,
+          "currentPrice": 1.037,
           "sl": 1.131,
           "tp": 0.9026464285714286,
-          "slDistPct": 9.59,
-          "tpDistPct": 12.53,
-          "unrealizedPct": 8.75,
-          "unrealizedPnl": 13.01,
+          "slDistPct": 9.06,
+          "tpDistPct": 12.96,
+          "unrealizedPct": 8.31,
+          "unrealizedPnl": 12.35,
           "tpPnl": 30,
           "slPnl": 0,
           "since": "2026-06-01T18:34"
@@ -46,19 +46,19 @@
           "symbol": "XRPUSDT",
           "side": "short",
           "entry": 1.2219,
-          "currentPrice": 1.1661,
+          "currentPrice": 1.1558,
           "sl": 1.3343285714285713,
           "tp": 0.884614285714286,
-          "slDistPct": 14.43,
-          "tpDistPct": 24.14,
-          "unrealizedPct": 4.57,
-          "unrealizedPnl": 4.96,
+          "slDistPct": 15.45,
+          "tpDistPct": 23.46,
+          "unrealizedPct": 5.41,
+          "unrealizedPnl": 5.88,
           "tpPnl": 30,
           "slPnl": -10,
           "since": "2026-06-02T18:53"
         }
       ],
-      "totalUnrealizedPnl": 17.97
+      "totalUnrealizedPnl": 18.23
     }
   },
   "strategy": {
@@ -71,24 +71,24 @@
       "totalPnl": "7.0549"
     },
     "today": {
-      "trades": 2,
-      "wins": 1,
-      "losses": 1,
-      "winRate": "50.0%",
-      "totalPnl": "16.3300"
+      "trades": 0,
+      "wins": 0,
+      "losses": 0,
+      "winRate": "N/A",
+      "totalPnl": "0.0000"
     },
     "openPositions": [
       {
         "symbol": "DOTUSDT",
         "side": "short",
         "entry": 1.131,
-        "currentPrice": 1.032,
+        "currentPrice": 1.037,
         "sl": 1.131,
         "tp": 0.9026464285714286,
-        "slDistPct": 9.59,
-        "tpDistPct": 12.53,
-        "unrealizedPct": 8.75,
-        "unrealizedPnl": 13.01,
+        "slDistPct": 9.06,
+        "tpDistPct": 12.96,
+        "unrealizedPct": 8.31,
+        "unrealizedPnl": 12.35,
         "tpPnl": 30,
         "slPnl": 0,
         "since": "2026-06-01T18:34"
@@ -97,18 +97,18 @@
         "symbol": "XRPUSDT",
         "side": "short",
         "entry": 1.2219,
-        "currentPrice": 1.1661,
+        "currentPrice": 1.1558,
         "sl": 1.3343285714285713,
         "tp": 0.884614285714286,
-        "slDistPct": 14.43,
-        "tpDistPct": 24.14,
-        "unrealizedPct": 4.57,
-        "unrealizedPnl": 4.96,
+        "slDistPct": 15.45,
+        "tpDistPct": 23.46,
+        "unrealizedPct": 5.41,
+        "unrealizedPnl": 5.88,
         "tpPnl": 30,
         "slPnl": -10,
         "since": "2026-06-02T18:53"
       }
     ],
-    "totalUnrealizedPnl": 17.97
+    "totalUnrealizedPnl": 18.23
   }
 }
