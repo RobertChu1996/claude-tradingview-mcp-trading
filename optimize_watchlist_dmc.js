@@ -13,7 +13,6 @@ import { writeFileSync } from "fs";
 import { WATCHLIST_DMC_FILE } from "./paths.js";
 
 const MIN_PF      = parseFloat(process.argv[2] || "1.2");
-const TOP_N       = parseInt(process.argv[3]   || "50");
 const SCAN_LIMIT  = 150;   // 掃 OKX 交易量前 150 幣
 const MONTHS      = 3;
 const INTERVAL    = "4H";
@@ -214,7 +213,7 @@ function backtestSymbol(candles) {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 async function main() {
-  console.log(`\nDMC 幣種優化器 | 掃前 ${SCAN_LIMIT} 幣 | PF≥${MIN_PF} | 取前 ${TOP_N}`);
+  console.log(`\nDMC 幣種優化器 | 掃前 ${SCAN_LIMIT} 幣 | PF≥${MIN_PF} | 全數寫入`);
   console.log(`回測：${MONTHS}個月 4H | 參數：SMA${SMA_PERIOD}/TP${TP_RATIO}:1\n`);
 
   console.log("取得 OKX 交易量排名...");
@@ -249,11 +248,10 @@ async function main() {
   // 排序：PF 優先，同 PF 取 PnL 高者
   const qualified = results
     .filter(r => r.pf >= MIN_PF)
-    .sort((a, b) => b.pf - a.pf || b.pnl - a.pnl)
-    .slice(0, TOP_N);
+    .sort((a, b) => b.pf - a.pf || b.pnl - a.pnl);
 
   console.log(`\n${"═".repeat(55)}`);
-  console.log(`  結果：${ok} 幣達標（PF≥${MIN_PF}），取前 ${qualified.length} 入清單`);
+  console.log(`  結果：${ok} 幣達標（PF≥${MIN_PF}），全數 ${qualified.length} 幣寫入清單`);
   console.log(`  跳過：${skip} | 錯誤：${err}`);
   console.log(`${"─".repeat(55)}`);
   console.log("  排名  幣種              PF     WR     PnL");
@@ -262,7 +260,7 @@ async function main() {
     const pf = r.pf === Infinity ? "  ∞  " : r.pf.toFixed(2).padStart(5);
     console.log(`  ${String(i + 1).padStart(3)}.  ${r.symbol.padEnd(16)} ${pf}  ${(r.wr * 100).toFixed(0).padStart(3)}%  $${r.pnl.toFixed(1)}`);
   }
-  if (qualified.length > 20) console.log(`  ... 以及另外 ${qualified.length - 20} 幣`);
+  if (qualified.length > 20) console.log(`  ... 以及另外 ${qualified.length - 20} 幣（全數寫入）`);
   console.log(`${"═".repeat(55)}\n`);
 
   const output = {
