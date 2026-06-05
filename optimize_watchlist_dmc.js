@@ -58,22 +58,22 @@ async function fetchCandles(symbol) {
   const fetch   = (await import("node-fetch")).default;
   const instId  = toInstId(symbol);
   const need    = Math.ceil((MONTHS * 30 * 24 * 3600 * 1000) / MS_CANDLE) + LOOKBACK + 10;
-  const all     = [];
-  let before    = "";   // OKX 用 before 參數往前翻頁
+  const all   = [];
+  let after   = "";   // OKX: after=ts 取「早於 ts」的資料（往舊翻頁）
 
   while (all.length < need) {
     const limit = Math.min(300, need - all.length);
-    const url   = `${OKX_BASE}/api/v5/market/history-candles?instId=${instId}&bar=${INTERVAL}&limit=${limit}${before ? `&before=${before}` : ""}`;
+    const url   = `${OKX_BASE}/api/v5/market/history-candles?instId=${instId}&bar=${INTERVAL}&limit=${limit}${after ? `&after=${after}` : ""}`;
     const res   = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const { data } = await res.json();
     if (!data?.length) break;
-    // OKX 回傳新→舊，要反轉後插到前面
-    const candles = data.reverse().map(k => ({
+    // OKX 回傳新→舊，翻轉後 unshift 到前面（舊的在前）
+    const candles = [...data].reverse().map(k => ({
       time: +k[0], open: +k[1], high: +k[2], low: +k[3], close: +k[4], volume: +k[5],
     }));
     all.unshift(...candles);
-    before = data[0][0];   // 最舊那根的 ts，下次從更早抓
+    after = data[data.length - 1][0];   // 這批最舊一根的 ts
     if (data.length < limit) break;
   }
   return all.sort((a, b) => a.time - b.time);
