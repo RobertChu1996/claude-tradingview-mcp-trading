@@ -1,6 +1,6 @@
 /**
  * DMC 動態幣種清單優化器
- * 從 Binance 取得交易量前 150 的 USDT 現貨幣種，
+ * 從 OKX 取得交易量前 150 的 USDT 現貨幣種，
  * 逐幣跑 DMC 回測（3個月 4H），篩選 PF >= MIN_PF 的幣種，
  * 寫入 watchlist_dmc.json（供 bot_dmc.js 讀取）
  *
@@ -14,10 +14,11 @@ import { WATCHLIST_DMC_FILE } from "./paths.js";
 
 const MIN_PF      = parseFloat(process.argv[2] || "1.2");
 const TOP_N       = parseInt(process.argv[3]   || "50");
-const SCAN_LIMIT  = 150;   // 掃 Binance 交易量前 150 幣
+const SCAN_LIMIT  = 150;   // 掃 OKX 交易量前 150 幣
 const MONTHS      = 3;
-const INTERVAL    = "4h";
+const INTERVAL    = "4H";
 const MS_CANDLE   = 4 * 3600 * 1000;
+const OKX_BASE    = "https://www.okx.com";
 
 // 策略參數（與 bot_dmc.js 完全一致）
 const SMA_PERIOD      = 25;
@@ -31,42 +32,48 @@ const COOLDOWN_BARS   = 2;
 const MIN_PRICE       = 0.001;
 const LOOKBACK        = SMA_PERIOD + SMA_PREV_OFFSET + 10;
 
-// 排除穩定幣與槓桿幣
+// 排除穩定幣
 const EXCLUDE = new Set([
-  "USDCUSDT","BUSDUSDT","TUSDUSDT","USDTUSDT","DAIUSDT","FDUSDUSDT",
-  "BTCDOMUSDT","DEFIUSDT","BNXUSDT",
+  "USDC-USDT","BUSD-USDT","TUSD-USDT","DAI-USDT","FDUSD-USDT",
 ]);
 
-// ─── Binance API ──────────────────────────────────────────────────────────────
+// OKX instId（BTC-USDT）↔ bot symbol（BTCUSDT）轉換
+const toInstId  = s => s.replace("USDT", "-USDT");
+const toSymbol  = s => s.replace("-USDT", "USDT");
+
+// ─── OKX API ──────────────────────────────────────────────────────────────────
 async function fetchTopSymbols() {
   const fetch = (await import("node-fetch")).default;
-  const res   = await fetch("https://api.binance.com/api/v3/ticker/24hr");
-  if (!res.ok) throw new Error(`Binance ticker ${res.status}`);
-  const tickers = await res.json();
-  return tickers
-    .filter(t => t.symbol.endsWith("USDT") && !EXCLUDE.has(t.symbol) && parseFloat(t.lastPrice) >= MIN_PRICE)
-    .sort((a, b) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume))
+  const res   = await fetch(`${OKX_BASE}/api/v5/market/tickers?instType=SPOT`);
+  if (!res.ok) throw new Error(`OKX tickers ${res.status}`);
+  const { data } = await res.json();
+  return data
+    .filter(t => t.instId.endsWith("-USDT") && !EXCLUDE.has(t.instId) && parseFloat(t.last) >= MIN_PRICE)
+    .sort((a, b) => parseFloat(b.volCcy24h) - parseFloat(a.volCcy24h))
     .slice(0, SCAN_LIMIT)
-    .map(t => t.symbol);
+    .map(t => toSymbol(t.instId));
 }
 
 async function fetchCandles(symbol) {
   const fetch   = (await import("node-fetch")).default;
+  const instId  = toInstId(symbol);
   const need    = Math.ceil((MONTHS * 30 * 24 * 3600 * 1000) / MS_CANDLE) + LOOKBACK + 10;
   const all     = [];
-  let endTime   = Date.now();
+  let before    = "";   // OKX 用 before 參數往前翻頁
 
   while (all.length < need) {
-    const limit = Math.min(1000, need - all.length);
-    const url   = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${INTERVAL}&endTime=${endTime}&limit=${limit}`;
+    const limit = Math.min(300, need - all.length);
+    const url   = `${OKX_BASE}/api/v5/market/history-candles?instId=${instId}&bar=${INTERVAL}&limit=${limit}${before ? `&before=${before}` : ""}`;
     const res   = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data  = await res.json();
-    if (!data.length) break;
-    all.unshift(...data.map(k => ({
-      time: k[0], open: +k[1], high: +k[2], low: +k[3], close: +k[4], volume: +k[5],
-    })));
-    endTime = data[0][0] - 1;
+    const { data } = await res.json();
+    if (!data?.length) break;
+    // OKX 回傳新→舊，要反轉後插到前面
+    const candles = data.reverse().map(k => ({
+      time: +k[0], open: +k[1], high: +k[2], low: +k[3], close: +k[4], volume: +k[5],
+    }));
+    all.unshift(...candles);
+    before = data[0][0];   // 最舊那根的 ts，下次從更早抓
     if (data.length < limit) break;
   }
   return all.sort((a, b) => a.time - b.time);
@@ -210,7 +217,7 @@ async function main() {
   console.log(`\nDMC 幣種優化器 | 掃前 ${SCAN_LIMIT} 幣 | PF≥${MIN_PF} | 取前 ${TOP_N}`);
   console.log(`回測：${MONTHS}個月 4H | 參數：SMA${SMA_PERIOD}/TP${TP_RATIO}:1\n`);
 
-  console.log("取得 Binance 交易量排名...");
+  console.log("取得 OKX 交易量排名...");
   const symbols = await fetchTopSymbols();
   console.log(`候選幣種：${symbols.length} 個\n`);
 
