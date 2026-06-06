@@ -1,58 +1,43 @@
 {
   "reportDate": "2026-06-06",
-  "generatedAt": "2026-06-06T07:36:35.747Z",
+  "generatedAt": "2026-06-06T09:47:32.542Z",
   "todayCombined": {
-    "trades": 0,
-    "wins": 0,
+    "trades": 1,
+    "wins": 1,
     "losses": 0,
-    "winRate": "N/A",
-    "totalPnl": "0.0000",
-    "totalUnrealizedPnl": 37.84
+    "winRate": "100.0%",
+    "totalPnl": "30.0000",
+    "totalUnrealizedPnl": 12.87
   },
   "strategies": {
     "dmc": {
       "label": "B: DMC/SMA25 [4H] 起:2026-05-29",
       "overall": {
-        "trades": 5,
-        "wins": 3,
+        "trades": 6,
+        "wins": 4,
         "losses": 2,
-        "winRate": "60.0%",
-        "totalPnl": "7.0549"
+        "winRate": "66.7%",
+        "totalPnl": "37.0549"
       },
       "today": {
-        "trades": 0,
-        "wins": 0,
+        "trades": 1,
+        "wins": 1,
         "losses": 0,
-        "winRate": "N/A",
-        "totalPnl": "0.0000"
+        "winRate": "100.0%",
+        "totalPnl": "30.0000"
       },
       "openPositions": [
-        {
-          "symbol": "DOTUSDT",
-          "side": "short",
-          "entry": 1.131,
-          "currentPrice": 0.94,
-          "sl": 1.131,
-          "tp": 0.9026464285714286,
-          "slDistPct": 20.32,
-          "tpDistPct": 3.97,
-          "unrealizedPct": 16.89,
-          "unrealizedPnl": 25.09,
-          "tpPnl": 30,
-          "slPnl": 0,
-          "since": "2026-06-01T18:34"
-        },
         {
           "symbol": "XRPUSDT",
           "side": "short",
           "entry": 1.2219,
-          "currentPrice": 1.0919,
+          "currentPrice": 1.0928,
           "sl": 1.2219,
           "tp": 0.884614285714286,
-          "slDistPct": 11.91,
-          "tpDistPct": 18.98,
-          "unrealizedPct": 10.64,
-          "unrealizedPnl": 11.56,
+          "slDistPct": 11.81,
+          "tpDistPct": 19.05,
+          "unrealizedPct": 10.57,
+          "unrealizedPnl": 11.48,
           "tpPnl": 30,
           "slPnl": 0,
           "since": "2026-06-02T18:53"
@@ -61,64 +46,49 @@
           "symbol": "PAXGUSDT",
           "side": "short",
           "entry": 4334.6,
-          "currentPrice": 4308.9,
+          "currentPrice": 4304.4,
           "sl": 4510.672500000001,
           "tp": 3806.3824999999997,
-          "slDistPct": 4.68,
-          "tpDistPct": 11.66,
-          "unrealizedPct": 0.59,
-          "unrealizedPnl": 1.19,
+          "slDistPct": 4.79,
+          "tpDistPct": 11.57,
+          "unrealizedPct": 0.7,
+          "unrealizedPnl": 1.39,
           "tpPnl": 24.37,
           "slPnl": -8.12,
           "since": "2026-06-05T16:12"
         }
       ],
-      "totalUnrealizedPnl": 37.84
+      "totalUnrealizedPnl": 12.87
     }
   },
   "strategy": {
     "label": "B: DMC/SMA25 [4H] 起:2026-05-29",
     "overall": {
-      "trades": 5,
-      "wins": 3,
+      "trades": 6,
+      "wins": 4,
       "losses": 2,
-      "winRate": "60.0%",
-      "totalPnl": "7.0549"
+      "winRate": "66.7%",
+      "totalPnl": "37.0549"
     },
     "today": {
-      "trades": 0,
-      "wins": 0,
+      "trades": 1,
+      "wins": 1,
       "losses": 0,
-      "winRate": "N/A",
-      "totalPnl": "0.0000"
+      "winRate": "100.0%",
+      "totalPnl": "30.0000"
     },
     "openPositions": [
-      {
-        "symbol": "DOTUSDT",
-        "side": "short",
-        "entry": 1.131,
-        "currentPrice": 0.94,
-        "sl": 1.131,
-        "tp": 0.9026464285714286,
-        "slDistPct": 20.32,
-        "tpDistPct": 3.97,
-        "unrealizedPct": 16.89,
-        "unrealizedPnl": 25.09,
-        "tpPnl": 30,
-        "slPnl": 0,
-        "since": "2026-06-01T18:34"
-      },
       {
         "symbol": "XRPUSDT",
         "side": "short",
         "entry": 1.2219,
-        "currentPrice": 1.0919,
+        "currentPrice": 1.0928,
         "sl": 1.2219,
         "tp": 0.884614285714286,
-        "slDistPct": 11.91,
-        "tpDistPct": 18.98,
-        "unrealizedPct": 10.64,
-        "unrealizedPnl": 11.56,
+        "slDistPct": 11.81,
+        "tpDistPct": 19.05,
+        "unrealizedPct": 10.57,
+        "unrealizedPnl": 11.48,
         "tpPnl": 30,
         "slPnl": 0,
         "since": "2026-06-02T18:53"
@@ -127,18 +97,18 @@
         "symbol": "PAXGUSDT",
         "side": "short",
         "entry": 4334.6,
-        "currentPrice": 4308.9,
+        "currentPrice": 4304.4,
         "sl": 4510.672500000001,
         "tp": 3806.3824999999997,
-        "slDistPct": 4.68,
-        "tpDistPct": 11.66,
-        "unrealizedPct": 0.59,
-        "unrealizedPnl": 1.19,
+        "slDistPct": 4.79,
+        "tpDistPct": 11.57,
+        "unrealizedPct": 0.7,
+        "unrealizedPnl": 1.39,
         "tpPnl": 24.37,
         "slPnl": -8.12,
         "since": "2026-06-05T16:12"
       }
     ],
-    "totalUnrealizedPnl": 37.84
+    "totalUnrealizedPnl": 12.87
   }
 }

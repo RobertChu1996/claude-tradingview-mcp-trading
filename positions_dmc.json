@@ -1,18 +1,6 @@
 {
   "open": [
     {
-      "symbol": "DOTUSDT",
-      "side": "short",
-      "entryPrice": 1.131,
-      "initialSL": 1.2071178571428571,
-      "currentSL": 1.131,
-      "tp": 0.9026464285714286,
-      "quantity": 131.37521700370667,
-      "entryTime": 1780338873747,
-      "orderId": "DMC-PAPER-1780338876413",
-      "algoId": null
-    },
-    {
       "symbol": "XRPUSDT",
       "side": "short",
       "entryPrice": 1.2219,
@@ -82,11 +70,27 @@
       "exitTime": 1780550503440,
       "exitPrice": 61766.97750000004,
       "pnl": 26.3279727712123
+    },
+    {
+      "symbol": "DOTUSDT",
+      "side": "short",
+      "entryPrice": 1.131,
+      "initialSL": 1.2071178571428571,
+      "currentSL": 1.131,
+      "tp": 0.9026464285714286,
+      "quantity": 131.37521700370667,
+      "entryTime": 1780338873747,
+      "orderId": "DMC-PAPER-1780338876413",
+      "algoId": null,
+      "exitTime": 1780739238824,
+      "exitPrice": 0.9026464285714286,
+      "pnl": 29.999999999999996
     }
   ],
   "cooldown": {
     "ONEUSDT": 1780426429222,
     "TONUSDT": 1780550503440,
-    "BTCUSDT": 1780550503440
+    "BTCUSDT": 1780550503440,
+    "DOTUSDT": 1780739238824
   }
 }
