@@ -51,7 +51,7 @@ jobs:
           OKX_API_KEY:          ${{ secrets.OKX_API_KEY }}
           OKX_SECRET_KEY:       ${{ secrets.OKX_SECRET_KEY }}
           OKX_PASSPHRASE:       ${{ secrets.OKX_PASSPHRASE }}
-          DMC_PAPER_TRADING:    "true"
+          DMC_PAPER_TRADING:    ${{ vars.DMC_PAPER_TRADING }}
           PORTFOLIO_VALUE_USD:  ${{ vars.PORTFOLIO_VALUE_USD }}
           MAX_TRADE_SIZE_USD:   ${{ vars.MAX_TRADE_SIZE_USD }}
           RISK_PCT:             ${{ vars.RISK_PCT }}
