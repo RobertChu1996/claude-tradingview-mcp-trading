@@ -284,13 +284,7 @@ function floorLot(v, lotSz) {
 }
 
 async function fetchPortfolioValue() {
-  if (!CONFIG.paperTrading) {
-    try {
-      const r = await okxGet("/api/v5/account/balance");
-      const eq = parseFloat(r.data?.[0]?.totalEq || 0);
-      if (eq > 0) return eq;
-    } catch {}
-  }
+  // 固定使用 PORTFOLIO_VALUE_USD 設定值，避免 OKX 全帳戶餘額影響倉位計算
   const pos = loadPositions();
   const closedPnl = (pos.closed||[]).reduce((s,t)=>s+(t.pnl||0),0);
   return CONFIG.portfolioValue + closedPnl;
