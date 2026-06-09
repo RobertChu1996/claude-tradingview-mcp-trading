@@ -2,8 +2,7 @@ name: DMC Trading Bot
 
 on:
   schedule:
-    - cron: '0,15,30,45 * * * *'   # 每15分鐘
-    - cron: '0 0 * * 1'            # 每週一 00:00 UTC 更新幣種清單
+    - cron: '0 0 * * 1'            # 每週一 00:00 UTC 更新幣種清單（每15分鐘由外部 cron-job.org 觸發）
   workflow_dispatch:                  # 允許手動觸發
 
 permissions:
