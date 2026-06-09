@@ -1,13 +1,13 @@
 {
   "reportDate": "2026-06-09",
-  "generatedAt": "2026-06-09T16:46:47.685Z",
+  "generatedAt": "2026-06-09T17:26:10.583Z",
   "todayCombined": {
     "trades": 0,
     "wins": 0,
     "losses": 0,
     "winRate": "N/A",
     "totalPnl": "0.0000",
-    "totalUnrealizedPnl": 0
+    "totalUnrealizedPnl": -1.87
   },
   "strategies": {
     "dmc": {
@@ -26,8 +26,54 @@
         "winRate": "N/A",
         "totalPnl": "0.0000"
       },
-      "openPositions": [],
-      "totalUnrealizedPnl": 0
+      "openPositions": [
+        {
+          "symbol": "BIGTIMEUSDT",
+          "side": "short",
+          "entry": 0.008689,
+          "currentPrice": 0.008841,
+          "sl": 0.009410532142857142,
+          "tp": 0.006524403571428576,
+          "slDistPct": 6.44,
+          "tpDistPct": 26.2,
+          "unrealizedPct": -1.75,
+          "unrealizedPnl": -0.71,
+          "tpPnl": 10.09,
+          "slPnl": -3.36,
+          "since": "2026-06-09T17:25"
+        },
+        {
+          "symbol": "ZROUSDT",
+          "side": "short",
+          "entry": 0.829,
+          "currentPrice": 0.844,
+          "sl": 0.9065392857142858,
+          "tp": 0.5963821428571425,
+          "slDistPct": 7.41,
+          "tpDistPct": 29.34,
+          "unrealizedPct": -1.81,
+          "unrealizedPnl": -0.65,
+          "tpPnl": 10.09,
+          "slPnl": -3.36,
+          "since": "2026-06-09T17:25"
+        },
+        {
+          "symbol": "PENDLEUSDT",
+          "side": "short",
+          "entry": 1.229,
+          "currentPrice": 1.242,
+          "sl": 1.3148607142857143,
+          "tp": 0.9714178571428576,
+          "slDistPct": 5.87,
+          "tpDistPct": 21.79,
+          "unrealizedPct": -1.06,
+          "unrealizedPnl": -0.51,
+          "tpPnl": 10.09,
+          "slPnl": -3.36,
+          "since": "2026-06-09T17:25"
+        }
+      ],
+      "totalUnrealizedPnl": -1.87
     }
   },
   "strategy": {
@@ -46,7 +92,53 @@
       "winRate": "N/A",
       "totalPnl": "0.0000"
     },
-    "openPositions": [],
-    "totalUnrealizedPnl": 0
+    "openPositions": [
+      {
+        "symbol": "BIGTIMEUSDT",
+        "side": "short",
+        "entry": 0.008689,
+        "currentPrice": 0.008841,
+        "sl": 0.009410532142857142,
+        "tp": 0.006524403571428576,
+        "slDistPct": 6.44,
+        "tpDistPct": 26.2,
+        "unrealizedPct": -1.75,
+        "unrealizedPnl": -0.71,
+        "tpPnl": 10.09,
+        "slPnl": -3.36,
+        "since": "2026-06-09T17:25"
+      },
+      {
+        "symbol": "ZROUSDT",
+        "side": "short",
+        "entry": 0.829,
+        "currentPrice": 0.844,
+        "sl": 0.9065392857142858,
+        "tp": 0.5963821428571425,
+        "slDistPct": 7.41,
+        "tpDistPct": 29.34,
+        "unrealizedPct": -1.81,
+        "unrealizedPnl": -0.65,
+        "tpPnl": 10.09,
+        "slPnl": -3.36,
+        "since": "2026-06-09T17:25"
+      },
+      {
+        "symbol": "PENDLEUSDT",
+        "side": "short",
+        "entry": 1.229,
+        "currentPrice": 1.242,
+        "sl": 1.3148607142857143,
+        "tp": 0.9714178571428576,
+        "slDistPct": 5.87,
+        "tpDistPct": 21.79,
+        "unrealizedPct": -1.06,
+        "unrealizedPnl": -0.51,
+        "tpPnl": 10.09,
+        "slPnl": -3.36,
+        "since": "2026-06-09T17:25"
+      }
+    ],
+    "totalUnrealizedPnl": -1.87
   }
 }
