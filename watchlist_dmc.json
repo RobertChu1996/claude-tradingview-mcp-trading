@@ -1,19 +1,20 @@
 {
-  "updatedAt": "2026-06-10T01:16:37.797Z",
+  "updatedAt": "2026-06-10T01:24:38.808Z",
   "minPf": 1.2,
   "symbols": [
     "WIFUSDT",
     "LUNAUSDT",
+    "RESOLVUSDT",
     "MOVEUSDT",
     "PARTIUSDT",
-    "PAXGUSDT",
-    "FLRUSDT",
     "BIOUSDT",
-    "CATIUSDT",
+    "ZILUSDT",
     "BCHUSDT",
+    "RVNUSDT",
     "APEUSDT",
     "OPUSDT",
     "KAITOUSDT",
+    "IMXUSDT",
     "EIGENUSDT",
     "ZENUSDT",
     "BIGTIMEUSDT",
@@ -22,6 +23,7 @@
     "IPUSDT",
     "ARBUSDT",
     "INJUSDT",
+    "AUSDT",
     "COREUSDT",
     "MOODENGUSDT",
     "ATOMUSDT",
@@ -30,10 +32,12 @@
     "LINKUSDT",
     "MORPHOUSDT",
     "BABYUSDT",
+    "ZKUSDT",
     "ZECUSDT",
     "PIUSDT",
     "QTUMUSDT",
     "SKYUSDT",
+    "KSMUSDT",
     "MERLUSDT",
     "ZROUSDT",
     "DOTUSDT",
@@ -47,20 +51,19 @@
     "LAYERUSDT",
     "IOTAUSDT",
     "SPKUSDT",
-    "SAFEUSDT",
+    "MASKUSDT",
     "KITEUSDT",
     "SOLUSDT",
     "DOODUSDT",
     "ALGOUSDT",
-    "CFGUSDT",
     "KMNOUSDT",
     "WLFIUSDT",
     "PENDLEUSDT",
     "DYDXUSDT",
     "LITUSDT",
     "TRXUSDT",
-    "XAUTUSDT",
-    "LTCUSDT"
+    "LTCUSDT",
+    "YBUSDT"
   ],
   "stats": [
     {
@@ -80,6 +83,14 @@
       "pnl": 60
     },
     {
+      "symbol": "RESOLVUSDT",
+      "trades": 4,
+      "wins": 3,
+      "wr": 75,
+      "pf": 999,
+      "pnl": 54.8
+    },
+    {
       "symbol": "MOVEUSDT",
       "trades": 4,
       "wins": 1,
@@ -96,22 +107,6 @@
       "pnl": 5
     },
     {
-      "symbol": "PAXGUSDT",
-      "trades": 5,
-      "wins": 2,
-      "wr": 40,
-      "pf": 49.05,
-      "pnl": 29.83
-    },
-    {
-      "symbol": "FLRUSDT",
-      "trades": 5,
-      "wins": 4,
-      "wr": 80,
-      "pf": 11.55,
-      "pnl": 89.51
-    },
-    {
       "symbol": "BIOUSDT",
       "trades": 5,
       "wins": 3,
@@ -120,18 +115,26 @@
       "pnl": 55
     },
     {
-      "symbol": "CATIUSDT",
-      "trades": 4,
+      "symbol": "ZILUSDT",
+      "trades": 3,
       "wins": 2,
-      "wr": 50,
-      "pf": 6,
-      "pnl": 50
+      "wr": 66.7,
+      "pf": 6.44,
+      "pnl": 38.01
     },
     {
       "symbol": "BCHUSDT",
       "trades": 3,
       "wins": 2,
       "wr": 66.7,
+      "pf": 6,
+      "pnl": 50
+    },
+    {
+      "symbol": "RVNUSDT",
+      "trades": 4,
+      "wins": 2,
+      "wr": 50,
       "pf": 6,
       "pnl": 50
     },
@@ -158,6 +161,14 @@
       "wr": 40,
       "pf": 5.68,
       "pnl": 46.76
+    },
+    {
+      "symbol": "IMXUSDT",
+      "trades": 3,
+      "wins": 2,
+      "wr": 66.7,
+      "pf": 5.67,
+      "pnl": 46.68
     },
     {
       "symbol": "EIGENUSDT",
@@ -224,6 +235,14 @@
       "pnl": 45
     },
     {
+      "symbol": "AUSDT",
+      "trades": 3,
+      "wins": 1,
+      "wr": 33.3,
+      "pf": 3,
+      "pnl": 20
+    },
+    {
       "symbol": "COREUSDT",
       "trades": 4,
       "wins": 2,
@@ -288,6 +307,14 @@
       "pnl": 40
     },
     {
+      "symbol": "ZKUSDT",
+      "trades": 3,
+      "wins": 1,
+      "wr": 33.3,
+      "pf": 3,
+      "pnl": 20
+    },
+    {
       "symbol": "ZECUSDT",
       "trades": 5,
       "wins": 2,
@@ -318,6 +345,14 @@
       "wr": 33.3,
       "pf": 2.26,
       "pnl": 12.61
+    },
+    {
+      "symbol": "KSMUSDT",
+      "trades": 6,
+      "wins": 3,
+      "wr": 50,
+      "pf": 2.17,
+      "pnl": 35
     },
     {
       "symbol": "MERLUSDT",
@@ -424,10 +459,10 @@
       "pnl": 10
     },
     {
-      "symbol": "SAFEUSDT",
-      "trades": 5,
+      "symbol": "MASKUSDT",
+      "trades": 3,
       "wins": 1,
-      "wr": 20,
+      "wr": 33.3,
       "pf": 1.5,
       "pnl": 10
     },
@@ -457,14 +492,6 @@
     },
     {
       "symbol": "ALGOUSDT",
-      "trades": 4,
-      "wins": 1,
-      "wr": 25,
-      "pf": 1.5,
-      "pnl": 10
-    },
-    {
-      "symbol": "CFGUSDT",
       "trades": 4,
       "wins": 1,
       "wr": 25,
@@ -520,20 +547,20 @@
       "pnl": 3.1
     },
     {
-      "symbol": "XAUTUSDT",
-      "trades": 5,
-      "wins": 2,
-      "wr": 40,
-      "pf": 1.26,
-      "pnl": 4.92
-    },
-    {
       "symbol": "LTCUSDT",
       "trades": 4,
       "wins": 1,
       "wr": 25,
       "pf": 1.23,
       "pnl": 4.21
+    },
+    {
+      "symbol": "YBUSDT",
+      "trades": 7,
+      "wins": 2,
+      "wr": 28.6,
+      "pf": 1.2,
+      "pnl": 10
     }
   ]
 }
