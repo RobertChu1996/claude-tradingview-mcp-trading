@@ -1,13 +1,13 @@
 {
   "reportDate": "2026-06-10",
-  "generatedAt": "2026-06-10T07:46:51.924Z",
+  "generatedAt": "2026-06-10T08:02:01.319Z",
   "todayCombined": {
     "trades": 0,
     "wins": 0,
     "losses": 0,
     "winRate": "N/A",
     "totalPnl": "0.0000",
-    "totalUnrealizedPnl": 1.85
+    "totalUnrealizedPnl": 2.18
   },
   "strategies": {
     "dmc": {
@@ -31,13 +31,13 @@
           "symbol": "BIGTIMEUSDT",
           "side": "short",
           "entry": 0.008689,
-          "currentPrice": 0.008635,
+          "currentPrice": 0.008595,
           "sl": 0.009410532142857142,
           "tp": 0.006524403571428576,
-          "slDistPct": 8.98,
-          "tpDistPct": 24.44,
-          "unrealizedPct": 0.62,
-          "unrealizedPnl": 0.25,
+          "slDistPct": 9.49,
+          "tpDistPct": 24.09,
+          "unrealizedPct": 1.08,
+          "unrealizedPnl": 0.44,
           "tpPnl": 10.09,
           "slPnl": -3.36,
           "since": "2026-06-09T17:25"
@@ -61,19 +61,34 @@
           "symbol": "PENDLEUSDT",
           "side": "short",
           "entry": 1.229,
-          "currentPrice": 1.197,
+          "currentPrice": 1.194,
           "sl": 1.3148607142857143,
           "tp": 0.9714178571428576,
-          "slDistPct": 9.85,
-          "tpDistPct": 18.85,
-          "unrealizedPct": 2.6,
-          "unrealizedPnl": 1.25,
+          "slDistPct": 10.12,
+          "tpDistPct": 18.64,
+          "unrealizedPct": 2.85,
+          "unrealizedPnl": 1.37,
           "tpPnl": 10.09,
           "slPnl": -3.36,
           "since": "2026-06-09T17:25"
+        },
+        {
+          "symbol": "SPKUSDT",
+          "side": "long",
+          "entry": 0.02049,
+          "currentPrice": 0.0205,
+          "sl": 0.01877957142857143,
+          "tp": 0.025621285714285714,
+          "slDistPct": 8.39,
+          "tpDistPct": 24.98,
+          "unrealizedPct": 0.05,
+          "unrealizedPnl": 0.02,
+          "tpPnl": 10.09,
+          "slPnl": -3.36,
+          "since": "2026-06-10T08:01"
         }
       ],
-      "totalUnrealizedPnl": 1.85
+      "totalUnrealizedPnl": 2.18
     }
   },
   "strategy": {
@@ -97,13 +112,13 @@
         "symbol": "BIGTIMEUSDT",
         "side": "short",
         "entry": 0.008689,
-        "currentPrice": 0.008635,
+        "currentPrice": 0.008595,
         "sl": 0.009410532142857142,
         "tp": 0.006524403571428576,
-        "slDistPct": 8.98,
-        "tpDistPct": 24.44,
-        "unrealizedPct": 0.62,
-        "unrealizedPnl": 0.25,
+        "slDistPct": 9.49,
+        "tpDistPct": 24.09,
+        "unrealizedPct": 1.08,
+        "unrealizedPnl": 0.44,
         "tpPnl": 10.09,
         "slPnl": -3.36,
         "since": "2026-06-09T17:25"
@@ -127,18 +142,33 @@
         "symbol": "PENDLEUSDT",
         "side": "short",
         "entry": 1.229,
-        "currentPrice": 1.197,
+        "currentPrice": 1.194,
         "sl": 1.3148607142857143,
         "tp": 0.9714178571428576,
-        "slDistPct": 9.85,
-        "tpDistPct": 18.85,
-        "unrealizedPct": 2.6,
-        "unrealizedPnl": 1.25,
+        "slDistPct": 10.12,
+        "tpDistPct": 18.64,
+        "unrealizedPct": 2.85,
+        "unrealizedPnl": 1.37,
         "tpPnl": 10.09,
         "slPnl": -3.36,
         "since": "2026-06-09T17:25"
+      },
+      {
+        "symbol": "SPKUSDT",
+        "side": "long",
+        "entry": 0.02049,
+        "currentPrice": 0.0205,
+        "sl": 0.01877957142857143,
+        "tp": 0.025621285714285714,
+        "slDistPct": 8.39,
+        "tpDistPct": 24.98,
+        "unrealizedPct": 0.05,
+        "unrealizedPnl": 0.02,
+        "tpPnl": 10.09,
+        "slPnl": -3.36,
+        "since": "2026-06-10T08:01"
       }
     ],
-    "totalUnrealizedPnl": 1.85
+    "totalUnrealizedPnl": 2.18
   }
 }
