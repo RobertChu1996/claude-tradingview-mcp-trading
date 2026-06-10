@@ -1,13 +1,13 @@
 {
   "reportDate": "2026-06-10",
-  "generatedAt": "2026-06-10T00:31:57.886Z",
+  "generatedAt": "2026-06-10T00:46:51.279Z",
   "todayCombined": {
     "trades": 0,
     "wins": 0,
     "losses": 0,
     "winRate": "N/A",
     "totalPnl": "0.0000",
-    "totalUnrealizedPnl": -1.83
+    "totalUnrealizedPnl": -0.5
   },
   "strategies": {
     "dmc": {
@@ -31,13 +31,13 @@
           "symbol": "BIGTIMEUSDT",
           "side": "short",
           "entry": 0.008689,
-          "currentPrice": 0.008718,
+          "currentPrice": 0.008649,
           "sl": 0.009410532142857142,
           "tp": 0.006524403571428576,
-          "slDistPct": 7.94,
-          "tpDistPct": 25.16,
-          "unrealizedPct": -0.33,
-          "unrealizedPnl": -0.14,
+          "slDistPct": 8.8,
+          "tpDistPct": 24.56,
+          "unrealizedPct": 0.46,
+          "unrealizedPnl": 0.19,
           "tpPnl": 10.09,
           "slPnl": -3.36,
           "since": "2026-06-09T17:25"
@@ -46,13 +46,13 @@
           "symbol": "ZROUSDT",
           "side": "short",
           "entry": 0.829,
-          "currentPrice": 0.849,
+          "currentPrice": 0.845,
           "sl": 0.9065392857142858,
           "tp": 0.5963821428571425,
-          "slDistPct": 6.78,
-          "tpDistPct": 29.75,
-          "unrealizedPct": -2.41,
-          "unrealizedPnl": -0.87,
+          "slDistPct": 7.28,
+          "tpDistPct": 29.42,
+          "unrealizedPct": -1.93,
+          "unrealizedPnl": -0.69,
           "tpPnl": 10.09,
           "slPnl": -3.36,
           "since": "2026-06-09T17:25"
@@ -61,19 +61,19 @@
           "symbol": "PENDLEUSDT",
           "side": "short",
           "entry": 1.229,
-          "currentPrice": 1.25,
+          "currentPrice": 1.229,
           "sl": 1.3148607142857143,
           "tp": 0.9714178571428576,
-          "slDistPct": 5.19,
-          "tpDistPct": 22.29,
-          "unrealizedPct": -1.71,
-          "unrealizedPnl": -0.82,
+          "slDistPct": 6.99,
+          "tpDistPct": 20.96,
+          "unrealizedPct": 0,
+          "unrealizedPnl": 0,
           "tpPnl": 10.09,
           "slPnl": -3.36,
           "since": "2026-06-09T17:25"
         }
       ],
-      "totalUnrealizedPnl": -1.83
+      "totalUnrealizedPnl": -0.5
     }
   },
   "strategy": {
@@ -97,13 +97,13 @@
         "symbol": "BIGTIMEUSDT",
         "side": "short",
         "entry": 0.008689,
-        "currentPrice": 0.008718,
+        "currentPrice": 0.008649,
         "sl": 0.009410532142857142,
         "tp": 0.006524403571428576,
-        "slDistPct": 7.94,
-        "tpDistPct": 25.16,
-        "unrealizedPct": -0.33,
-        "unrealizedPnl": -0.14,
+        "slDistPct": 8.8,
+        "tpDistPct": 24.56,
+        "unrealizedPct": 0.46,
+        "unrealizedPnl": 0.19,
         "tpPnl": 10.09,
         "slPnl": -3.36,
         "since": "2026-06-09T17:25"
@@ -112,13 +112,13 @@
         "symbol": "ZROUSDT",
         "side": "short",
         "entry": 0.829,
-        "currentPrice": 0.849,
+        "currentPrice": 0.845,
         "sl": 0.9065392857142858,
         "tp": 0.5963821428571425,
-        "slDistPct": 6.78,
-        "tpDistPct": 29.75,
-        "unrealizedPct": -2.41,
-        "unrealizedPnl": -0.87,
+        "slDistPct": 7.28,
+        "tpDistPct": 29.42,
+        "unrealizedPct": -1.93,
+        "unrealizedPnl": -0.69,
         "tpPnl": 10.09,
         "slPnl": -3.36,
         "since": "2026-06-09T17:25"
@@ -127,18 +127,18 @@
         "symbol": "PENDLEUSDT",
         "side": "short",
         "entry": 1.229,
-        "currentPrice": 1.25,
+        "currentPrice": 1.229,
         "sl": 1.3148607142857143,
         "tp": 0.9714178571428576,
-        "slDistPct": 5.19,
-        "tpDistPct": 22.29,
-        "unrealizedPct": -1.71,
-        "unrealizedPnl": -0.82,
+        "slDistPct": 6.99,
+        "tpDistPct": 20.96,
+        "unrealizedPct": 0,
+        "unrealizedPnl": 0,
         "tpPnl": 10.09,
         "slPnl": -3.36,
         "since": "2026-06-09T17:25"
       }
     ],
-    "totalUnrealizedPnl": -1.83
+    "totalUnrealizedPnl": -0.5
   }
 }
