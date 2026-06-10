@@ -43,11 +43,22 @@ const toSymbol  = s => s.replace("-USDT", "USDT");
 // ─── OKX API ──────────────────────────────────────────────────────────────────
 async function fetchTopSymbols() {
   const fetch = (await import("node-fetch")).default;
-  const res   = await fetch(`${OKX_BASE}/api/v5/market/tickers?instType=SPOT`);
+
+  // 取得有永續合約的幣種清單，避免掃入無 SWAP 合約的幣（如 PAXG）
+  const swapRes  = await fetch(`${OKX_BASE}/api/v5/public/instruments?instType=SWAP`);
+  if (!swapRes.ok) throw new Error(`OKX instruments ${swapRes.status}`);
+  const { data: swapData } = await swapRes.json();
+  const swapSet = new Set(
+    swapData
+      .filter(i => i.instId.endsWith("-USDT-SWAP") && i.state === "live")
+      .map(i => i.instId.replace("-USDT-SWAP", "USDT"))
+  );
+
+  const res = await fetch(`${OKX_BASE}/api/v5/market/tickers?instType=SPOT`);
   if (!res.ok) throw new Error(`OKX tickers ${res.status}`);
   const { data } = await res.json();
   return data
-    .filter(t => t.instId.endsWith("-USDT") && !EXCLUDE.has(t.instId) && parseFloat(t.last) >= MIN_PRICE)
+    .filter(t => t.instId.endsWith("-USDT") && !EXCLUDE.has(t.instId) && parseFloat(t.last) >= MIN_PRICE && swapSet.has(toSymbol(t.instId)))
     .sort((a, b) => parseFloat(b.volCcy24h) - parseFloat(a.volCcy24h))
     .slice(0, SCAN_LIMIT)
     .map(t => toSymbol(t.instId));
