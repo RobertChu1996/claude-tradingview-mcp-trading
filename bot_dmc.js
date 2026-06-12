@@ -157,6 +157,17 @@ function swingHighOf(candles, lb) {
   return Math.max(...candles.slice(-lb-1,-1).map(c=>c.high));
 }
 
+// ─── BTC 趨勢方向（用於過濾逆勢信號）────────────────────────────────────────
+function btcTrendDir(candles) {
+  if (candles.length < SMA_PERIOD + SMA_PREV_OFFSET) return 0;
+  const closes  = candles.map(c => c.close);
+  const smaNow  = smaOf(closes, SMA_PERIOD);
+  const smaPrev = smaOf(closes.slice(0, -SMA_PREV_OFFSET), SMA_PERIOD);
+  if (smaNow > smaPrev * 1.001) return  1;  // 上漲
+  if (smaNow < smaPrev * 0.999) return -1;  // 下跌
+  return 0;                                  // 橫盤（允許雙向）
+}
+
 // ─── 進場信號 ─────────────────────────────────────────────────────────────────
 function checkSignal(candles) {
   if (candles.length < SMA_PERIOD + SMA_PREV_OFFSET + 10) return null;
@@ -426,6 +437,16 @@ async function run() {
   const SYMBOLS = loadSymbols();
   log(`[DMC] 掃描 ${SYMBOLS.length} 幣種... 今日損失 $${todayLoss.toFixed(2)}/$${dailyLossLimit.toFixed(2)}`);
 
+  // 取得 BTC 趨勢方向（一次性，供所有幣種過濾使用）
+  let btcTrend = 0;
+  try {
+    const btcRaw = await fetchCandles4H("BTCUSDT", SMA_PERIOD + SMA_PREV_OFFSET + 10);
+    btcTrend = btcTrendDir(completed4H(btcRaw));
+    log(`[DMC] BTC 趨勢: ${btcTrend === 1 ? "上漲↑（只做多）" : btcTrend === -1 ? "下跌↓（只做空）" : "橫盤→（雙向）"}`);
+  } catch(e) {
+    log(`⚠️ BTC 趨勢取得失敗，跳過過濾: ${e.message}`);
+  }
+
   const cooldownMs = COOLDOWN_BARS * 4 * 3600 * 1000;
 
   for (const symbol of SYMBOLS) {
@@ -441,6 +462,16 @@ async function run() {
       const c   = completed4H(raw);
       const sig = checkSignal(c);
       if (!sig) continue;
+
+      // BTC 趨勢過濾：上漲時不做空，下跌時不做多
+      if (btcTrend === 1 && sig.side === "short") {
+        log(`[DMC] 跳過 ${symbol}(short)：BTC 上漲趨勢`);
+        continue;
+      }
+      if (btcTrend === -1 && sig.side === "long") {
+        log(`[DMC] 跳過 ${symbol}(long)：BTC 下跌趨勢`);
+        continue;
+      }
 
       log(`[DMC] 信號 ${symbol}(${sig.side}) | SL $${sig.sl.toFixed(4)} | TP $${sig.tp.toFixed(4)} | SL% ${(sig.slPct*100).toFixed(2)}%`);
 
