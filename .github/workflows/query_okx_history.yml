@@ -10,22 +10,19 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-
       - run: npm ci
-
-      - name: Query OKX position history & balance
+      - name: Query OKX balance and position history
         env:
           OKX_API_KEY:    ${{ secrets.OKX_API_KEY }}
           OKX_SECRET_KEY: ${{ secrets.OKX_SECRET_KEY }}
           OKX_PASSPHRASE: ${{ secrets.OKX_PASSPHRASE }}
         run: |
           node -e "
-          import('dotenv/config').then(async () => {
+          (async () => {
             const crypto = await import('crypto');
             const cfg = {
               apiKey: process.env.OKX_API_KEY,
@@ -51,7 +48,6 @@ jobs:
               return res.json();
             }
 
-            // 帳戶餘額
             const bal = await okxGet('/api/v5/account/balance');
             const usdt = bal.data?.[0]?.details?.find(d=>d.ccy==='USDT');
             console.log('=== 帳戶餘額 ===');
@@ -62,7 +58,6 @@ jobs:
               console.log('ERROR:', JSON.stringify(bal));
             }
 
-            // 持倉歷史（最近 20 筆）
             const hist = await okxGet('/api/v5/account/positions-history?instType=SWAP&limit=20');
             console.log('\n=== 平倉紀錄（最近 20 筆）===');
             if (hist.data?.length) {
@@ -71,31 +66,28 @@ jobs:
                 const pnl = parseFloat(p.realizedPnl);
                 total += pnl;
                 const dt = new Date(+p.uTime).toISOString().slice(0,16);
-                const fee = parseFloat(p.fee||0)+parseFloat(p.fundingFee||0);
                 console.log(dt + '  ' + p.instId.padEnd(22) + p.direction.padEnd(7)
-                  + ' 進場=' + p.openAvgPx.padEnd(12)
-                  + ' 出場=' + (p.closeAvgPx||'N/A').padEnd(12)
-                  + ' PnL=\$' + pnl.toFixed(4)
-                  + ' 手續費=\$' + fee.toFixed(4));
+                  + ' 進場=' + String(p.openAvgPx).padEnd(12)
+                  + ' 出場=' + String(p.closeAvgPx||'N/A').padEnd(12)
+                  + ' PnL=\$' + pnl.toFixed(4));
               }
               console.log('\n合計 PnL: \$' + total.toFixed(4));
             } else {
               console.log('無紀錄或錯誤:', JSON.stringify(hist).slice(0,300));
             }
 
-            // 最近成交明細
             const fills = await okxGet('/api/v5/trade/fills-history?instType=SWAP&limit=20');
             console.log('\n=== 成交明細（最近 20 筆）===');
             if (fills.data?.length) {
               for (const f of fills.data) {
                 const dt = new Date(+f.ts).toISOString().slice(0,16);
                 console.log(dt + '  ' + f.instId.padEnd(22) + f.side.padEnd(5)
-                  + ' px=' + f.fillPx.padEnd(14)
-                  + ' qty=' + f.fillSz.padEnd(10)
+                  + ' px=' + String(f.fillPx).padEnd(14)
+                  + ' qty=' + String(f.fillSz).padEnd(10)
                   + ' fee=' + f.fee);
               }
             } else {
               console.log('無紀錄:', JSON.stringify(fills).slice(0,200));
             }
-          });
+          })();
           "
