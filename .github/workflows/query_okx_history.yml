@@ -1,0 +1,101 @@
+name: Query OKX History (one-off)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  query:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Query OKX position history & balance
+        env:
+          OKX_API_KEY:    ${{ secrets.OKX_API_KEY }}
+          OKX_SECRET_KEY: ${{ secrets.OKX_SECRET_KEY }}
+          OKX_PASSPHRASE: ${{ secrets.OKX_PASSPHRASE }}
+        run: |
+          node -e "
+          import('dotenv/config').then(async () => {
+            const crypto = await import('crypto');
+            const cfg = {
+              apiKey: process.env.OKX_API_KEY,
+              secretKey: process.env.OKX_SECRET_KEY,
+              passphrase: process.env.OKX_PASSPHRASE,
+              baseUrl: 'https://www.okx.com',
+            };
+            const stRes = await fetch('https://www.okx.com/api/v5/public/time');
+            const st = await stRes.json();
+            const offset = st.data?.[0]?.ts ? parseInt(st.data[0].ts) - Date.now() : 0;
+
+            function sign(ts, method, path) {
+              return crypto.default.createHmac('sha256', cfg.secretKey).update(ts+method+path).digest('base64');
+            }
+            async function okxGet(path) {
+              const ts = new Date(Date.now()+offset).toISOString();
+              const res = await fetch(cfg.baseUrl+path, { headers: {
+                'OK-ACCESS-KEY': cfg.apiKey,
+                'OK-ACCESS-SIGN': sign(ts,'GET',path),
+                'OK-ACCESS-TIMESTAMP': ts,
+                'OK-ACCESS-PASSPHRASE': cfg.passphrase,
+              }});
+              return res.json();
+            }
+
+            // 帳戶餘額
+            const bal = await okxGet('/api/v5/account/balance');
+            const usdt = bal.data?.[0]?.details?.find(d=>d.ccy==='USDT');
+            console.log('=== 帳戶餘額 ===');
+            if (usdt) {
+              console.log('USDT 總資產: \$' + parseFloat(usdt.eq).toFixed(4));
+              console.log('USDT 可用:   \$' + parseFloat(usdt.availBal).toFixed(4));
+            } else {
+              console.log('ERROR:', JSON.stringify(bal));
+            }
+
+            // 持倉歷史（最近 20 筆）
+            const hist = await okxGet('/api/v5/account/positions-history?instType=SWAP&limit=20');
+            console.log('\n=== 平倉紀錄（最近 20 筆）===');
+            if (hist.data?.length) {
+              let total = 0;
+              for (const p of hist.data) {
+                const pnl = parseFloat(p.realizedPnl);
+                total += pnl;
+                const dt = new Date(+p.uTime).toISOString().slice(0,16);
+                const fee = parseFloat(p.fee||0)+parseFloat(p.fundingFee||0);
+                console.log(dt + '  ' + p.instId.padEnd(22) + p.direction.padEnd(7)
+                  + ' 進場=' + p.openAvgPx.padEnd(12)
+                  + ' 出場=' + (p.closeAvgPx||'N/A').padEnd(12)
+                  + ' PnL=\$' + pnl.toFixed(4)
+                  + ' 手續費=\$' + fee.toFixed(4));
+              }
+              console.log('\n合計 PnL: \$' + total.toFixed(4));
+            } else {
+              console.log('無紀錄或錯誤:', JSON.stringify(hist).slice(0,300));
+            }
+
+            // 最近成交明細
+            const fills = await okxGet('/api/v5/trade/fills-history?instType=SWAP&limit=20');
+            console.log('\n=== 成交明細（最近 20 筆）===');
+            if (fills.data?.length) {
+              for (const f of fills.data) {
+                const dt = new Date(+f.ts).toISOString().slice(0,16);
+                console.log(dt + '  ' + f.instId.padEnd(22) + f.side.padEnd(5)
+                  + ' px=' + f.fillPx.padEnd(14)
+                  + ' qty=' + f.fillSz.padEnd(10)
+                  + ' fee=' + f.fee);
+              }
+            } else {
+              console.log('無紀錄:', JSON.stringify(fills).slice(0,200));
+            }
+          });
+          "
