@@ -1,14 +1,41 @@
 /**
  * 產生 report.json（給 GitHub Actions 用）
- * 讀取本地 positions_dn.json + trades_dn.csv，抓 Binance 即時價，輸出 report.json
+ * 直接查 OKX API 取得餘額與持倉，讀取 trades_dmc.csv 計算歷史統計
  */
 
 import { existsSync, readFileSync, writeFileSync } from "fs";
+import crypto from "crypto";
 
 const D = process.env.DATA_DIR || ".";
-const STRATEGIES = [
-  { key: "dmc", posFile: "positions_dmc.json", csvFile: "trades_dmc.csv", label: "B: DMC/SMA25 [4H] 起:2026-05-29" },
-];
+const OKX_BASE = process.env.OKX_BASE_URL || "https://www.okx.com";
+const DMC_LABEL = "B: DMC/SMA25 [4H] 起:2026-05-29";
+
+// ─── OKX API ─────────────────────────────────────────────────────────────────
+let _serverTimeOffset = 0;
+async function initOkxTime() {
+  try {
+    const r = await fetch(`${OKX_BASE}/api/v5/public/time`);
+    const d = await r.json();
+    if (d.data?.[0]?.ts) _serverTimeOffset = parseInt(d.data[0].ts) - Date.now();
+  } catch {}
+}
+
+function okxSign(ts, method, path, body = "") {
+  return crypto.createHmac("sha256", process.env.OKX_SECRET_KEY)
+    .update(`${ts}${method}${path}${body}`).digest("base64");
+}
+async function okxGet(path) {
+  const ts  = new Date(Date.now() + _serverTimeOffset).toISOString();
+  const res = await fetch(`${OKX_BASE}${path}`, {
+    headers: {
+      "OK-ACCESS-KEY":       process.env.OKX_API_KEY,
+      "OK-ACCESS-SIGN":      okxSign(ts, "GET", path),
+      "OK-ACCESS-TIMESTAMP": ts,
+      "OK-ACCESS-PASSPHRASE":process.env.OKX_PASSPHRASE,
+    },
+  });
+  return res.json();
+}
 
 function toOkxInstId(sym) {
   for (const q of ["USDT", "USDC", "BTC", "ETH"]) {
@@ -17,57 +44,51 @@ function toOkxInstId(sym) {
   return sym;
 }
 
-async function fetchPrices(symbols) {
-  if (!symbols.length) return {};
-  const out = {};
-  await Promise.all(symbols.map(async (sym) => {
-    const instId = toOkxInstId(sym);
-    try {
-      const r = await fetch(`https://www.okx.com/api/v5/market/ticker?instId=${instId}`);
-      if (r.ok) {
-        const data = await r.json();
-        if (data.data?.[0]?.last) out[sym] = parseFloat(data.data[0].last);
-        else console.error(`fetchPrices ${sym}: no data`, JSON.stringify(data).slice(0, 100));
-      } else {
-        console.error(`fetchPrices ${sym}: HTTP ${r.status}`);
-      }
-    } catch(e) { console.error(`fetchPrices ${sym}:`, e.message); }
-  }));
-  return out;
+// ─── 從 OKX 取得即時持倉 ──────────────────────────────────────────────────────
+async function fetchOkxPositions() {
+  const res = await okxGet("/api/v5/account/positions?instType=SWAP");
+  if (!res.data) return [];
+  return res.data
+    .filter(p => parseFloat(p.pos) !== 0)
+    .map(p => {
+      const instId  = p.instId.replace("-SWAP", "");
+      const sym     = instId.replace(/-/g, "");
+      const side    = p.posSide;
+      const entry   = parseFloat(p.avgPx);
+      const curPx   = parseFloat(p.markPx || p.last || 0);
+      const upl     = parseFloat(p.upl);
+      const qty     = Math.abs(parseFloat(p.pos)) * parseFloat(p.ctVal || 1);
+      const slDist  = (curPx && p.liqPx) ? null : null;  // liquidation px only; SL not in this endpoint
+      const pct     = entry ? (side === "short" ? (entry - curPx) / entry : (curPx - entry) / entry) * 100 : null;
+      return {
+        symbol:        sym,
+        side,
+        entry,
+        currentPrice:  curPx,
+        sl:            null,
+        tp:            null,
+        slDistPct:     null,
+        tpDistPct:     null,
+        unrealizedPct: pct  !== null ? parseFloat(pct.toFixed(2))  : null,
+        unrealizedPnl: parseFloat(upl.toFixed(2)),
+        since:         p.cTime ? new Date(+p.cTime).toISOString().slice(0, 16) : undefined,
+      };
+    });
 }
 
-function buildPositions(pos, prices) {
-  return (pos.open || []).map(p => {
-    const curPx  = prices[p.symbol];
-    const entry  = p.entryPrice;
-    const sl     = p.currentSL ?? p.stopLoss ?? null;
-    const tp     = p.tp ?? null;
-    const sign   = p.side === "short" ? -1 : 1;
-    const pct    = curPx && entry ? sign * (curPx - entry) / entry * 100 : null;
-    const qty    = p.quantity ?? null;
-    const uPnl   = (pct !== null && qty) ? sign * (curPx - entry) * qty : null;
-    const slDist = (curPx && sl) ? (p.side === "short" ? (sl - curPx) / curPx * 100 : (curPx - sl) / curPx * 100) : null;
-    const tpDist = (curPx && tp) ? (p.side === "short" ? (curPx - tp) / curPx * 100 : (tp - curPx) / curPx * 100) : null;
-    const tpPnl  = (entry && tp && qty) ? Math.abs(entry - tp) * qty : null;
-    const slPnl  = (entry && sl && qty) ? -Math.abs(entry - sl) * qty : null;
-    return {
-      symbol:        p.symbol,
-      side:          p.side,
-      entry,
-      currentPrice:  curPx ?? null,
-      sl,
-      tp,
-      slDistPct:     slDist !== null ? parseFloat(slDist.toFixed(2)) : null,
-      tpDistPct:     tpDist !== null ? parseFloat(tpDist.toFixed(2)) : null,
-      unrealizedPct: pct    !== null ? parseFloat(pct.toFixed(2))    : null,
-      unrealizedPnl: uPnl   !== null ? parseFloat(uPnl.toFixed(2))   : null,
-      tpPnl:         tpPnl  !== null ? parseFloat(tpPnl.toFixed(2))  : null,
-      slPnl:         slPnl  !== null ? parseFloat(slPnl.toFixed(2))  : null,
-      since:         p.entryTime ? new Date(p.entryTime).toISOString().slice(0, 16) : undefined,
-    };
-  });
+// ─── 從 OKX 取得 USDT 餘額 ────────────────────────────────────────────────────
+async function fetchOkxBalance() {
+  const res = await okxGet("/api/v5/account/balance");
+  const usdt = res.data?.[0]?.details?.find(d => d.ccy === "USDT");
+  if (!usdt) return null;
+  return {
+    totalEq:   parseFloat(parseFloat(usdt.eq).toFixed(4)),
+    availBal:  parseFloat(parseFloat(usdt.availBal).toFixed(4)),
+    frozenBal: parseFloat(parseFloat(usdt.frozenBal || 0).toFixed(4)),
+  };
 }
 
+// ─── 讀 CSV 歷史成交 ──────────────────────────────────────────────────────────
 function readExits(csvFile) {
   if (!existsSync(csvFile)) return [];
   return readFileSync(csvFile, "utf8")
@@ -92,60 +113,62 @@ function calcStats(rows) {
   };
 }
 
+// ─── Main ─────────────────────────────────────────────────────────────────────
 async function main() {
   const today = new Date().toISOString().slice(0, 10);
+  const hasOkxCreds = process.env.OKX_API_KEY && process.env.OKX_SECRET_KEY && process.env.OKX_PASSPHRASE;
 
-  // 收集所有策略的開倉幣種 → 一次抓價格
-  const allSymbols = new Set();
-  const stratData  = {};
-  for (const s of STRATEGIES) {
-    const pos = existsSync(`${D}/${s.posFile}`)
-      ? JSON.parse(readFileSync(`${D}/${s.posFile}`, "utf8"))
-      : { open: [], closed: [], cooldown: {} };
-    stratData[s.key] = { pos };
-    (pos.open || []).forEach(p => p.symbol && allSymbols.add(p.symbol));
+  await initOkxTime();
+
+  // Fetch OKX data if credentials available
+  let openPositions = [];
+  let balance = null;
+  if (hasOkxCreds) {
+    try {
+      [openPositions, balance] = await Promise.all([fetchOkxPositions(), fetchOkxBalance()]);
+      console.log(`[report] OKX 持倉: ${openPositions.length} 筆 | USDT 餘額: $${balance?.totalEq ?? "N/A"}`);
+    } catch(e) {
+      console.error("[report] OKX 查詢失敗:", e.message);
+    }
+  } else {
+    console.warn("[report] 無 OKX API 憑證，跳過持倉查詢");
   }
 
-  const prices = await fetchPrices([...allSymbols]);
+  const totalUnrealized = openPositions.reduce((s, p) => s + (p.unrealizedPnl ?? 0), 0);
 
-  let totalUnrealizedAll = 0;
-  const todayExitsAll    = [];
-  const stratReports     = {};
+  const exits       = readExits(`${D}/trades_dmc.csv`);
+  const todayExits  = exits.filter(r => r.date === today);
 
-  for (const s of STRATEGIES) {
-    const { pos } = stratData[s.key];
-    const openPositions = buildPositions(pos, prices);
-    const totalUnrealized = openPositions.reduce((sum, p) => sum + (p.unrealizedPnl ?? 0), 0);
-    totalUnrealizedAll += totalUnrealized;
-
-    const exits     = readExits(`${D}/${s.csvFile}`);
-    const todayExits = exits.filter(r => r.date === today);
-    todayExitsAll.push(...todayExits);
-
-    stratReports[s.key] = {
-      label:             s.label,
-      overall:           calcStats(exits),
-      today:             calcStats(todayExits),
-      openPositions,
-      totalUnrealizedPnl: parseFloat(totalUnrealized.toFixed(2)),
-    };
-
-    console.log(`[report][${s.key}] 開倉:${openPositions.length} | 未實現:$${totalUnrealized.toFixed(2)}`);
-  }
+  console.log(`[report][dmc] 開倉:${openPositions.length} | 未實現:$${totalUnrealized.toFixed(2)}`);
 
   const report = {
     reportDate:  today,
     generatedAt: new Date().toISOString(),
+    balance,
     todayCombined: {
-      ...calcStats(todayExitsAll),
-      totalUnrealizedPnl: parseFloat(totalUnrealizedAll.toFixed(2)),
+      ...calcStats(todayExits),
+      totalUnrealizedPnl: parseFloat(totalUnrealized.toFixed(2)),
     },
-    strategies: stratReports,
-    strategy: stratReports["dmc"],
+    strategies: {
+      dmc: {
+        label:              DMC_LABEL,
+        overall:            calcStats(exits),
+        today:              calcStats(todayExits),
+        openPositions,
+        totalUnrealizedPnl: parseFloat(totalUnrealized.toFixed(2)),
+      },
+    },
+    strategy: {
+      label:              DMC_LABEL,
+      overall:            calcStats(exits),
+      today:              calcStats(todayExits),
+      openPositions,
+      totalUnrealizedPnl: parseFloat(totalUnrealized.toFixed(2)),
+    },
   };
 
   writeFileSync(`${D}/report.json`, JSON.stringify(report, null, 2));
-  console.log(`[report] ${today} | 總未實現:$${totalUnrealizedAll.toFixed(2)}`);
+  console.log(`[report] ${today} | 總未實現:$${totalUnrealized.toFixed(2)}`);
 }
 
 main().catch(e => { console.error("Report error:", e.message); process.exit(1); });

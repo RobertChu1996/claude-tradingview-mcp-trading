@@ -345,15 +345,63 @@ async function updateOCO(pos, newSL) {
 }
 
 async function checkAlgoStatus(algoId, instId) {
-  const res = await okxGet(`/api/v5/trade/order-algo?ordType=oco&algoId=${algoId}&instId=${instId}`);
+  const res   = await okxGet(`/api/v5/trade/order-algo?ordType=oco&algoId=${algoId}&instId=${instId}`);
   const state = res.data?.[0]?.state;
-  if (state) return state;
 
-  // OCO 已執行後 API 不再回傳資料，改查實際持倉確認是否已平
+  // If algo is clearly still active, no need to check positions
+  if (state === "live" || state === "effective" || state === "partially_effective") return state;
+
+  // For all other cases (filled/cancelled/stopped/null), verify via actual OKX position.
+  // This prevents false-closes when a stale algoId (from trailing-SL updates) returns "cancelled"
+  // while the position is still genuinely open.
   const posRes = await okxGet(`/api/v5/account/positions?instId=${instId}`);
   const hasPos = posRes.data?.some(p => parseFloat(p.pos) !== 0);
-  if (!hasPos) return "filled"; // OKX 無持倉 → OCO 已觸發
-  return undefined;
+  if (hasPos) return undefined;   // position still exists on OKX → don't close in state
+  return "filled";                // no OKX position → truly closed
+}
+
+// ─── 啟動對帳：比對 OKX 實際持倉與 state，修復不一致 ───────────────────────
+async function reconcileWithOKX(positions) {
+  if (CONFIG.paperTrading) return;  // 模擬盤不需要對帳
+  try {
+    const posRes = await okxGet("/api/v5/account/positions?instType=SWAP");
+    const okxMap = {};
+    for (const p of posRes.data || []) {
+      if (parseFloat(p.pos) !== 0) okxMap[p.instId] = p;
+    }
+
+    // Fetch active algo orders so we can refresh stale algoIds
+    const algoRes = await okxGet("/api/v5/trade/orders-algo-pending?ordType=oco&instType=SWAP");
+    const algoMap = {};
+    for (const a of algoRes.data || []) algoMap[a.instId] = a.algoId;
+
+    let changed = false;
+    const now = Date.now();
+
+    for (const pos of [...positions.open]) {
+      const instId = toOkxInstId(pos.symbol) + "-SWAP";
+      if (okxMap[instId]) {
+        // Position exists on OKX — refresh algoId if a newer OCO is active
+        if (algoMap[instId] && algoMap[instId] !== pos.algoId) {
+          log(`[reconcile] ${pos.symbol} 更新 algoId ${pos.algoId} → ${algoMap[instId]}`);
+          pos.algoId = algoMap[instId];
+          changed = true;
+        }
+      } else {
+        // No OKX position — confirm closed and move to closed array
+        log(`[reconcile] ⚠️ ${pos.symbol} 不在 OKX 持倉，標記平倉`);
+        positions.closed.push({ ...pos, exitTime: now, exitState: "reconcile", pnl: null });
+        positions.cooldown[pos.symbol] = now;
+        positions.open = positions.open.filter(p => p !== pos);
+        changed = true;
+      }
+    }
+
+    if (changed) log("[reconcile] state 已對帳更新");
+    else         log("[reconcile] state 與 OKX 一致");
+  } catch(e) {
+    log(`⚠️ 對帳失敗: ${e.message}`);
+  }
 }
 
 // ─── 主流程 ───────────────────────────────────────────────────────────────────
@@ -365,6 +413,9 @@ async function run() {
 
   const portfolioValue = await fetchPortfolioValue();
   log(`[DMC] 開始 | 模式:${CONFIG.paperTrading?"PAPER":"LIVE"} | 開倉:${positions.open.length}/${CONFIG.maxOpen} | 資產:$${portfolioValue.toFixed(2)}`);
+
+  // 啟動對帳：確保 state 與 OKX 實際持倉一致
+  await reconcileWithOKX(positions);
 
   if (!CONFIG.paperTrading) {
     const paperOpen = positions.open.filter(p=>p.orderId?.startsWith("DMC-PAPER-"));
