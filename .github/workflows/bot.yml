@@ -1,0 +1,97 @@
+name: DMC Trading Bot
+
+on:
+  schedule:
+    - cron: '0 0 * * 1'            # 每週一 00:00 UTC 更新幣種清單（每15分鐘由外部 cron-job.org 觸發）
+  workflow_dispatch:                  # 允許手動觸發
+
+permissions:
+  contents: write
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Restore state from state branch
+        run: |
+          git fetch origin state --depth=1 2>/dev/null || echo "No state branch yet, starting fresh"
+          git show origin/state:positions_dmc.json > positions_dmc.json 2>/dev/null || echo '{"open":[],"closed":[],"cooldown":{}}' > positions_dmc.json
+          git show origin/state:trades_dmc.csv     > trades_dmc.csv     2>/dev/null || true
+          git show origin/state:safety-check-log-dmc.json > safety-check-log-dmc.json 2>/dev/null || true
+          git show origin/state:report.json        > report.json        2>/dev/null || true
+          git show origin/state:watchlist_dmc.json > watchlist_dmc.json 2>/dev/null || true
+          echo "State restored"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Update DMC watchlist (weekly on Monday)
+        if: github.event.schedule == '0 0 * * 1' || github.event_name == 'workflow_dispatch'
+        env:
+          DATA_DIR: "."
+        run: node optimize_watchlist_dmc.js
+        continue-on-error: true
+
+      - name: Run DMC bot (Strategy B)
+        env:
+          DATA_DIR: "."
+          OKX_API_KEY:          ${{ secrets.OKX_API_KEY }}
+          OKX_SECRET_KEY:       ${{ secrets.OKX_SECRET_KEY }}
+          OKX_PASSPHRASE:       ${{ secrets.OKX_PASSPHRASE }}
+          DMC_PAPER_TRADING:    ${{ vars.DMC_PAPER_TRADING }}
+          PORTFOLIO_VALUE_USD:  ${{ vars.PORTFOLIO_VALUE_USD }}
+          MAX_TRADE_SIZE_USD:   ${{ vars.MAX_TRADE_SIZE_USD }}
+          RISK_PCT:             ${{ vars.RISK_PCT }}
+          DMC_MAX_OPEN:         ${{ vars.DMC_MAX_OPEN }}
+          DAILY_LOSS_LIMIT_PCT: ${{ vars.DAILY_LOSS_LIMIT_PCT }}
+        run: node bot_dmc.js
+        continue-on-error: true
+
+      - name: Generate report
+        env:
+          DATA_DIR: "."
+          OKX_API_KEY:    ${{ secrets.OKX_API_KEY }}
+          OKX_SECRET_KEY: ${{ secrets.OKX_SECRET_KEY }}
+          OKX_PASSPHRASE: ${{ secrets.OKX_PASSPHRASE }}
+        run: node generate_report.js
+        continue-on-error: true
+
+      - name: Save state to state branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # 用 git 底層指令建立 state branch 的 commit，不切換工作目錄的 branch
+          git fetch origin state:refs/heads/state 2>/dev/null || true
+
+          git read-tree --empty
+          for f in positions_dmc.json trades_dmc.csv safety-check-log-dmc.json report.json watchlist_dmc.json; do
+            [ -f "$f" ] && git update-index --add "$f"
+          done
+
+          TREE=$(git write-tree)
+          PARENT=$(git rev-parse --verify refs/heads/state 2>/dev/null || echo "")
+          MSG="state: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+
+          if [ -n "$PARENT" ]; then
+            COMMIT=$(git commit-tree "$TREE" -p "$PARENT" -m "$MSG")
+          else
+            COMMIT=$(git commit-tree "$TREE" -m "$MSG")
+          fi
+
+          git push origin "$COMMIT:refs/heads/state"
+          echo "State saved: $MSG"

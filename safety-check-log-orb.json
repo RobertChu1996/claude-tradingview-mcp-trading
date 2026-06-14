@@ -1,0 +1,152 @@
+{
+  "trades": [
+    {
+      "timestamp": "2026-04-22T01:43:08.468Z",
+      "symbol": "BTCUSDT",
+      "timeframe": "15m",
+      "price": 76261.34,
+      "orb": {
+        "high": 76500,
+        "low": 76242.8
+      },
+      "conditions": [
+        {
+          "label": "收盤突破開盤區間",
+          "pass": false,
+          "detail": "收盤 76261.3400 在區間內 [76242.8000, 76500.0000]"
+        },
+        {
+          "label": "成交量放大 (>1.5x 均量)",
+          "pass": false,
+          "detail": "當根量 0.47x 均量"
+        },
+        {
+          "label": "ATR 波動夠大 (>0.8x 均值)",
+          "pass": true,
+          "detail": "ATR 206.814286 vs 均值 257.573036 (0.80x)"
+        },
+        {
+          "label": "突破幅度合理 (不超過 3x ATR)",
+          "pass": true,
+          "detail": "避免追漲殺跌 — 突破後還沒走太遠"
+        }
+      ],
+      "allPass": false,
+      "tradeSize": 388,
+      "orderPlaced": false,
+      "orderId": null,
+      "paperTrading": true
+    },
+    {
+      "timestamp": "2026-04-22T01:43:08.526Z",
+      "symbol": "ETHUSDT",
+      "timeframe": "15m",
+      "price": 2321.71,
+      "orb": {
+        "high": 2330.82,
+        "low": 2322.72
+      },
+      "conditions": [
+        {
+          "label": "收盤突破開盤區間",
+          "pass": true,
+          "detail": "收盤 2321.7100 < 區間下軌 2322.7200"
+        },
+        {
+          "label": "成交量放大 (>1.5x 均量)",
+          "pass": false,
+          "detail": "當根量 0.64x 均量"
+        },
+        {
+          "label": "ATR 波動夠大 (>0.8x 均值)",
+          "pass": false,
+          "detail": "ATR 7.879286 vs 均值 9.977500 (0.79x)"
+        },
+        {
+          "label": "突破幅度合理 (不超過 3x ATR)",
+          "pass": true,
+          "detail": "避免追漲殺跌 — 突破後還沒走太遠"
+        }
+      ],
+      "allPass": false,
+      "tradeSize": 388,
+      "orderPlaced": false,
+      "orderId": null,
+      "paperTrading": true
+    },
+    {
+      "timestamp": "2026-04-22T01:43:08.595Z",
+      "symbol": "SOLUSDT",
+      "timeframe": "15m",
+      "price": 86.31,
+      "orb": {
+        "high": 86.46,
+        "low": 86.01
+      },
+      "conditions": [
+        {
+          "label": "收盤突破開盤區間",
+          "pass": false,
+          "detail": "收盤 86.3100 在區間內 [86.0100, 86.4600]"
+        },
+        {
+          "label": "成交量放大 (>1.5x 均量)",
+          "pass": false,
+          "detail": "當根量 0.38x 均量"
+        },
+        {
+          "label": "ATR 波動夠大 (>0.8x 均值)",
+          "pass": false,
+          "detail": "ATR 0.312857 vs 均值 0.396250 (0.79x)"
+        },
+        {
+          "label": "突破幅度合理 (不超過 3x ATR)",
+          "pass": true,
+          "detail": "避免追漲殺跌 — 突破後還沒走太遠"
+        }
+      ],
+      "allPass": false,
+      "tradeSize": 388,
+      "orderPlaced": false,
+      "orderId": null,
+      "paperTrading": true
+    },
+    {
+      "timestamp": "2026-04-22T01:43:08.652Z",
+      "symbol": "XRPUSDT",
+      "timeframe": "15m",
+      "price": 1.4283,
+      "orb": {
+        "high": 1.4344,
+        "low": 1.4308
+      },
+      "conditions": [
+        {
+          "label": "收盤突破開盤區間",
+          "pass": true,
+          "detail": "收盤 1.4283 < 區間下軌 1.4308"
+        },
+        {
+          "label": "成交量放大 (>1.5x 均量)",
+          "pass": false,
+          "detail": "當根量 0.72x 均量"
+        },
+        {
+          "label": "ATR 波動夠大 (>0.8x 均值)",
+          "pass": false,
+          "detail": "ATR 0.003607 vs 均值 0.004884 (0.74x)"
+        },
+        {
+          "label": "突破幅度合理 (不超過 3x ATR)",
+          "pass": true,
+          "detail": "避免追漲殺跌 — 突破後還沒走太遠"
+        }
+      ],
+      "allPass": false,
+      "tradeSize": 388,
+      "orderPlaced": false,
+      "orderId": null,
+      "paperTrading": true
+    }
+  ]
+}

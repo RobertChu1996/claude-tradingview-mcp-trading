@@ -1,0 +1,71 @@
+{
+  "open": [
+    {
+      "symbol": "LTCUSDT",
+      "side": "long",
+      "entryPrice": 56.5,
+      "entryTime": "2026-04-24T17:48:04.133Z",
+      "tradeSize": 388,
+      "quantity": 6.867256637168142,
+      "stopLoss": 56.20294598489672,
+      "riskAmount": 5.82
+    }
+  ],
+  "closed": [
+    {
+      "symbol": "APTUSDT",
+      "side": "long",
+      "entryPrice": 0.938,
+      "entryTime": "2026-04-21T01:25:14.550Z",
+      "tradeSize": 10,
+      "quantity": 10.660980810234543,
+      "orderId": "PAPER-1776734714550",
+      "stopLoss": 0.935186,
+      "exitTime": "2026-04-24T17:25:32.105Z",
+      "exitReason": "OKX止損觸發",
+      "pnl": null
+    },
+    {
+      "symbol": "MEMEUSDT",
+      "side": "long",
+      "entryPrice": 0.000583,
+      "entryTime": "2026-04-21T01:25:15.315Z",
+      "tradeSize": 10,
+      "quantity": 17152.658662092625,
+      "orderId": "PAPER-1776734715315",
+      "stopLoss": 0.000581251,
+      "exitTime": "2026-04-24T17:25:32.105Z",
+      "exitReason": "OKX止損觸發",
+      "pnl": null
+    },
+    {
+      "symbol": "DEXEUSDT",
+      "side": "short",
+      "entryPrice": 14.298,
+      "entryTime": "2026-04-21T01:25:15.492Z",
+      "tradeSize": 10,
+      "quantity": 0.6993985172751433,
+      "orderId": "PAPER-1776734715492",
+      "stopLoss": 14.340893999999999,
+      "exitTime": "2026-04-24T17:25:32.105Z",
+      "exitReason": "OKX止損觸發",
+      "pnl": null
+    },
+    {
+      "symbol": "SUIUSDT",
+      "side": "long",
+      "entryPrice": 0.9507,
+      "entryTime": "2026-04-24T17:49:35.919Z",
+      "tradeSize": 388,
+      "quantity": 408.1203323866625,
+      "stopLoss": 0.9459785762601385,
+      "riskAmount": 7.76,
+      "exitPrice": 0.9522,
+      "exitTime": "2026-04-24T17:55:47.385Z",
+      "exitReason": "RSI(3) 穿越 50（動能出場）",
+      "pnl": 0.6121804985800169,
+      "win": true,
+      "paperTrading": false
+    }
+  ]
+}
