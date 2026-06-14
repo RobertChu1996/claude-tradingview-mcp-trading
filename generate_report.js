@@ -44,32 +44,47 @@ function toOkxInstId(sym) {
   return sym;
 }
 
-// ─── 從 OKX 取得即時持倉 ──────────────────────────────────────────────────────
+// ─── 從 OKX 取得即時持倉（含 SL/TP from active OCO）────────────────────────
 async function fetchOkxPositions() {
-  const res = await okxGet("/api/v5/account/positions?instType=SWAP");
-  if (!res.data) return [];
-  return res.data
+  const [posRes, algoRes] = await Promise.all([
+    okxGet("/api/v5/account/positions?instType=SWAP"),
+    okxGet("/api/v5/trade/orders-algo-pending?ordType=oco&instType=SWAP"),
+  ]);
+
+  // Build instId → active OCO map
+  const algoMap = {};
+  for (const a of algoRes.data || []) {
+    algoMap[a.instId] = {
+      sl: parseFloat(a.slTriggerPx) || null,
+      tp: parseFloat(a.tpTriggerPx) || null,
+    };
+  }
+
+  if (!posRes.data) return [];
+  return posRes.data
     .filter(p => parseFloat(p.pos) !== 0)
     .map(p => {
-      const instId  = p.instId.replace("-SWAP", "");
-      const sym     = instId.replace(/-/g, "");
-      const side    = p.posSide;
-      const entry   = parseFloat(p.avgPx);
-      const curPx   = parseFloat(p.markPx || p.last || 0);
-      const upl     = parseFloat(p.upl);
-      const qty     = Math.abs(parseFloat(p.pos)) * parseFloat(p.ctVal || 1);
-      const slDist  = (curPx && p.liqPx) ? null : null;  // liquidation px only; SL not in this endpoint
-      const pct     = entry ? (side === "short" ? (entry - curPx) / entry : (curPx - entry) / entry) * 100 : null;
+      const sym    = p.instId.replace("-SWAP", "").replace(/-/g, "");
+      const side   = p.posSide;
+      const entry  = parseFloat(p.avgPx);
+      const curPx  = parseFloat(p.markPx || p.last || 0);
+      const upl    = parseFloat(p.upl);
+      const oco    = algoMap[p.instId] ?? {};
+      const sl     = oco.sl ?? null;
+      const tp     = oco.tp ?? null;
+      const pct    = entry ? (side === "short" ? (entry - curPx) / entry : (curPx - entry) / entry) * 100 : null;
+      const slDist = (curPx && sl) ? (side === "short" ? (sl - curPx) / curPx * 100 : (curPx - sl) / curPx * 100) : null;
+      const tpDist = (curPx && tp) ? (side === "short" ? (curPx - tp) / curPx * 100 : (tp - curPx) / curPx * 100) : null;
       return {
         symbol:        sym,
         side,
         entry,
         currentPrice:  curPx,
-        sl:            null,
-        tp:            null,
-        slDistPct:     null,
-        tpDistPct:     null,
-        unrealizedPct: pct  !== null ? parseFloat(pct.toFixed(2))  : null,
+        sl,
+        tp,
+        slDistPct:     slDist !== null ? parseFloat(slDist.toFixed(2)) : null,
+        tpDistPct:     tpDist !== null ? parseFloat(tpDist.toFixed(2)) : null,
+        unrealizedPct: pct    !== null ? parseFloat(pct.toFixed(2))    : null,
         unrealizedPnl: parseFloat(upl.toFixed(2)),
         since:         p.cTime ? new Date(+p.cTime).toISOString().slice(0, 16) : undefined,
       };

@@ -362,33 +362,43 @@ async function checkAlgoStatus(algoId, instId) {
 
 // ─── 啟動對帳：比對 OKX 實際持倉與 state，修復不一致 ───────────────────────
 async function reconcileWithOKX(positions) {
-  if (CONFIG.paperTrading) return;  // 模擬盤不需要對帳
+  if (CONFIG.paperTrading) return;
   try {
-    const posRes = await okxGet("/api/v5/account/positions?instType=SWAP");
-    const okxMap = {};
-    for (const p of posRes.data || []) {
-      if (parseFloat(p.pos) !== 0) okxMap[p.instId] = p;
-    }
+    const [posRes, algoRes, specAllRes] = await Promise.all([
+      okxGet("/api/v5/account/positions?instType=SWAP"),
+      okxGet("/api/v5/trade/orders-algo-pending?ordType=oco&instType=SWAP"),
+      okxGet("/api/v5/public/instruments?instType=SWAP"),
+    ]);
 
-    // Fetch active algo orders so we can refresh stale algoIds
-    const algoRes = await okxGet("/api/v5/trade/orders-algo-pending?ordType=oco&instType=SWAP");
+    // instId → OKX position
+    const okxMap = {};
+    for (const p of posRes.data || [])
+      if (parseFloat(p.pos) !== 0) okxMap[p.instId] = p;
+
+    // instId → active OCO {algoId, sl, tp}
     const algoMap = {};
-    for (const a of algoRes.data || []) algoMap[a.instId] = a.algoId;
+    for (const a of algoRes.data || [])
+      algoMap[a.instId] = { algoId: a.algoId, sl: parseFloat(a.slTriggerPx), tp: parseFloat(a.tpTriggerPx) };
+
+    // instId → contract spec {ctVal}
+    const specMap = {};
+    for (const s of specAllRes.data || [])
+      specMap[s.instId] = { ctVal: parseFloat(s.ctVal) };
 
     let changed = false;
     const now = Date.now();
 
+    // Direction 1: state.open position missing from OKX → mark closed
     for (const pos of [...positions.open]) {
       const instId = toOkxInstId(pos.symbol) + "-SWAP";
       if (okxMap[instId]) {
-        // Position exists on OKX — refresh algoId if a newer OCO is active
-        if (algoMap[instId] && algoMap[instId] !== pos.algoId) {
-          log(`[reconcile] ${pos.symbol} 更新 algoId ${pos.algoId} → ${algoMap[instId]}`);
-          pos.algoId = algoMap[instId];
+        // Refresh stale algoId if a newer OCO is active for this position
+        if (algoMap[instId] && algoMap[instId].algoId !== pos.algoId) {
+          log(`[reconcile] ${pos.symbol} 更新 algoId ${pos.algoId} → ${algoMap[instId].algoId}`);
+          pos.algoId = algoMap[instId].algoId;
           changed = true;
         }
       } else {
-        // No OKX position — confirm closed and move to closed array
         log(`[reconcile] ⚠️ ${pos.symbol} 不在 OKX 持倉，標記平倉`);
         positions.closed.push({ ...pos, exitTime: now, exitState: "reconcile", pnl: null });
         positions.cooldown[pos.symbol] = now;
@@ -397,8 +407,35 @@ async function reconcileWithOKX(positions) {
       }
     }
 
+    // Direction 2: OKX position not in state.open → restore from OKX data
+    const stateSymbols = new Set(positions.open.map(p => toOkxInstId(p.symbol) + "-SWAP"));
+    for (const [instId, okxPos] of Object.entries(okxMap)) {
+      if (stateSymbols.has(instId)) continue;
+      const sym     = instId.replace("-SWAP", "").replace(/-/g, "");
+      const side    = okxPos.posSide;
+      const entry   = parseFloat(okxPos.avgPx);
+      const ctVal   = specMap[instId]?.ctVal ?? 1;
+      const qty     = Math.abs(parseFloat(okxPos.pos)) * ctVal;
+      const oco     = algoMap[instId];
+      const restoredPos = {
+        symbol:    sym,
+        side,
+        entryPrice: entry,
+        initialSL:  oco?.sl ?? null,
+        currentSL:  oco?.sl ?? null,
+        tp:         oco?.tp ?? null,
+        quantity:   qty,
+        entryTime:  okxPos.cTime ? parseInt(okxPos.cTime) : now,
+        orderId:    okxPos.tradeId ?? `RECONCILE-${now}`,
+        algoId:     oco?.algoId ?? null,
+      };
+      log(`[reconcile] ⚠️ ${sym}(${side}) 在 OKX 但不在 state，自動補回 entry=$${entry}`);
+      positions.open.push(restoredPos);
+      changed = true;
+    }
+
     if (changed) log("[reconcile] state 已對帳更新");
-    else         log("[reconcile] state 與 OKX 一致");
+    else         log("[reconcile] state 與 OKX 一致，無需修正");
   } catch(e) {
     log(`⚠️ 對帳失敗: ${e.message}`);
   }
