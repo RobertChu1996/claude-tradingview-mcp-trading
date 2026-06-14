@@ -381,6 +381,24 @@ async function updateOCO(pos, newSL) {
   throw new Error(`OCO更新失敗，已緊急平倉 ${pos.symbol}`);
 }
 
+async function fetchClosedPnl(instId, afterTs) {
+  // Query positions-history for the most recent close of this instId
+  const limit = 5;
+  const res = await okxGet(
+    `/api/v5/account/positions-history?instType=SWAP&instId=${instId}&limit=${limit}`
+  );
+  const rec = (res.data || [])
+    .filter(p => !afterTs || parseInt(p.uTime) >= afterTs)
+    .sort((a, b) => parseInt(b.uTime) - parseInt(a.uTime))[0];
+  if (!rec) return null;
+  return {
+    exitPrice: parseFloat(rec.closeAvgPx) || null,
+    pnl:       parseFloat(rec.realizedPnl),
+    exitTime:  parseInt(rec.uTime),
+    reason:    parseFloat(rec.realizedPnl) >= 0 ? "止盈" : "止損",
+  };
+}
+
 async function checkAlgoStatus(algoId, instId) {
   const res   = await okxGet(`/api/v5/trade/order-algo?ordType=oco&algoId=${algoId}&instId=${instId}`);
   const state = res.data?.[0]?.state;
@@ -519,11 +537,24 @@ async function run() {
         const instId = toOkxInstId(pos.symbol) + "-SWAP";
         const state  = await checkAlgoStatus(pos.algoId, instId);
         if (state==="filled"||state==="cancelled"||state==="stopped") {
-          log(`[DMC] 出場確認 ${pos.symbol} state=${state}`);
-          appendCsv(pos, null, null, state);
-          positions.closed.push({ ...pos, exitTime:now, exitState:state });
-          positions.cooldown[pos.symbol] = now;
-          positions.open = positions.open.filter(p=>p!==pos);
+          // Fetch real exit price and PnL from OKX positions-history
+          let exitPrice = null, pnl = null, reason = state, exitTime = now;
+          try {
+            const hist = await fetchClosedPnl(instId, pos.entryTime);
+            if (hist) {
+              exitPrice = hist.exitPrice;
+              pnl       = hist.pnl;
+              reason    = hist.reason;
+              exitTime  = hist.exitTime;
+            }
+          } catch(e) { log(`⚠️ 取得平倉PnL失敗 ${pos.symbol}: ${e.message}`); }
+
+          const pnlStr = pnl !== null ? `$${pnl.toFixed(4)}` : "N/A";
+          log(`[DMC] 出場 ${pos.symbol}(${pos.side}) ${reason} exitPx=${exitPrice ?? "N/A"} PnL=${pnlStr}`);
+          appendCsv(pos, exitPrice, pnl, reason);
+          positions.closed.push({ ...pos, exitTime, exitPrice, pnl, exitState: state });
+          positions.cooldown[pos.symbol] = exitTime;
+          positions.open = positions.open.filter(p => p !== pos);
         }
       } catch(e) { log(`⚠️ 查詢OCO失敗 ${pos.symbol}: ${e.message}`); }
     }
