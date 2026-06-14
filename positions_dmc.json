@@ -1,5 +1,42 @@
 {
-  "open": [],
+  "open": [
+    {
+      "symbol": "BIGTIMEUSDT",
+      "side": "short",
+      "entryPrice": 0.008689,
+      "initialSL": 0.009410532142857142,
+      "currentSL": 0.009410532142857142,
+      "tp": 0.006524403571428576,
+      "quantity": 4661.302702876301,
+      "entryTime": 1781025956543,
+      "orderId": "3641446413745479680",
+      "algoId": "3641446419787419648"
+    },
+    {
+      "symbol": "SPKUSDT",
+      "side": "long",
+      "entryPrice": 0.02049,
+      "initialSL": 0.01877957142857143,
+      "currentSL": 0.01877957142857143,
+      "tp": 0.025621285714285714,
+      "quantity": 1966.337433724619,
+      "entryTime": 1781078508008,
+      "orderId": "3643209972078829568",
+      "algoId": "3643209978020106240"
+    },
+    {
+      "symbol": "ZKUSDT",
+      "side": "long",
+      "entryPrice": 0.01094,
+      "initialSL": 0.009829535714285714,
+      "currentSL": 0.009829535714285714,
+      "tp": 0.014271392857142857,
+      "quantity": 3028.714899686085,
+      "entryTime": 1781107321523,
+      "orderId": "3644176820488331264",
+      "algoId": "3644176828912635904"
+    }
+  ],
   "closed": [
     {
       "symbol": "ONEUSDT",
@@ -62,21 +99,6 @@
       "pnl": 29.999999999999996
     },
     {
-      "symbol": "BIGTIMEUSDT",
-      "side": "short",
-      "entryPrice": 0.008689,
-      "initialSL": 0.009410532142857142,
-      "currentSL": 0.009410532142857142,
-      "tp": 0.006524403571428576,
-      "quantity": 4661.302702876301,
-      "entryTime": 1781025956543,
-      "orderId": "3641446413745479680",
-      "algoId": "3641446419787419648",
-      "exitTime": 1781424691601,
-      "exitState": "filled",
-      "pnl": null
-    },
-    {
       "symbol": "ZROUSDT",
       "side": "short",
       "entryPrice": 0.829,
@@ -87,9 +109,10 @@
       "entryTime": 1781025956543,
       "orderId": "3641446553633906688",
       "algoId": "3641446560414044160",
-      "exitTime": 1781424691601,
+      "exitTime": 1781176316090,
       "exitState": "filled",
-      "pnl": null
+      "pnl": -2.9007,
+      "exitPrice": 0.907
     },
     {
       "symbol": "PENDLEUSDT",
@@ -102,24 +125,10 @@
       "entryTime": 1781025956543,
       "orderId": "3641446700602318848",
       "algoId": "3641446706711367680",
-      "exitTime": 1781424691601,
+      "exitTime": 1781339455760,
       "exitState": "filled",
-      "pnl": null
-    },
-    {
-      "symbol": "SPKUSDT",
-      "side": "long",
-      "entryPrice": 0.02049,
-      "initialSL": 0.01877957142857143,
-      "currentSL": 0.01877957142857143,
-      "tp": 0.025621285714285714,
-      "quantity": 1966.337433724619,
-      "entryTime": 1781078508008,
-      "orderId": "3643209972078829568",
-      "algoId": "3643209978020106240",
-      "exitTime": 1781424691601,
-      "exitState": "filled",
-      "pnl": null
+      "pnl": -2.9863,
+      "exitPrice": 1.3155128205128206
     },
     {
       "symbol": "KSMUSDT",
@@ -132,24 +141,10 @@
       "entryTime": 1781092922711,
       "orderId": "3643693699280101376",
       "algoId": "3643693707737960448",
-      "exitTime": 1781424691601,
+      "exitTime": 1781179764993,
       "exitState": "filled",
-      "pnl": null
-    },
-    {
-      "symbol": "ZKUSDT",
-      "side": "long",
-      "entryPrice": 0.01094,
-      "initialSL": 0.009829535714285714,
-      "currentSL": 0.009829535714285714,
-      "tp": 0.014271392857142857,
-      "quantity": 3028.714899686085,
-      "entryTime": 1781107321523,
-      "orderId": "3644176820488331264",
-      "algoId": "3644176828912635904",
-      "exitTime": 1781424691601,
-      "exitState": "filled",
-      "pnl": null
+      "pnl": -3.8502,
+      "exitPrice": 3.683
     }
   ],
   "cooldown": {
@@ -157,11 +152,8 @@
     "TONUSDT": 1780550503440,
     "BTCUSDT": 1780550503440,
     "DOTUSDT": 1780739238824,
-    "BIGTIMEUSDT": 1781424691601,
-    "ZROUSDT": 1781424691601,
-    "PENDLEUSDT": 1781424691601,
-    "SPKUSDT": 1781424691601,
-    "KSMUSDT": 1781424691601,
-    "ZKUSDT": 1781424691601
+    "ZROUSDT": 1781176316090,
+    "PENDLEUSDT": 1781339455760,
+    "KSMUSDT": 1781179764993
   }
 }
