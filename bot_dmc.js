@@ -346,7 +346,14 @@ async function updateOCO(pos, newSL) {
 
 async function checkAlgoStatus(algoId, instId) {
   const res = await okxGet(`/api/v5/trade/order-algo?ordType=oco&algoId=${algoId}&instId=${instId}`);
-  return res.data?.[0]?.state;
+  const state = res.data?.[0]?.state;
+  if (state) return state;
+
+  // OCO 已執行後 API 不再回傳資料，改查實際持倉確認是否已平
+  const posRes = await okxGet(`/api/v5/account/positions?instId=${instId}`);
+  const hasPos = posRes.data?.some(p => parseFloat(p.pos) !== 0);
+  if (!hasPos) return "filled"; // OKX 無持倉 → OCO 已觸發
+  return undefined;
 }
 
 // ─── 主流程 ───────────────────────────────────────────────────────────────────
