@@ -295,9 +295,22 @@ function floorLot(v, lotSz) {
 }
 
 async function fetchPortfolioValue() {
-  // 固定使用 PORTFOLIO_VALUE_USD 設定值，避免 OKX 全帳戶餘額影響倉位計算
+  if (!CONFIG.paperTrading) {
+    try {
+      const res  = await okxGet("/api/v5/account/balance");
+      const usdt = res.data?.[0]?.details?.find(d => d.ccy === "USDT");
+      if (usdt) {
+        const eq = parseFloat(usdt.eq);
+        log(`[DMC] 帳戶餘額 (OKX): $${eq.toFixed(4)}`);
+        return eq;
+      }
+    } catch(e) {
+      log(`⚠️ OKX 餘額查詢失敗，使用設定值: ${e.message}`);
+    }
+  }
+  // Paper mode or API failure fallback
   const pos = loadPositions();
-  const closedPnl = (pos.closed||[]).reduce((s,t)=>s+(t.pnl||0),0);
+  const closedPnl = (pos.closed || []).reduce((s, t) => s + (t.pnl || 0), 0);
   return CONFIG.portfolioValue + closedPnl;
 }
 
@@ -327,21 +340,45 @@ async function placeEntry(symbol, sig, portfolioValue) {
   return { orderId, algoId:ocoRes.data?.[0]?.algoId };
 }
 
+async function placeOCO(instId, isShort, sz, sl, tp) {
+  return okxPost("/api/v5/trade/order-algo", {
+    instId, tdMode: "isolated",
+    side: isShort ? "buy" : "sell", posSide: isShort ? "short" : "long",
+    ordType: "oco", sz,
+    slTriggerPx: sl.toFixed(8), slOrdPx: "-1", slTriggerPxType: "last",
+    tpTriggerPx: tp.toFixed(8), tpOrdPx: "-1", tpTriggerPxType: "last",
+  });
+}
+
+async function closePosition(instId, isShort, sz) {
+  return okxPost("/api/v5/trade/order", {
+    instId, tdMode: "isolated",
+    side: isShort ? "buy" : "sell", posSide: isShort ? "short" : "long",
+    ordType: "market", sz,
+  });
+}
+
 async function updateOCO(pos, newSL) {
   const instId  = toOkxInstId(pos.symbol) + "-SWAP";
   const spec    = await fetchSpec(instId);
-  const sz      = String(floorLot(pos.quantity/spec.ctVal, spec.lotSz));
-  const isShort = pos.side==="short";
-  await okxPost("/api/v5/trade/cancel-algos", [{ algoId:pos.algoId, instId }]);
-  const ocoRes  = await okxPost("/api/v5/trade/order-algo", {
-    instId, tdMode:"isolated",
-    side: isShort?"buy":"sell", posSide: isShort?"short":"long",
-    ordType:"oco", sz,
-    slTriggerPx: newSL.toFixed(8), slOrdPx:"-1", slTriggerPxType:"last",
-    tpTriggerPx: pos.tp.toFixed(8), tpOrdPx:"-1", tpTriggerPxType:"last",
-  });
-  if (ocoRes.code !== "0") throw new Error(`新OCO失敗: ${ocoRes.msg}`);
-  return ocoRes.data?.[0]?.algoId;
+  const sz      = String(floorLot(pos.quantity / spec.ctVal, spec.lotSz));
+  const isShort = pos.side === "short";
+
+  await okxPost("/api/v5/trade/cancel-algos", [{ algoId: pos.algoId, instId }]);
+
+  // Attempt new OCO; retry once on failure; emergency-close if both fail
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const ocoRes = await placeOCO(instId, isShort, sz, newSL, pos.tp);
+    if (ocoRes.code === "0") return ocoRes.data?.[0]?.algoId;
+    log(`⚠️ updateOCO 第${attempt}次失敗 ${pos.symbol}: ${ocoRes.msg}`);
+    if (attempt < 2) await new Promise(r => setTimeout(r, 2000));
+  }
+
+  // Both attempts failed — position now has no SL; close immediately to cap risk
+  log(`🚨 updateOCO 連續失敗，緊急平倉 ${pos.symbol} 以保護資金`);
+  const closeRes = await closePosition(instId, isShort, sz);
+  if (closeRes.code !== "0") log(`🚨 緊急平倉也失敗: ${closeRes.msg}`);
+  throw new Error(`OCO更新失敗，已緊急平倉 ${pos.symbol}`);
 }
 
 async function checkAlgoStatus(algoId, instId) {

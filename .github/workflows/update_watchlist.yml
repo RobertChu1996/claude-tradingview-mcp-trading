@@ -1,0 +1,60 @@
+name: Update DMC Watchlist (weekly)
+
+on:
+  schedule:
+    - cron: '0 1 * * 1'   # 每週一 01:00 UTC
+  workflow_dispatch:        # 允許手動觸發
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Run watchlist optimizer
+        run: node optimize_watchlist_dmc.js
+        timeout-minutes: 30
+
+      - name: Commit updated watchlist to state branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git fetch origin state:refs/heads/state 2>/dev/null || true
+
+          BLOB=$(git hash-object -w watchlist_dmc.json)
+          NEW_TREE=$(
+            git ls-tree refs/heads/state |
+            grep -v 'watchlist_dmc\.json' |
+            { cat; echo "100644 blob $BLOB	watchlist_dmc.json"; } |
+            git mktree
+          )
+          PARENT=$(git rev-parse --verify refs/heads/state 2>/dev/null || echo "")
+          MSG="watchlist: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          if [ -n "$PARENT" ]; then
+            COMMIT=$(git commit-tree "$NEW_TREE" -p "$PARENT" -m "$MSG")
+          else
+            COMMIT=$(git commit-tree "$NEW_TREE" -m "$MSG")
+          fi
+          git push origin "$COMMIT:refs/heads/state"
+          echo "Watchlist saved: $MSG"
+
+          # 同時更新 main branch 讓 code 裡有最新版本
+          git add watchlist_dmc.json
+          git diff --cached --quiet || git commit -m "chore: update watchlist_dmc.json $(date -u +'%Y-%m-%d')"
+          git push origin main || true

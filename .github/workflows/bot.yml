@@ -39,13 +39,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Update DMC watchlist (weekly on Monday)
-        if: github.event.schedule == '0 0 * * 1' || github.event_name == 'workflow_dispatch'
-        env:
-          DATA_DIR: "."
-        run: node optimize_watchlist_dmc.js
-        continue-on-error: true
-
       - name: Run DMC bot (Strategy B)
         env:
           DATA_DIR: "."
