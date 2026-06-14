@@ -1,23 +1,28 @@
 {
   "reportDate": "2026-06-14",
-  "generatedAt": "2026-06-14T10:46:55.649Z",
+  "generatedAt": "2026-06-14T11:02:22.997Z",
+  "balance": {
+    "totalEq": 308.818,
+    "availBal": 272.2905,
+    "frozenBal": 36.5275
+  },
   "todayCombined": {
     "trades": 0,
     "wins": 0,
     "losses": 0,
     "winRate": "N/A",
     "totalPnl": "0.0000",
-    "totalUnrealizedPnl": 0
+    "totalUnrealizedPnl": -1.2
   },
   "strategies": {
     "dmc": {
       "label": "B: DMC/SMA25 [4H] 起:2026-05-29",
       "overall": {
-        "trades": 0,
+        "trades": 2,
         "wins": 0,
-        "losses": 0,
-        "winRate": "N/A",
-        "totalPnl": "0.0000"
+        "losses": 2,
+        "winRate": "0.0%",
+        "totalPnl": "-6.8365"
       },
       "today": {
         "trades": 0,
@@ -26,18 +31,58 @@
         "winRate": "N/A",
         "totalPnl": "0.0000"
       },
-      "openPositions": [],
-      "totalUnrealizedPnl": 0
+      "openPositions": [
+        {
+          "symbol": "ZKUSDT",
+          "side": "long",
+          "entry": 0.01093,
+          "currentPrice": 0.01138,
+          "sl": null,
+          "tp": null,
+          "slDistPct": null,
+          "tpDistPct": null,
+          "unrealizedPct": 4.12,
+          "unrealizedPnl": 1.36,
+          "since": "2026-06-10T16:02"
+        },
+        {
+          "symbol": "SPKUSDT",
+          "side": "long",
+          "entry": 0.02048,
+          "currentPrice": 0.01944,
+          "sl": null,
+          "tp": null,
+          "slDistPct": null,
+          "tpDistPct": null,
+          "unrealizedPct": -5.08,
+          "unrealizedPnl": -1.98,
+          "since": "2026-06-10T08:01"
+        },
+        {
+          "symbol": "BIGTIMEUSDT",
+          "side": "short",
+          "entry": 0.0088022896995709,
+          "currentPrice": 0.008927,
+          "sl": null,
+          "tp": null,
+          "slDistPct": null,
+          "tpDistPct": null,
+          "unrealizedPct": -1.42,
+          "unrealizedPnl": -0.58,
+          "since": "2026-06-09T17:25"
+        }
+      ],
+      "totalUnrealizedPnl": -1.2
     }
   },
   "strategy": {
     "label": "B: DMC/SMA25 [4H] 起:2026-05-29",
     "overall": {
-      "trades": 0,
+      "trades": 2,
       "wins": 0,
-      "losses": 0,
-      "winRate": "N/A",
-      "totalPnl": "0.0000"
+      "losses": 2,
+      "winRate": "0.0%",
+      "totalPnl": "-6.8365"
     },
     "today": {
       "trades": 0,
@@ -46,7 +91,47 @@
       "winRate": "N/A",
       "totalPnl": "0.0000"
     },
-    "openPositions": [],
-    "totalUnrealizedPnl": 0
+    "openPositions": [
+      {
+        "symbol": "ZKUSDT",
+        "side": "long",
+        "entry": 0.01093,
+        "currentPrice": 0.01138,
+        "sl": null,
+        "tp": null,
+        "slDistPct": null,
+        "tpDistPct": null,
+        "unrealizedPct": 4.12,
+        "unrealizedPnl": 1.36,
+        "since": "2026-06-10T16:02"
+      },
+      {
+        "symbol": "SPKUSDT",
+        "side": "long",
+        "entry": 0.02048,
+        "currentPrice": 0.01944,
+        "sl": null,
+        "tp": null,
+        "slDistPct": null,
+        "tpDistPct": null,
+        "unrealizedPct": -5.08,
+        "unrealizedPnl": -1.98,
+        "since": "2026-06-10T08:01"
+      },
+      {
+        "symbol": "BIGTIMEUSDT",
+        "side": "short",
+        "entry": 0.0088022896995709,
+        "currentPrice": 0.008927,
+        "sl": null,
+        "tp": null,
+        "slDistPct": null,
+        "tpDistPct": null,
+        "unrealizedPct": -1.42,
+        "unrealizedPnl": -0.58,
+        "since": "2026-06-09T17:25"
+      }
+    ],
+    "totalUnrealizedPnl": -1.2
   }
 }
