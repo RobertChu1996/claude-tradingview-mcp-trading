@@ -130,6 +130,16 @@ async function fetchCandles4H(symbol, limit = 350) {
   }));
 }
 
+async function fetchCandles1D(symbol, limit = 60) {
+  const instId = toOkxInstId(symbol);
+  const url    = `https://www.okx.com/api/v5/market/candles?instId=${instId}&bar=1D&limit=${Math.min(limit,300)}`;
+  const res    = await fetch(url);
+  if (!res.ok) throw new Error(`OKX 1D ${res.status}`);
+  const data   = await res.json();
+  if (!data.data?.length) return [];
+  return data.data.reverse().map(k => ({ time:+k[0], close:+k[4] }));
+}
+
 function completed4H(candles) {
   const h4ms = 4 * 3600 * 1000;
   const curBarOpen = Math.floor(Date.now() / h4ms) * h4ms;
@@ -157,16 +167,17 @@ function swingHighOf(candles, lb) {
   return Math.max(...candles.slice(-lb-1,-1).map(c=>c.high));
 }
 
-// ─── BTC 趨勢方向（用於過濾逆勢信號）────────────────────────────────────────
-function btcTrendDir(candles) {
+// ─── 趨勢方向（BTC 4H 或個幣 1D，共用同一邏輯）──────────────────────────────
+function trendDir(candles) {
   if (candles.length < SMA_PERIOD + SMA_PREV_OFFSET) return 0;
   const closes  = candles.map(c => c.close);
   const smaNow  = smaOf(closes, SMA_PERIOD);
   const smaPrev = smaOf(closes.slice(0, -SMA_PREV_OFFSET), SMA_PERIOD);
-  if (smaNow > smaPrev * 1.001) return  1;  // 上漲
-  if (smaNow < smaPrev * 0.999) return -1;  // 下跌
-  return 0;                                  // 橫盤（允許雙向）
+  if (smaNow > smaPrev * 1.001) return  1;
+  if (smaNow < smaPrev * 0.999) return -1;
+  return 0;
 }
+const btcTrendDir = trendDir;  // alias kept for compatibility
 
 // ─── 進場信號 ─────────────────────────────────────────────────────────────────
 function checkSignal(candles) {
@@ -634,6 +645,19 @@ async function run() {
       if (btcTrend === -1 && sig.side === "long") {
         log(`[DMC] 跳過 ${symbol}(long)：BTC 下跌趨勢`);
         continue;
+      }
+
+      // 多時框確認：個幣 1D SMA25 需與 4H 信號方向一致（橫盤時放行）
+      try {
+        const daily1D   = await fetchCandles1D(symbol, SMA_PERIOD + SMA_PREV_OFFSET + 5);
+        const dailyDir  = trendDir(daily1D);
+        const sigDir    = sig.side === "long" ? 1 : -1;
+        if (dailyDir !== 0 && dailyDir !== sigDir) {
+          log(`[DMC] 跳過 ${symbol}(${sig.side})：1D SMA 方向相反`);
+          continue;
+        }
+      } catch(e) {
+        log(`⚠️ ${symbol} 1D 資料取得失敗，跳過 MTF 確認: ${e.message}`);
       }
 
       log(`[DMC] 信號 ${symbol}(${sig.side}) | SL $${sig.sl.toFixed(4)} | TP $${sig.tp.toFixed(4)} | SL% ${(sig.slPct*100).toFixed(2)}%`);

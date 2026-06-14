@@ -21,7 +21,8 @@ const MIN_PRICE       = 0.001;
 
 const COMPARE_MODE  = process.argv[2] === "compare";
 const FILTER_MODE   = process.argv[2] === "filter";
-const MAX_OPEN      = (COMPARE_MODE || FILTER_MODE) ? 6 : parseInt(process.argv[2] || "6");
+const OPTIMIZE_MODE = process.argv[2] === "optimize";
+const MAX_OPEN      = (COMPARE_MODE || FILTER_MODE || OPTIMIZE_MODE) ? 6 : parseInt(process.argv[2] || "6");
 const SYMBOL_LIMIT  = parseInt(process.argv[3] || "30");
 const MONTHS        = parseInt(process.argv[4] || "12");
 const PORTFOLIO     = 1000;
@@ -86,8 +87,8 @@ function swingHighOf(candles, lb) {
   return Math.max(...candles.slice(-lb - 1, -1).map(c => c.high));
 }
 
-// ─── 進場信號（完整複製 bot_dmc.js checkSignal）──────────────────────────────
-function checkSignal(candles) {
+// ─── 進場信號（volRatio 可調）────────────────────────────────────────────────
+function checkSignal(candles, volRatio = VOL_RATIO) {
   if (candles.length < SMA_PERIOD + SMA_PREV_OFFSET + 10) return null;
   const closes   = candles.map(c => c.close);
   const price    = closes[closes.length - 1];
@@ -104,7 +105,7 @@ function checkSignal(candles) {
   const prev3   = closes.slice(-6, -3).reduce((a, b) => a + b, 0) / 3;
   const atr     = atrOf(candles, 14);
 
-  if (smaNow > smaPrev && price > smaNow && volR > VOL_RATIO &&
+  if (smaNow > smaPrev && price > smaNow && volR > volRatio &&
       last.close > last.open && strength > STRENGTH && rec3 > prev3) {
     const sl    = swingLowOf(candles, SWING_LB) - atr * ATR_MULT;
     const slPct = (price - sl) / price;
@@ -112,7 +113,7 @@ function checkSignal(candles) {
     const tp = price + (price - sl) * TP_RATIO;
     return { side: "long", stopLoss: sl, tp };
   }
-  if (smaNow < smaPrev && price < smaNow && volR > VOL_RATIO &&
+  if (smaNow < smaPrev && price < smaNow && volR > volRatio &&
       last.close < last.open && strength > STRENGTH && rec3 < prev3) {
     const sl    = swingHighOf(candles, SWING_LB) + atr * ATR_MULT;
     const slPct = (sl - price) / price;
@@ -122,6 +123,18 @@ function checkSignal(candles) {
     return { side: "short", stopLoss: sl, tp };
   }
   return null;
+}
+
+// ─── 1D SMA 方向（多時框確認）────────────────────────────────────────────────
+function dailyTrend(dailyCandles, ts) {
+  const idx = dailyCandles.findLastIndex(c => c.time <= ts);
+  if (idx < SMA_PERIOD + SMA_PREV_OFFSET) return 0;
+  const closes  = dailyCandles.slice(0, idx + 1).map(c => c.close);
+  const smaNow  = smaOf(closes, SMA_PERIOD);
+  const smaPrev = smaOf(closes.slice(0, -SMA_PREV_OFFSET), SMA_PERIOD);
+  if (smaNow > smaPrev * 1.001) return  1;
+  if (smaNow < smaPrev * 0.999) return -1;
+  return 0;
 }
 
 // ─── 追蹤止損（與 bot_dmc.js 一致）──────────────────────────────────────────
@@ -231,22 +244,68 @@ function btcTrend(btcCandles, ts) {
 }
 
 // ─── 核心模擬 ─────────────────────────────────────────────────────────────────
-// opts: { btcFilter: bool, maxSameDir: number }
+// opts: { btcFilter, maxSameDir, volRatio, timeFilter, partialTP, timeSL, dailyData }
 function runSimulation(allData, times, cutoff, maxOpen, opts = {}) {
-  const { btcFilter = false, maxSameDir = maxOpen } = opts;
-  const btcCandles = allData["BTCUSDT"] || [];
+  const {
+    btcFilter  = false,
+    maxSameDir = maxOpen,
+    volRatio   = VOL_RATIO,
+    timeFilter = false,   // skip UTC 00:00–08:00 candles
+    partialTP  = false,   // take 50% at 1.5R, rest trail
+    timeSL     = false,   // close if ≥10 bars and profit < 0.5R
+    dailyData  = null,    // { symbol → 1D candles } for MTF confirm
+  } = opts;
 
-  const openPos  = [];
-  const trades   = [];
-  const cooldown = {};
+  const btcCandles = allData["BTCUSDT"] || [];
+  const openPos    = [];
+  const trades     = [];
+  const cooldown   = {};
 
   for (const ts of times) {
-    // 先出場
+    // ── 出場 ──────────────────────────────────────────────────────────────────
     for (const pos of [...openPos]) {
       const candles = allData[pos.symbol];
       const idx     = candles.findIndex(c => c.time === ts);
       if (idx < 0) continue;
-      const { exit, ep, reason } = checkExit(pos, candles[idx]);
+      const candle  = candles[idx];
+
+      // 時間止損：持倉 ≥10 根且未達 0.5R 獲利 → 平倉
+      if (timeSL) {
+        const barsHeld = (ts - pos.entryTime) / MS_CANDLE;
+        if (barsHeld >= 10) {
+          const risk   = Math.abs(pos.entryPrice - pos.stopLoss);
+          const profit = pos.side === "long"
+            ? candle.close - pos.entryPrice
+            : pos.entryPrice - candle.close;
+          if (profit < risk * 0.5) {
+            const pnl = pos.side === "long"
+              ? (candle.close - pos.entryPrice) * pos.quantity
+              : (pos.entryPrice - candle.close) * pos.quantity;
+            trades.push({ entryTime: pos.entryTime, exitTime: ts, symbol: pos.symbol, side: pos.side, pnl, win: pnl > 0, reason: "時間止損" });
+            cooldown[pos.symbol] = ts;
+            openPos.splice(openPos.indexOf(pos), 1);
+            continue;
+          }
+        }
+      }
+
+      // 分批止盈：到達 1.5R 時平一半
+      if (partialTP && !pos.halfClosed) {
+        const risk      = Math.abs(pos.entryPrice - pos.stopLoss);
+        const target15R = pos.side === "long" ? pos.entryPrice + risk * 1.5 : pos.entryPrice - risk * 1.5;
+        const hit15R    = pos.side === "long" ? candle.high >= target15R : candle.low <= target15R;
+        if (hit15R) {
+          const halfQty = pos.quantity / 2;
+          const pnl     = pos.side === "long"
+            ? (target15R - pos.entryPrice) * halfQty
+            : (pos.entryPrice - target15R) * halfQty;
+          trades.push({ entryTime: pos.entryTime, exitTime: ts, symbol: pos.symbol, side: pos.side, pnl, win: true, reason: "分批止盈" });
+          pos.quantity   = halfQty;
+          pos.halfClosed = true;
+        }
+      }
+
+      const { exit, ep, reason } = checkExit(pos, candle);
       if (exit) {
         const pnl = pos.side === "long"
           ? (ep - pos.entryPrice) * pos.quantity
@@ -257,8 +316,14 @@ function runSimulation(allData, times, cutoff, maxOpen, opts = {}) {
       }
     }
 
-    // 再入場
+    // ── 入場 ──────────────────────────────────────────────────────────────────
     if (openPos.length >= maxOpen) continue;
+
+    // 時段過濾：跳過 UTC 00:00–08:00 開盤的 4H 棒（低流動性）
+    if (timeFilter) {
+      const hourUtc = (ts % (24 * 3600 * 1000)) / 3600000;
+      if (hourUtc < 8) continue;
+    }
 
     const trend = btcFilter ? btcTrend(btcCandles, ts) : 0;
 
@@ -273,13 +338,19 @@ function runSimulation(allData, times, cutoff, maxOpen, opts = {}) {
 
       const slice = candles.slice(0, idx + 1);
       const price = candles[idx].close;
-      const sig   = checkSignal(slice);
+      const sig   = checkSignal(slice, volRatio);
       if (!sig) continue;
 
       // BTC 方向過濾
       if (btcFilter && trend !== 0) {
-        if (trend === 1 && sig.side === "short") continue; // BTC 上漲，不做空
-        if (trend === -1 && sig.side === "long")  continue; // BTC 下跌，不做多
+        if (trend === 1 && sig.side === "short") continue;
+        if (trend === -1 && sig.side === "long")  continue;
+      }
+
+      // 多時框確認：個幣 1D SMA 方向需與信號一致
+      if (dailyData && dailyData[symbol]) {
+        const dTrend = dailyTrend(dailyData[symbol], ts);
+        if (dTrend !== 0 && dTrend !== (sig.side === "long" ? 1 : -1)) continue;
       }
 
       // 同向持倉上限
@@ -292,7 +363,7 @@ function runSimulation(allData, times, cutoff, maxOpen, opts = {}) {
       openPos.push({
         symbol, side: sig.side, entryPrice: price,
         entryTime: ts, stopLoss: sig.stopLoss, tp: sig.tp,
-        quantity: size / price,
+        quantity: size / price, halfClosed: false,
       });
     }
   }
@@ -309,8 +380,8 @@ async function main() {
   if (FILTER_MODE)  console.log("模式：基準 vs BTC過濾 vs BTC過濾+同向上限");
   console.log("═".repeat(62));
 
-  // 下載資料（filter 模式需確保 BTCUSDT 在清單內）
-  const fetchList = (FILTER_MODE && !WATCHLIST.includes("BTCUSDT"))
+  // 下載資料（filter/optimize 模式需確保 BTCUSDT 在清單內）
+  const fetchList = ((FILTER_MODE || OPTIMIZE_MODE) && !WATCHLIST.includes("BTCUSDT"))
     ? ["BTCUSDT", ...WATCHLIST]
     : WATCHLIST;
 
@@ -349,7 +420,67 @@ async function main() {
     return `  ${label.padEnd(22)} ${String(t.length).padStart(5)}  ${(wr+"%").padStart(6)}  ${("$"+pnl).padStart(9)}  ${pf.padStart(6)}  ${(mdd+"%").padStart(7)}`;
   };
 
-  if (FILTER_MODE) {
+  if (OPTIMIZE_MODE) {
+    // 下載 1D 資料供 MTF 使用
+    console.log("\n下載 1D 資料（多時框確認）...");
+    const fetch1D  = (await import("node-fetch")).default;
+    const dailyData = {};
+    for (const symbol of Object.keys(allData)) {
+      if (symbol === "BTCUSDT") continue;
+      try {
+        const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1d&limit=400`;
+        const r   = await fetch1D(url);
+        const d   = await r.json();
+        if (Array.isArray(d) && d.length) {
+          dailyData[symbol] = d.map(k => ({ time: k[0], close: +k[4] }));
+          process.stdout.write(".");
+        }
+      } catch {}
+    }
+    console.log(`\n完成（${Object.keys(dailyData).length} 幣）\n`);
+
+    const BASE = { btcFilter: true };  // BTC filter 已知有效，作為所有方案的基底
+
+    const scenarios = [
+      { label: "基準（BTC過濾）",              opts: { ...BASE } },
+      { label: "+成交量門檻2x",                opts: { ...BASE, volRatio: 2.0 } },
+      { label: "+成交量門檻2.5x",              opts: { ...BASE, volRatio: 2.5 } },
+      { label: "+時段過濾(UTC≥8)",             opts: { ...BASE, timeFilter: true } },
+      { label: "+分批止盈(1.5R平半)",          opts: { ...BASE, partialTP: true } },
+      { label: "+時間止損(10棒<0.5R平)",       opts: { ...BASE, timeSL: true } },
+      { label: "+多時框確認(1D SMA)",          opts: { ...BASE, dailyData } },
+      { label: "全組合(vol2x+時段+分批+時間)", opts: { ...BASE, volRatio: 2.0, timeFilter: true, partialTP: true, timeSL: true } },
+    ];
+
+    const results = [];
+    for (const sc of scenarios) {
+      process.stdout.write(`  ${sc.label}... `);
+      const t = runSimulation(allData, times, cutoff, MAX_OPEN, sc.opts);
+      const w = t.filter(x => x.win).reduce((s, x) => s + x.pnl, 0);
+      const l = Math.abs(t.filter(x => !x.win).reduce((s, x) => s + x.pnl, 0));
+      const pf  = l > 0 ? w / l : Infinity;
+      const pnl = t.reduce((s, x) => s + x.pnl, 0);
+      const wr  = t.length ? t.filter(x => x.win).length / t.length * 100 : 0;
+      const mdd = calcMDD(t);
+      console.log(`${t.length} 筆`);
+      results.push({ label: sc.label, n: t.length, wr, pnl, pf, mdd });
+    }
+
+    console.log(`\n${"═".repeat(80)}`);
+    console.log("  優化方案比較（12個月, 30幣, MAX_OPEN=6, BTC過濾為基底）");
+    console.log(`${"─".repeat(80)}`);
+    console.log(`  ${"方案".padEnd(28)} ${"筆數".padStart(5)}  ${"勝率".padStart(6)}  ${"總損益".padStart(9)}  ${"PF".padStart(6)}  ${"MDD".padStart(7)}`);
+    console.log(`  ${"─".repeat(75)}`);
+    for (const r of results) {
+      const better = r !== results[0] && r.pf > results[0].pf ? " ✓" : "";
+      console.log(
+        `  ${r.label.padEnd(28)} ${String(r.n).padStart(5)}  ${(r.wr.toFixed(1)+"%").padStart(6)}` +
+        `  ${("$"+r.pnl.toFixed(2)).padStart(9)}  ${r.pf.toFixed(2).padStart(6)}  ${(r.mdd.toFixed(1)+"%").padStart(7)}${better}`
+      );
+    }
+    console.log(`${"═".repeat(80)}\n`);
+
+  } else if (FILTER_MODE) {
     console.log("  [1/3] 基準（無過濾）...");
     const tBase = runSimulation(allData, times, cutoff, 6);
     console.log(`  完成：${tBase.length} 筆`);
