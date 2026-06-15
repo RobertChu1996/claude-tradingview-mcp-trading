@@ -125,15 +125,15 @@ function checkSignal(candles, volRatio = VOL_RATIO) {
   return null;
 }
 
-// ─── 1D SMA 方向（多時框確認）────────────────────────────────────────────────
-function dailyTrend(dailyCandles, ts) {
+// ─── 1D SMA 方向（多時框確認，band 可調）────────────────────────────────────
+function dailyTrend(dailyCandles, ts, band = 0.001) {
   const idx = dailyCandles.findLastIndex(c => c.time <= ts);
   if (idx < SMA_PERIOD + SMA_PREV_OFFSET) return 0;
   const closes  = dailyCandles.slice(0, idx + 1).map(c => c.close);
   const smaNow  = smaOf(closes, SMA_PERIOD);
   const smaPrev = smaOf(closes.slice(0, -SMA_PREV_OFFSET), SMA_PERIOD);
-  if (smaNow > smaPrev * 1.001) return  1;
-  if (smaNow < smaPrev * 0.999) return -1;
+  if (smaNow > smaPrev * (1 + band)) return  1;
+  if (smaNow < smaPrev * (1 - band)) return -1;
   return 0;
 }
 
@@ -250,10 +250,11 @@ function runSimulation(allData, times, cutoff, maxOpen, opts = {}) {
     btcFilter  = false,
     maxSameDir = maxOpen,
     volRatio   = VOL_RATIO,
-    timeFilter = false,   // skip UTC 00:00–08:00 candles
-    partialTP  = false,   // take 50% at 1.5R, rest trail
-    timeSL     = false,   // close if ≥10 bars and profit < 0.5R
-    dailyData  = null,    // { symbol → 1D candles } for MTF confirm
+    timeFilter = false,
+    partialTP  = false,
+    timeSL     = false,
+    dailyData  = null,
+    mtfBand    = 0.001,   // 1D SMA band threshold
   } = opts;
 
   const btcCandles = allData["BTCUSDT"] || [];
@@ -349,7 +350,7 @@ function runSimulation(allData, times, cutoff, maxOpen, opts = {}) {
 
       // 多時框確認：個幣 1D SMA 方向需與信號一致
       if (dailyData && dailyData[symbol]) {
-        const dTrend = dailyTrend(dailyData[symbol], ts);
+        const dTrend = dailyTrend(dailyData[symbol], ts, mtfBand);
         if (dTrend !== 0 && dTrend !== (sig.side === "long" ? 1 : -1)) continue;
       }
 
@@ -448,7 +449,9 @@ async function main() {
       { label: "+時段過濾(UTC≥8)",             opts: { ...BASE, timeFilter: true } },
       { label: "+分批止盈(1.5R平半)",          opts: { ...BASE, partialTP: true } },
       { label: "+時間止損(10棒<0.5R平)",       opts: { ...BASE, timeSL: true } },
-      { label: "+多時框確認(1D SMA)",          opts: { ...BASE, dailyData } },
+      { label: "+1D MTF band=0.1%（現行）",    opts: { ...BASE, dailyData, mtfBand: 0.001 } },
+      { label: "+1D MTF band=0.05%",           opts: { ...BASE, dailyData, mtfBand: 0.0005 } },
+      { label: "+1D MTF band=0%（純方向）",    opts: { ...BASE, dailyData, mtfBand: 0 } },
       { label: "全組合(vol2x+時段+分批+時間)", opts: { ...BASE, volRatio: 2.0, timeFilter: true, partialTP: true, timeSL: true } },
     ];
 
