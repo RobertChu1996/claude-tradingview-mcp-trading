@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-06-15",
-  "generatedAt": "2026-06-15T16:15:53.739Z",
+  "generatedAt": "2026-06-15T16:31:00.813Z",
   "balance": {
-    "totalEq": 310.2923,
+    "totalEq": 310.4287,
     "availBal": 283.0381,
-    "frozenBal": 27.2542
+    "frozenBal": 27.3906
   },
   "todayCombined": {
     "trades": 0,
@@ -12,7 +12,7 @@
     "losses": 0,
     "winRate": "N/A",
     "totalPnl": "0.0000",
-    "totalUnrealizedPnl": 3.28
+    "totalUnrealizedPnl": 3.41
   },
   "strategies": {
     "dmc": {
@@ -36,30 +36,30 @@
           "symbol": "ZKUSDT",
           "side": "long",
           "entry": 0.01093,
-          "currentPrice": 0.01206,
+          "currentPrice": 0.01208,
           "sl": 0.01094,
           "tp": 0.01427,
-          "slDistPct": 9.29,
-          "tpDistPct": 18.33,
-          "unrealizedPct": 10.34,
-          "unrealizedPnl": 3.41,
+          "slDistPct": 9.44,
+          "tpDistPct": 18.13,
+          "unrealizedPct": 10.52,
+          "unrealizedPnl": 3.47,
           "since": "2026-06-10T16:02"
         },
         {
           "symbol": "SPKUSDT",
           "side": "long",
           "entry": 0.02048,
-          "currentPrice": 0.02041,
+          "currentPrice": 0.02045,
           "sl": 0.01877,
           "tp": 0.02562,
-          "slDistPct": 8.04,
-          "tpDistPct": 25.53,
-          "unrealizedPct": -0.34,
-          "unrealizedPnl": -0.13,
+          "slDistPct": 8.22,
+          "tpDistPct": 25.28,
+          "unrealizedPct": -0.15,
+          "unrealizedPnl": -0.06,
           "since": "2026-06-10T08:01"
         }
       ],
-      "totalUnrealizedPnl": 3.28
+      "totalUnrealizedPnl": 3.41
     }
   },
   "strategy": {
@@ -83,29 +83,29 @@
         "symbol": "ZKUSDT",
         "side": "long",
         "entry": 0.01093,
-        "currentPrice": 0.01206,
+        "currentPrice": 0.01208,
         "sl": 0.01094,
         "tp": 0.01427,
-        "slDistPct": 9.29,
-        "tpDistPct": 18.33,
-        "unrealizedPct": 10.34,
-        "unrealizedPnl": 3.41,
+        "slDistPct": 9.44,
+        "tpDistPct": 18.13,
+        "unrealizedPct": 10.52,
+        "unrealizedPnl": 3.47,
         "since": "2026-06-10T16:02"
       },
       {
         "symbol": "SPKUSDT",
         "side": "long",
         "entry": 0.02048,
-        "currentPrice": 0.02041,
+        "currentPrice": 0.02045,
         "sl": 0.01877,
         "tp": 0.02562,
-        "slDistPct": 8.04,
-        "tpDistPct": 25.53,
-        "unrealizedPct": -0.34,
-        "unrealizedPnl": -0.13,
+        "slDistPct": 8.22,
+        "tpDistPct": 25.28,
+        "unrealizedPct": -0.15,
+        "unrealizedPnl": -0.06,
         "since": "2026-06-10T08:01"
       }
     ],
-    "totalUnrealizedPnl": 3.28
+    "totalUnrealizedPnl": 3.41
   }
 }
