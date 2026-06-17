@@ -226,8 +226,8 @@ function calcTrailingSL(pos, price) {
   if (!risk) return pos.currentSL;
   const profit  = pos.side==="long" ? price-pos.entryPrice : pos.entryPrice-price;
   const profitR = profit / risk;
-  if (profitR < 1) return pos.currentSL;
-  const lockR = Math.max(0, Math.floor(profitR*2)/2 - 1.0);
+  if (profitR < 0.75) return pos.currentSL;
+  const lockR = Math.max(0, Math.floor(profitR*2)/2 - 0.75);
   const ns = pos.side==="long"
     ? pos.entryPrice + risk*lockR
     : pos.entryPrice - risk*lockR;

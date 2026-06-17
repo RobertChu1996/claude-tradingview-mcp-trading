@@ -137,14 +137,14 @@ function dailyTrend(dailyCandles, ts, band = 0.001) {
   return 0;
 }
 
-// ─── 追蹤止損（與 bot_dmc.js 一致）──────────────────────────────────────────
-function trailingSL(pos, price) {
+// ─── 追蹤止損（trailStart = 開始移動的 R 倍數門檻）──────────────────────────
+function trailingSL(pos, price, trailStart = 1.0) {
   const risk = Math.abs(pos.entryPrice - pos.stopLoss);
   if (!risk) return pos.stopLoss;
   const profit  = pos.side === "long" ? price - pos.entryPrice : pos.entryPrice - price;
   const profitR = profit / risk;
-  if (profitR < 1) return pos.stopLoss;
-  const lockR = Math.max(0, Math.floor(profitR * 2) / 2 - 1.0);
+  if (profitR < trailStart) return pos.stopLoss;
+  const lockR = Math.max(0, Math.floor(profitR * 2) / 2 - trailStart);
   const ns    = pos.side === "long"
     ? pos.entryPrice + risk * lockR
     : pos.entryPrice - risk * lockR;
@@ -152,8 +152,8 @@ function trailingSL(pos, price) {
 }
 
 // ─── 出場判斷（用 high/low 觸發，更準確）────────────────────────────────────
-function checkExit(pos, candle) {
-  const sl = trailingSL(pos, candle.close);
+function checkExit(pos, candle, trailStart = 1.0) {
+  const sl = trailingSL(pos, candle.close, trailStart);
   pos.stopLoss = sl;
 
   if (pos.side === "long") {
@@ -254,7 +254,8 @@ function runSimulation(allData, times, cutoff, maxOpen, opts = {}) {
     partialTP  = false,
     timeSL     = false,
     dailyData  = null,
-    mtfBand    = 0.001,   // 1D SMA band threshold
+    mtfBand    = 0.001,
+    trailStart = 1.0,     // R threshold before trailing SL activates
   } = opts;
 
   const btcCandles = allData["BTCUSDT"] || [];
@@ -306,7 +307,7 @@ function runSimulation(allData, times, cutoff, maxOpen, opts = {}) {
         }
       }
 
-      const { exit, ep, reason } = checkExit(pos, candle);
+      const { exit, ep, reason } = checkExit(pos, candle, trailStart);
       if (exit) {
         const pnl = pos.side === "long"
           ? (ep - pos.entryPrice) * pos.quantity
@@ -443,16 +444,12 @@ async function main() {
     const BASE = { btcFilter: true };  // BTC filter 已知有效，作為所有方案的基底
 
     const scenarios = [
-      { label: "基準（BTC過濾）",              opts: { ...BASE } },
-      { label: "+成交量門檻2x",                opts: { ...BASE, volRatio: 2.0 } },
-      { label: "+成交量門檻2.5x",              opts: { ...BASE, volRatio: 2.5 } },
-      { label: "+時段過濾(UTC≥8)",             opts: { ...BASE, timeFilter: true } },
-      { label: "+分批止盈(1.5R平半)",          opts: { ...BASE, partialTP: true } },
-      { label: "+時間止損(10棒<0.5R平)",       opts: { ...BASE, timeSL: true } },
-      { label: "+1D MTF band=0.1%（現行）",    opts: { ...BASE, dailyData, mtfBand: 0.001 } },
-      { label: "+1D MTF band=0.05%",           opts: { ...BASE, dailyData, mtfBand: 0.0005 } },
-      { label: "+1D MTF band=0%（純方向）",    opts: { ...BASE, dailyData, mtfBand: 0 } },
-      { label: "全組合(vol2x+時段+分批+時間)", opts: { ...BASE, volRatio: 2.0, timeFilter: true, partialTP: true, timeSL: true } },
+      { label: "基準（BTC過濾）",                  opts: { ...BASE } },
+      { label: "+1D MTF（現行最佳）",              opts: { ...BASE, dailyData, mtfBand: 0.001 } },
+      { label: "trailing 1.0R→鎖0R（現行）",      opts: { ...BASE, dailyData, mtfBand: 0.001, trailStart: 1.0 } },
+      { label: "trailing 0.75R→鎖0R",             opts: { ...BASE, dailyData, mtfBand: 0.001, trailStart: 0.75 } },
+      { label: "trailing 0.5R→鎖0R",              opts: { ...BASE, dailyData, mtfBand: 0.001, trailStart: 0.5 } },
+      { label: "trailing 0.5R + 時段過濾",         opts: { ...BASE, dailyData, mtfBand: 0.001, trailStart: 0.5, timeFilter: true } },
     ];
 
     const results = [];
