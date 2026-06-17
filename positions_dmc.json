@@ -1,18 +1,6 @@
 {
   "open": [
     {
-      "symbol": "SPKUSDT",
-      "side": "long",
-      "entryPrice": 0.02049,
-      "initialSL": 0.01877957142857143,
-      "currentSL": 0.01877957142857143,
-      "tp": 0.025621285714285714,
-      "quantity": 1966.337433724619,
-      "entryTime": 1781078508008,
-      "orderId": "3643209972078829568",
-      "algoId": "3643209978020106240"
-    },
-    {
       "symbol": "ZKUSDT",
       "side": "long",
       "entryPrice": 0.01094,
@@ -160,6 +148,21 @@
       "exitTime": 1781443840811,
       "exitState": "reconcile",
       "pnl": null
+    },
+    {
+      "symbol": "SPKUSDT",
+      "side": "long",
+      "entryPrice": 0.02049,
+      "initialSL": 0.01877957142857143,
+      "currentSL": 0.01877957142857143,
+      "tp": 0.025621285714285714,
+      "quantity": 1966.337433724619,
+      "entryTime": 1781078508008,
+      "orderId": "3643209972078829568",
+      "algoId": "3643209978020106240",
+      "exitTime": 1781712053129,
+      "exitState": "reconcile",
+      "pnl": null
     }
   ],
   "cooldown": {
@@ -169,6 +172,7 @@
     "ZROUSDT": 1781176316090,
     "PENDLEUSDT": 1781339455760,
     "KSMUSDT": 1781179764993,
-    "BIGTIMEUSDT": 1781443840811
+    "BIGTIMEUSDT": 1781443840811,
+    "SPKUSDT": 1781712053129
   }
 }
