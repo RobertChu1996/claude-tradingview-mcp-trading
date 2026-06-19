@@ -25,18 +25,6 @@
       "algoId": "3667368128268734464"
     },
     {
-      "symbol": "DOODUSDT",
-      "side": "short",
-      "entryPrice": 0.001441,
-      "initialSL": 0.0015661535714285716,
-      "currentSL": 0.0015661535714285716,
-      "tp": 0.0010655392857142852,
-      "quantity": 24075.22620878778,
-      "entryTime": 1781798479735,
-      "orderId": "3667368203495628800",
-      "algoId": "3667368210980409344"
-    },
-    {
       "symbol": "BIGTIMEUSDT",
       "side": "short",
       "entryPrice": 0.008313,
@@ -229,6 +217,21 @@
       "exitTime": 1781855132244,
       "exitState": "reconcile",
       "pnl": null
+    },
+    {
+      "symbol": "DOODUSDT",
+      "side": "short",
+      "entryPrice": 0.001441,
+      "initialSL": 0.0015661535714285716,
+      "currentSL": 0.0015661535714285716,
+      "tp": 0.0010655392857142852,
+      "quantity": 24075.22620878778,
+      "entryTime": 1781798479735,
+      "orderId": "3667368203495628800",
+      "algoId": "3667368210980409344",
+      "exitTime": 1781867734027,
+      "exitState": "reconcile",
+      "pnl": null
     }
   ],
   "cooldown": {
@@ -241,6 +244,7 @@
     "BIGTIMEUSDT": 1781443840811,
     "SPKUSDT": 1781712053129,
     "LITUSDT": 1781749839241,
-    "ZKUSDT": 1781855132244
+    "ZKUSDT": 1781855132244,
+    "DOODUSDT": 1781867734027
   }
 }
