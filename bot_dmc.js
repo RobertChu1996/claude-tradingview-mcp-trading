@@ -613,10 +613,16 @@ async function run() {
 
   // 取得 BTC 趨勢方向（一次性，供所有幣種過濾使用）
   let btcTrend = 0;
+  let btcOverheated = false;  // BTC 動能過熱（代理資金費率偏高）
   try {
-    const btcRaw = await fetchCandles4H("BTCUSDT", SMA_PERIOD + SMA_PREV_OFFSET + 10);
-    btcTrend = btcTrendDir(completed4H(btcRaw));
-    log(`[DMC] BTC 趨勢: ${btcTrend === 1 ? "上漲↑（只做多）" : btcTrend === -1 ? "下跌↓（只做空）" : "橫盤→（雙向）"}`);
+    const btcRaw    = await fetchCandles4H("BTCUSDT", SMA_PERIOD + SMA_PREV_OFFSET + 10);
+    const btcC      = completed4H(btcRaw);
+    btcTrend        = btcTrendDir(btcC);
+    const btcCloses = btcC.map(c => c.close);
+    const btcSma25  = btcCloses.slice(-SMA_PERIOD).reduce((a, b) => a + b, 0) / SMA_PERIOD;
+    const btcPrice  = btcCloses[btcCloses.length - 1];
+    btcOverheated   = btcPrice > btcSma25 * 1.03;
+    log(`[DMC] BTC 趨勢: ${btcTrend === 1 ? "上漲↑（只做多）" : btcTrend === -1 ? "下跌↓（只做空）" : "橫盤→（雙向）"} | 動能: ${btcOverheated ? `過熱(${((btcPrice/btcSma25-1)*100).toFixed(1)}% > SMA25，跳多頭)` : "正常"}`);
   } catch(e) {
     log(`⚠️ BTC 趨勢取得失敗，跳過過濾: ${e.message}`);
   }
@@ -644,6 +650,12 @@ async function run() {
       }
       if (btcTrend === -1 && sig.side === "long") {
         log(`[DMC] 跳過 ${symbol}(long)：BTC 下跌趨勢`);
+        continue;
+      }
+
+      // 資金費代理過濾：BTC 動能過熱（>3% 超 SMA25）時跳過做多
+      if (btcOverheated && sig.side === "long") {
+        log(`[DMC] 跳過 ${symbol}(long)：BTC 動能過熱，資金費可能偏高`);
         continue;
       }
 
