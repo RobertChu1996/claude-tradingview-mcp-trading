@@ -61,16 +61,16 @@
       "algoId": "3677030851269103616"
     },
     {
-      "symbol": "NEOUSDT",
+      "symbol": "KITEUSDT",
       "side": "short",
-      "entryPrice": 2.131,
-      "initialSL": 2.2375357142857144,
-      "currentSL": 2.0311227678571426,
-      "tp": 1.811392857142856,
-      "quantity": 28.003478329851596,
-      "entryTime": 1782086452189,
-      "orderId": "3677030926361780224",
-      "algoId": "3684791311410139136"
+      "entryPrice": 0.147,
+      "initialSL": 0.16648989285714286,
+      "currentSL": 0.16648989285714286,
+      "tp": 0.0885303214285714,
+      "quantity": 158.8267015863389,
+      "entryTime": 1782338450705,
+      "orderId": "3685486773215649792",
+      "algoId": "3685486780801093632"
     }
   ],
   "closed": [
@@ -256,6 +256,21 @@
       "exitTime": 1781867734027,
       "exitState": "reconcile",
       "pnl": null
+    },
+    {
+      "symbol": "NEOUSDT",
+      "side": "short",
+      "entryPrice": 2.131,
+      "initialSL": 2.2375357142857144,
+      "currentSL": 2.0311227678571426,
+      "tp": 1.811392857142856,
+      "quantity": 28.003478329851596,
+      "entryTime": 1782086452189,
+      "orderId": "3677030926361780224",
+      "algoId": "3684791311410139136",
+      "exitTime": 1782338451387,
+      "exitState": "reconcile",
+      "pnl": null
     }
   ],
   "cooldown": {
@@ -269,6 +284,7 @@
     "SPKUSDT": 1781712053129,
     "LITUSDT": 1781749839241,
     "ZKUSDT": 1781855132244,
-    "DOODUSDT": 1781867734027
+    "DOODUSDT": 1781867734027,
+    "NEOUSDT": 1782338451387
   }
 }
