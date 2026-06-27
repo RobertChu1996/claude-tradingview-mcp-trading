@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-06-27",
-  "generatedAt": "2026-06-27T22:15:45.765Z",
+  "generatedAt": "2026-06-27T22:30:55.960Z",
   "balance": {
-    "totalEq": 313.6939,
+    "totalEq": 313.259,
     "availBal": 259.747,
-    "frozenBal": 53.9468
+    "frozenBal": 53.5119
   },
   "todayCombined": {
     "trades": 0,
@@ -12,7 +12,7 @@
     "losses": 0,
     "winRate": "N/A",
     "totalPnl": "0.0000",
-    "totalUnrealizedPnl": 10.3
+    "totalUnrealizedPnl": 9.86
   },
   "strategies": {
     "dmc": {
@@ -36,13 +36,13 @@
           "symbol": "AUCTIONUSDT",
           "side": "short",
           "entry": 3.404,
-          "currentPrice": 3.29,
+          "currentPrice": 3.306,
           "sl": 3.586,
           "tp": 2.497,
-          "slDistPct": 9,
-          "tpDistPct": 24.1,
-          "unrealizedPct": 3.35,
-          "unrealizedPnl": 1.29,
+          "slDistPct": 8.47,
+          "tpDistPct": 24.47,
+          "unrealizedPct": 2.88,
+          "unrealizedPnl": 1.11,
           "since": "2026-06-24T22:15"
         },
         {
@@ -62,43 +62,43 @@
           "symbol": "ZECUSDT",
           "side": "short",
           "entry": 434.08,
-          "currentPrice": 396.63,
+          "currentPrice": 398.22,
           "sl": 487.85,
           "tp": 275.02,
-          "slDistPct": 23,
-          "tpDistPct": 30.66,
-          "unrealizedPct": 8.63,
-          "unrealizedPnl": 1.87,
+          "slDistPct": 22.51,
+          "tpDistPct": 30.94,
+          "unrealizedPct": 8.26,
+          "unrealizedPnl": 1.79,
           "since": "2026-06-22T00:00"
         },
         {
           "symbol": "BIGTIMEUSDT",
           "side": "short",
           "entry": 0.0083144161290324,
-          "currentPrice": 0.007451,
+          "currentPrice": 0.007469,
           "sl": 0.008313,
           "tp": 0.0054,
-          "slDistPct": 11.57,
-          "tpDistPct": 27.53,
-          "unrealizedPct": 10.38,
-          "unrealizedPnl": 2.68,
+          "slDistPct": 11.3,
+          "tpDistPct": 27.7,
+          "unrealizedPct": 10.17,
+          "unrealizedPnl": 2.62,
           "since": "2026-06-18T16:01"
         },
         {
           "symbol": "AUSDT",
           "side": "short",
           "entry": 0.06758,
-          "currentPrice": 0.06014,
+          "currentPrice": 0.0605,
           "sl": 0.0676,
           "tp": 0.04024,
-          "slDistPct": 12.4,
-          "tpDistPct": 33.09,
-          "unrealizedPct": 11.01,
-          "unrealizedPnl": 2.46,
+          "slDistPct": 11.74,
+          "tpDistPct": 33.49,
+          "unrealizedPct": 10.48,
+          "unrealizedPnl": 2.34,
           "since": "2026-06-18T16:01"
         }
       ],
-      "totalUnrealizedPnl": 10.3
+      "totalUnrealizedPnl": 9.86
     }
   },
   "strategy": {
@@ -122,13 +122,13 @@
         "symbol": "AUCTIONUSDT",
         "side": "short",
         "entry": 3.404,
-        "currentPrice": 3.29,
+        "currentPrice": 3.306,
         "sl": 3.586,
         "tp": 2.497,
-        "slDistPct": 9,
-        "tpDistPct": 24.1,
-        "unrealizedPct": 3.35,
-        "unrealizedPnl": 1.29,
+        "slDistPct": 8.47,
+        "tpDistPct": 24.47,
+        "unrealizedPct": 2.88,
+        "unrealizedPnl": 1.11,
         "since": "2026-06-24T22:15"
       },
       {
@@ -148,42 +148,42 @@
         "symbol": "ZECUSDT",
         "side": "short",
         "entry": 434.08,
-        "currentPrice": 396.63,
+        "currentPrice": 398.22,
         "sl": 487.85,
         "tp": 275.02,
-        "slDistPct": 23,
-        "tpDistPct": 30.66,
-        "unrealizedPct": 8.63,
-        "unrealizedPnl": 1.87,
+        "slDistPct": 22.51,
+        "tpDistPct": 30.94,
+        "unrealizedPct": 8.26,
+        "unrealizedPnl": 1.79,
         "since": "2026-06-22T00:00"
       },
       {
         "symbol": "BIGTIMEUSDT",
         "side": "short",
         "entry": 0.0083144161290324,
-        "currentPrice": 0.007451,
+        "currentPrice": 0.007469,
         "sl": 0.008313,
         "tp": 0.0054,
-        "slDistPct": 11.57,
-        "tpDistPct": 27.53,
-        "unrealizedPct": 10.38,
-        "unrealizedPnl": 2.68,
+        "slDistPct": 11.3,
+        "tpDistPct": 27.7,
+        "unrealizedPct": 10.17,
+        "unrealizedPnl": 2.62,
         "since": "2026-06-18T16:01"
       },
       {
         "symbol": "AUSDT",
         "side": "short",
         "entry": 0.06758,
-        "currentPrice": 0.06014,
+        "currentPrice": 0.0605,
         "sl": 0.0676,
         "tp": 0.04024,
-        "slDistPct": 12.4,
-        "tpDistPct": 33.09,
-        "unrealizedPct": 11.01,
-        "unrealizedPnl": 2.46,
+        "slDistPct": 11.74,
+        "tpDistPct": 33.49,
+        "unrealizedPct": 10.48,
+        "unrealizedPnl": 2.34,
         "since": "2026-06-18T16:01"
       }
     ],
-    "totalUnrealizedPnl": 10.3
+    "totalUnrealizedPnl": 9.86
   }
 }
