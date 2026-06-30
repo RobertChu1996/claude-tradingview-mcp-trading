@@ -530,6 +530,22 @@ async function run() {
     }
   }
 
+  // 取得 BTC 趨勢方向（一次性，供出場收緊SL及進場過濾使用）
+  let btcTrend = 0;
+  let btcOverheated = false;
+  try {
+    const btcRaw    = await fetchCandles4H("BTCUSDT", SMA_PERIOD + SMA_PREV_OFFSET + 10);
+    const btcC      = completed4H(btcRaw);
+    btcTrend        = btcTrendDir(btcC);
+    const btcCloses = btcC.map(c => c.close);
+    const btcSma25  = btcCloses.slice(-SMA_PERIOD).reduce((a, b) => a + b, 0) / SMA_PERIOD;
+    const btcPrice  = btcCloses[btcCloses.length - 1];
+    btcOverheated   = btcPrice > btcSma25 * 1.03;
+    log(`[DMC] BTC 趨勢: ${btcTrend === 1 ? "上漲↑（只做多）" : btcTrend === -1 ? "下跌↓（只做空）" : "橫盤→（雙向）"} | 動能: ${btcOverheated ? `過熱(${((btcPrice/btcSma25-1)*100).toFixed(1)}% > SMA25，跳多頭)` : "正常"}`);
+  } catch(e) {
+    log(`⚠️ BTC 趨勢取得失敗，跳過過濾: ${e.message}`);
+  }
+
   // Step 1：檢查出場
   for (const pos of [...positions.open]) {
     if (CONFIG.paperTrading) {
@@ -571,7 +587,32 @@ async function run() {
     }
   }
 
-  // Step 2：更新追蹤止損
+  // Step 2a：趨勢翻轉收緊止損（選項B）
+  // 當 BTC 趨勢與持倉方向相反時，將 SL 移到保本點（進場價），避免獲利轉虧
+  for (const pos of positions.open) {
+    try {
+      const againstTrend = (btcTrend === -1 && pos.side === "long") ||
+                           (btcTrend ===  1 && pos.side === "short");
+      if (!againstTrend) continue;
+
+      const breakeven = pos.entryPrice;
+      const alreadyAtBreakeven = pos.side === "long"
+        ? pos.currentSL >= breakeven
+        : pos.currentSL <= breakeven;
+      if (alreadyAtBreakeven) continue;
+
+      log(`[DMC] 趨勢翻轉 ${pos.symbol}(${pos.side})：SL 移至保本 $${breakeven.toFixed(6)}`);
+      if (CONFIG.paperTrading) {
+        pos.currentSL = breakeven;
+      } else {
+        const newAlgoId = await updateOCO(pos, breakeven);
+        pos.currentSL = breakeven;
+        pos.algoId    = newAlgoId;
+      }
+    } catch(e) { log(`⚠️ 趨勢收緊SL失敗 ${pos.symbol}: ${e.message}`); }
+  }
+
+  // Step 2b：更新追蹤止損
   for (const pos of positions.open) {
     try {
       const raw   = await fetchCandles4H(pos.symbol, 5);
@@ -610,22 +651,6 @@ async function run() {
 
   const SYMBOLS = loadSymbols();
   log(`[DMC] 掃描 ${SYMBOLS.length} 幣種... 今日損失 $${todayLoss.toFixed(2)}/$${dailyLossLimit.toFixed(2)}`);
-
-  // 取得 BTC 趨勢方向（一次性，供所有幣種過濾使用）
-  let btcTrend = 0;
-  let btcOverheated = false;  // BTC 動能過熱（代理資金費率偏高）
-  try {
-    const btcRaw    = await fetchCandles4H("BTCUSDT", SMA_PERIOD + SMA_PREV_OFFSET + 10);
-    const btcC      = completed4H(btcRaw);
-    btcTrend        = btcTrendDir(btcC);
-    const btcCloses = btcC.map(c => c.close);
-    const btcSma25  = btcCloses.slice(-SMA_PERIOD).reduce((a, b) => a + b, 0) / SMA_PERIOD;
-    const btcPrice  = btcCloses[btcCloses.length - 1];
-    btcOverheated   = btcPrice > btcSma25 * 1.03;
-    log(`[DMC] BTC 趨勢: ${btcTrend === 1 ? "上漲↑（只做多）" : btcTrend === -1 ? "下跌↓（只做空）" : "橫盤→（雙向）"} | 動能: ${btcOverheated ? `過熱(${((btcPrice/btcSma25-1)*100).toFixed(1)}% > SMA25，跳多頭)` : "正常"}`);
-  } catch(e) {
-    log(`⚠️ BTC 趨勢取得失敗，跳過過濾: ${e.message}`);
-  }
 
   const cooldownMs = COOLDOWN_BARS * 4 * 3600 * 1000;
 
