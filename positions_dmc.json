@@ -25,18 +25,6 @@
       "algoId": "3685244748153229312"
     },
     {
-      "symbol": "ZECUSDT",
-      "side": "short",
-      "entryPrice": 434.65,
-      "initialSL": 487.85864285714285,
-      "currentSL": 434.65,
-      "tp": 275.02407142857135,
-      "quantity": 0.05606928510402281,
-      "entryTime": 1782086452189,
-      "orderId": "3677030845629816832",
-      "algoId": "3695391593827405824"
-    },
-    {
       "symbol": "KITEUSDT",
       "side": "short",
       "entryPrice": 0.147,
@@ -304,6 +292,21 @@
       "exitTime": 1782942333534,
       "exitState": "reconcile",
       "pnl": null
+    },
+    {
+      "symbol": "ZECUSDT",
+      "side": "short",
+      "entryPrice": 434.65,
+      "initialSL": 487.85864285714285,
+      "currentSL": 434.65,
+      "tp": 275.02407142857135,
+      "quantity": 0.05606928510402281,
+      "entryTime": 1782086452189,
+      "orderId": "3677030845629816832",
+      "algoId": "3695391593827405824",
+      "exitTime": 1782990933436,
+      "exitState": "reconcile",
+      "pnl": null
     }
   ],
   "cooldown": {
@@ -321,6 +324,7 @@
     "NEOUSDT": 1782338451387,
     "DOGEUSDT": 1782339338817,
     "PENGUUSDT": 1782572452150,
-    "BATUSDT": 1782942333534
+    "BATUSDT": 1782942333534,
+    "ZECUSDT": 1782990933436
   }
 }
