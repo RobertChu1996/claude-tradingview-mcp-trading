@@ -49,18 +49,6 @@
       "algoId": "3707471998378315776"
     },
     {
-      "symbol": "ETCUSDT",
-      "side": "long",
-      "entryPrice": 7.338,
-      "initialSL": 7.034189285714286,
-      "currentSL": 7.034189285714286,
-      "tp": 8.249432142857144,
-      "quantity": 10.228951366738572,
-      "entryTime": 1783166462101,
-      "orderId": "3713269884720472064",
-      "algoId": "3713269892943450112"
-    },
-    {
       "symbol": "ARUSDT",
       "side": "long",
       "entryPrice": 2.096,
@@ -361,6 +349,21 @@
       "exitTime": 1783110654346,
       "exitState": "reconcile",
       "pnl": null
+    },
+    {
+      "symbol": "ETCUSDT",
+      "side": "long",
+      "entryPrice": 7.338,
+      "initialSL": 7.034189285714286,
+      "currentSL": 7.034189285714286,
+      "tp": 8.249432142857144,
+      "quantity": 10.228951366738572,
+      "entryTime": 1783166462101,
+      "orderId": "3713269884720472064",
+      "algoId": "3713269892943450112",
+      "exitTime": 1783235729076,
+      "exitState": "reconcile",
+      "pnl": null
     }
   ],
   "cooldown": {
@@ -381,6 +384,7 @@
     "BATUSDT": 1782942333534,
     "ZECUSDT": 1782990933436,
     "AUCTIONUSDT": 1783077330782,
-    "AUSDT": 1783110654346
+    "AUSDT": 1783110654346,
+    "ETCUSDT": 1783235729076
   }
 }
