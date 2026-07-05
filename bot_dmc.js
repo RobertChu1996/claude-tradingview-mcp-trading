@@ -22,7 +22,7 @@ const VOL_RATIO       = 1.5;
 const STRENGTH        = 0.7;
 const SWING_LB        = 8;
 const ATR_MULT        = 0.05;
-const TP_RATIO        = 3.0;
+const TP_RATIO        = 1.25;
 const SMA_PREV_OFFSET = 5;   // 用幾根前的SMA判斷趨勢方向
 const COOLDOWN_BARS   = 2;   // 止損/止盈後冷卻 2 根4H棒（= 8小時）
 const MIN_PRICE       = 0.001; // 微價幣過濾（PEPE/SHIB等浮點問題）

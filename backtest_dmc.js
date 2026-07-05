@@ -34,12 +34,14 @@ const MS_CANDLE     = 4 * 3600 * 1000;
 
 // ─── 幣種清單（與 bot_dmc.js 靜態清單一致）──────────────────────────────────
 const WATCHLIST = [
-  "BTCUSDT","ETHUSDT","SOLUSDT","BNBUSDT","XRPUSDT",
-  "DOGEUSDT","ADAUSDT","AVAXUSDT","DOTUSDT","LINKUSDT",
-  "LTCUSDT","UNIUSDT","ATOMUSDT","NEARUSDT","FTMUSDT",
-  "MATICUSDT","SANDUSDT","MANAUSDT","AXSUSDT","GALAUSDT",
-  "APEUSDT","OPUSDT","ARBUSDT","SUIUSDT","SEIUSDT",
-  "TIAUSDT","INJUSDT","STXUSDT","ONDOUSDT","TONUSDT",
+  "BTCUSDT",
+  "APEUSDT","ETCUSDT","FILUSDT","EIGENUSDT","ETHUSDT","ENSUSDT","CROUSDT","PYTHUSDT","BCHUSDT",
+  "ZILUSDT","BIGTIMEUSDT","SNXUSDT","GALAUSDT","BIOUSDT","BLURUSDT","SUSDT","DOGEUSDT","ARBUSDT",
+  "SUSHIUSDT","LINKUSDT","HUMAUSDT","PENGUUSDT","DOODUSDT","IOTAUSDT","PNUTUSDT","YGGUSDT",
+  "ZKUSDT","ZENUSDT","RESOLVUSDT","STRKUSDT","AGLDUSDT","INJUSDT","TRXUSDT","WLFIUSDT",
+  "WIFUSDT","ZROUSDT","ZECUSDT","OPUSDT","BATUSDT","AAVEUSDT","NEARUSDT","ATOMUSDT",
+  "COREUSDT","LAYERUSDT","SOLUSDT","KITEUSDT","KATUSDT","JUPUSDT","MOVEUSDT",
+  "ARUSDT","DYDXUSDT","UNIUSDT","SEIUSDT","TIAUSDT","OPUSDT",
 ].slice(0, SYMBOL_LIMIT);
 
 // ─── Binance 4H 歷史資料 ──────────────────────────────────────────────────────
@@ -138,8 +140,11 @@ function dailyTrend(dailyCandles, ts, band = 0.001) {
 }
 
 // ─── 追蹤止損（trailStart = 開始移動的 R 倍數門檻）──────────────────────────
-function trailingSL(pos, price, trailStart = 1.0) {
-  const risk = Math.abs(pos.entryPrice - pos.stopLoss);
+function trailingSL(pos, price, trailStart = 1.0, fixTrail = false) {
+  // fixTrail=true: 用 initialSL 計算 R，避免 trendTightenSL 把 risk 壓成 0
+  const risk = fixTrail
+    ? Math.abs(pos.entryPrice - (pos.initialSL ?? pos.stopLoss))
+    : Math.abs(pos.entryPrice - pos.stopLoss);
   if (!risk) return pos.stopLoss;
   const profit  = pos.side === "long" ? price - pos.entryPrice : pos.entryPrice - price;
   const profitR = profit / risk;
@@ -152,8 +157,8 @@ function trailingSL(pos, price, trailStart = 1.0) {
 }
 
 // ─── 出場判斷（用 high/low 觸發，更準確）────────────────────────────────────
-function checkExit(pos, candle, trailStart = 1.0) {
-  const sl = trailingSL(pos, candle.close, trailStart);
+function checkExit(pos, candle, trailStart = 1.0, fixTrail = false) {
+  const sl = trailingSL(pos, candle.close, trailStart, fixTrail);
   pos.stopLoss = sl;
 
   if (pos.side === "long") {
@@ -232,46 +237,99 @@ function calcMDD(trades) {
 }
 
 // ─── BTC 趨勢方向（給定時間點的 SMA25 方向）────────────────────────────────
-function btcTrend(btcCandles, ts) {
+// method: "sma_slope"（SMA斜率，預設）| "price_vs_sma"（價格 vs SMA）
+function btcTrend(btcCandles, ts, opts = {}) {
+  const { band = 0.001, prevOffset = SMA_PREV_OFFSET, method = "sma_slope" } = opts;
   const idx = btcCandles.findIndex(c => c.time === ts);
-  if (idx < SMA_PERIOD + SMA_PREV_OFFSET) return 0;
-  const closes  = btcCandles.slice(0, idx + 1).map(c => c.close);
-  const smaNow  = smaOf(closes, SMA_PERIOD);
-  const smaPrev = smaOf(closes.slice(0, -SMA_PREV_OFFSET), SMA_PERIOD);
-  if (smaNow > smaPrev * 1.001) return  1;  // 上漲
-  if (smaNow < smaPrev * 0.999) return -1;  // 下跌
-  return 0;                                  // 橫盤
+  if (idx < SMA_PERIOD + prevOffset) return 0;
+  const closes = btcCandles.slice(0, idx + 1).map(c => c.close);
+  const smaNow = smaOf(closes, SMA_PERIOD);
+
+  if (method === "price_vs_sma") {
+    const price = closes[closes.length - 1];
+    if (price > smaNow * (1 + band)) return  1;
+    if (price < smaNow * (1 - band)) return -1;
+    return 0;
+  }
+
+  // sma_slope（預設）
+  const smaPrev = smaOf(closes.slice(0, -prevOffset), SMA_PERIOD);
+  if (smaNow > smaPrev * (1 + band)) return  1;
+  if (smaNow < smaPrev * (1 - band)) return -1;
+  return 0;
 }
 
 // ─── 核心模擬 ─────────────────────────────────────────────────────────────────
-// opts: { btcFilter, maxSameDir, volRatio, timeFilter, partialTP, timeSL, timeSLBars, fundingProxy, dailyData }
+// opts: { btcFilter, maxSameDir, volRatio, timeFilter, partialTP, timeSL, timeSLBars,
+//         fundingProxy, dailyData, mtfBand, trailStart,
+//         atrFilter, tpRatio, lossStreakReduce, strictSidewaysShort }
 function runSimulation(allData, times, cutoff, maxOpen, opts = {}) {
   const {
-    btcFilter     = false,
-    maxSameDir    = maxOpen,
-    volRatio      = VOL_RATIO,
-    timeFilter    = false,
-    partialTP     = false,
-    timeSL        = false,
-    timeSLBars    = 10,   // 持倉超過 N 棒未達 0.5R → 平倉
-    fundingProxy  = false, // BTC 動能過熱（>3% 超 SMA25）→ 跳過做多（代理高資金費）
-    dailyData     = null,
-    mtfBand       = 0.001,
-    trailStart    = 1.0,
+    btcFilter           = false,
+    btcBand             = 0.001,
+    btcPrevOffset       = SMA_PREV_OFFSET,
+    btcMethod           = "sma_slope",
+    trendExit           = false,  // A: 趨勢翻轉時平掉反向持倉
+    trendTightenSL      = false,  // B: 趨勢翻轉時將反向持倉 SL 移到保本
+    fixTrailAfterBreakeven = false, // 修正：保本後仍用 initialSL 計算追蹤止損 R 值
+    maxSameDir          = maxOpen,
+    volRatio            = VOL_RATIO,
+    timeFilter          = false,
+    partialTP           = false,
+    timeSL              = false,
+    timeSLBars          = 10,
+    fundingProxy        = false,
+    dailyData           = null,
+    mtfBand             = 0.001,
+    trailStart          = 1.0,
+    atrFilter           = false,
+    tpRatio             = TP_RATIO,
+    lossStreakReduce    = false,
+    strictSidewaysShort = false,
   } = opts;
 
-  const btcCandles = allData["BTCUSDT"] || [];
-  const openPos    = [];
-  const trades     = [];
-  const cooldown   = {};
+  const btcCandles  = allData["BTCUSDT"] || [];
+  const openPos     = [];
+  const trades      = [];
+  const cooldown    = {};
+  let   lossStreak  = 0;  // 連虧計數（供 lossStreakReduce 使用）
 
   for (const ts of times) {
     // ── 出場 ──────────────────────────────────────────────────────────────────
+    const curTrend = btcFilter ? btcTrend(btcCandles, ts, { band: btcBand, prevOffset: btcPrevOffset, method: btcMethod }) : 0;
+
     for (const pos of [...openPos]) {
       const candles = allData[pos.symbol];
       const idx     = candles.findIndex(c => c.time === ts);
       if (idx < 0) continue;
       const candle  = candles[idx];
+
+      // 趨勢翻轉出場
+      if (trendExit || trendTightenSL) {
+        const againstTrend = (curTrend === -1 && pos.side === "long") ||
+                             (curTrend ===  1 && pos.side === "short");
+        if (againstTrend) {
+          if (trendExit) {
+            // A: 直接平倉
+            const pnl = pos.side === "long"
+              ? (candle.close - pos.entryPrice) * pos.quantity
+              : (pos.entryPrice - candle.close) * pos.quantity;
+            const win = pnl > 0;
+            trades.push({ entryTime: pos.entryTime, exitTime: ts, symbol: pos.symbol, side: pos.side, pnl, win, reason: "趨勢翻轉平倉" });
+            if (lossStreakReduce) lossStreak = win ? 0 : lossStreak + 1;
+            cooldown[pos.symbol] = ts;
+            openPos.splice(openPos.indexOf(pos), 1);
+            continue;
+          } else if (trendTightenSL) {
+            // B: 移 SL 到保本（只收緊，不放鬆）
+            if (pos.side === "long" && pos.stopLoss < pos.entryPrice) {
+              pos.stopLoss = pos.entryPrice;
+            } else if (pos.side === "short" && pos.stopLoss > pos.entryPrice) {
+              pos.stopLoss = pos.entryPrice;
+            }
+          }
+        }
+      }
 
       // 時間止損：持倉 ≥ timeSLBars 根且未達 0.5R 獲利 → 平倉
       if (timeSL) {
@@ -309,12 +367,14 @@ function runSimulation(allData, times, cutoff, maxOpen, opts = {}) {
         }
       }
 
-      const { exit, ep, reason } = checkExit(pos, candle, trailStart);
+      const { exit, ep, reason } = checkExit(pos, candle, trailStart, fixTrailAfterBreakeven);
       if (exit) {
         const pnl = pos.side === "long"
           ? (ep - pos.entryPrice) * pos.quantity
           : (pos.entryPrice - ep) * pos.quantity;
-        trades.push({ entryTime: pos.entryTime, exitTime: ts, symbol: pos.symbol, side: pos.side, pnl, win: pnl > 0, reason });
+        const win = pnl > 0;
+        trades.push({ entryTime: pos.entryTime, exitTime: ts, symbol: pos.symbol, side: pos.side, pnl, win, reason });
+        if (lossStreakReduce) lossStreak = win ? 0 : lossStreak + 1;
         cooldown[pos.symbol] = ts;
         openPos.splice(openPos.indexOf(pos), 1);
       }
@@ -329,7 +389,7 @@ function runSimulation(allData, times, cutoff, maxOpen, opts = {}) {
       if (hourUtc < 8) continue;
     }
 
-    const trend = btcFilter ? btcTrend(btcCandles, ts) : 0;
+    const trend = curTrend;
 
     for (const [symbol, candles] of Object.entries(allData)) {
       if (symbol === "BTCUSDT") continue;
@@ -351,7 +411,7 @@ function runSimulation(allData, times, cutoff, maxOpen, opts = {}) {
         if (trend === -1 && sig.side === "long")  continue;
       }
 
-      // 資金費代理過濾：BTC 比 SMA25 高 >3% 時跳過做多（動能過熱，資金費貴）
+      // 資金費代理過濾：BTC 比 SMA25 高 >3% 時跳過做多
       if (fundingProxy && sig.side === "long") {
         const btcIdx = btcCandles.findIndex(c => c.time === ts);
         if (btcIdx >= SMA_PERIOD) {
@@ -360,6 +420,20 @@ function runSimulation(allData, times, cutoff, maxOpen, opts = {}) {
           const btcPrice  = btcCandles[btcIdx].close;
           if (btcPrice > btcSma * 1.03) continue;
         }
+      }
+
+      // ATR 波動率過濾：ATR/price < 0.5% 或 > 8% 跳過（太平靜或太亂）
+      if (atrFilter) {
+        const atr    = atrOf(slice, 14);
+        const atrPct = atr / price;
+        if (atrPct < 0.005 || atrPct > 0.08) continue;
+      }
+
+      // 空頭嚴格確認：BTC 橫盤（trend=0）時，空頭需量能 > 2x 才進場
+      if (strictSidewaysShort && sig.side === "short" && trend === 0) {
+        const last  = slice[slice.length - 1];
+        const volR  = last.volume / avgVolOf(slice, 20);
+        if (volR < 2.0) continue;
       }
 
       // 多時框確認：個幣 1D SMA 方向需與信號一致
@@ -372,12 +446,19 @@ function runSimulation(allData, times, cutoff, maxOpen, opts = {}) {
       const sameDirCount = openPos.filter(p => p.side === sig.side).length;
       if (sameDirCount >= maxSameDir) continue;
 
-      const slPct   = Math.abs(price - sig.stopLoss) / price;
-      const rawSize = slPct > 0.001 ? (PORTFOLIO * RISK_PCT) / slPct : PORTFOLIO * RISK_PCT;
-      const size    = Math.min(rawSize, MAX_TRADE_USD);
+      const slPct    = Math.abs(price - sig.stopLoss) / price;
+      const riskMult = (lossStreakReduce && lossStreak >= 3) ? 0.5 : 1.0;
+      const rawSize  = slPct > 0.001 ? (PORTFOLIO * RISK_PCT * riskMult) / slPct : PORTFOLIO * RISK_PCT * riskMult;
+      const size     = Math.min(rawSize, MAX_TRADE_USD);
+
+      // 套用可調 TP 比例
+      const tp = sig.side === "long"
+        ? price + (price - sig.stopLoss) * tpRatio
+        : price - (sig.stopLoss - price) * tpRatio;
+
       openPos.push({
         symbol, side: sig.side, entryPrice: price,
-        entryTime: ts, stopLoss: sig.stopLoss, tp: sig.tp,
+        entryTime: ts, stopLoss: sig.stopLoss, initialSL: sig.stopLoss, tp,
         quantity: size / price, halfClosed: false,
       });
     }
@@ -454,16 +535,16 @@ async function main() {
     }
     console.log(`\n完成（${Object.keys(dailyData).length} 幣）\n`);
 
-    // 現行最佳設定（BTC過濾 + 1D MTF + trailing 0.75R）作為所有方案基底
-    const BASE_BEST = { btcFilter: true, dailyData, mtfBand: 0.001, trailStart: 0.75 };
+    // 現行最佳設定（BTC過濾 + 1D MTF + trailing 0.75R + 資金費代理 + Step2a）
+    const BASE_BEST = { btcFilter: true, dailyData, mtfBand: 0.001, trailStart: 0.75, fundingProxy: true, trendTightenSL: true };
 
     const scenarios = [
-      { label: "現行最佳（基準）",                  opts: { ...BASE_BEST } },
-      { label: "+時間止損 10棒",                   opts: { ...BASE_BEST, timeSL: true, timeSLBars: 10 } },
-      { label: "+時間止損 15棒",                   opts: { ...BASE_BEST, timeSL: true, timeSLBars: 15 } },
-      { label: "+時間止損 20棒",                   opts: { ...BASE_BEST, timeSL: true, timeSLBars: 20 } },
-      { label: "+資金費代理過濾",                   opts: { ...BASE_BEST, fundingProxy: true } },
-      { label: "+資金費代理 + 時間止損15棒",        opts: { ...BASE_BEST, fundingProxy: true, timeSL: true, timeSLBars: 15 } },
+      { label: "現行（3:1 TP）",        opts: { ...BASE_BEST, tpRatio: 3.0 } },
+      { label: "2:1 TP",               opts: { ...BASE_BEST, tpRatio: 2.0 } },
+      { label: "1.5:1 TP",             opts: { ...BASE_BEST, tpRatio: 1.5 } },
+      { label: "1.25:1 TP",            opts: { ...BASE_BEST, tpRatio: 1.25 } },
+      { label: "1.1:1 TP",             opts: { ...BASE_BEST, tpRatio: 1.1 } },
+      { label: "1.0:1 TP",             opts: { ...BASE_BEST, tpRatio: 1.0 } },
     ];
 
     const results = [];
@@ -481,7 +562,7 @@ async function main() {
     }
 
     console.log(`\n${"═".repeat(80)}`);
-    console.log("  優化方案比較（12個月, 30幣, MAX_OPEN=6, BTC過濾為基底）");
+    console.log(`  優化方案比較（${MONTHS}個月, ${MAX_OPEN === 6 ? "30" : SYMBOL_LIMIT}幣, MAX_OPEN=6, BTC過濾為基底）`);
     console.log(`${"─".repeat(80)}`);
     console.log(`  ${"方案".padEnd(28)} ${"筆數".padStart(5)}  ${"勝率".padStart(6)}  ${"總損益".padStart(9)}  ${"PF".padStart(6)}  ${"MDD".padStart(7)}`);
     console.log(`  ${"─".repeat(75)}`);
