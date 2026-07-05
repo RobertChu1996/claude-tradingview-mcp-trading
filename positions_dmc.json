@@ -49,18 +49,6 @@
       "algoId": "3707471998378315776"
     },
     {
-      "symbol": "ARUSDT",
-      "side": "long",
-      "entryPrice": 2.096,
-      "initialSL": 1.9910750000000002,
-      "currentSL": 1.9910750000000002,
-      "tp": 2.410775,
-      "quantity": 29.617965414559766,
-      "entryTime": 1783166462101,
-      "orderId": "3713270371897270272",
-      "algoId": "3713270380321574912"
-    },
-    {
       "symbol": "BCHUSDT",
       "side": "long",
       "entryPrice": 240.9,
@@ -376,6 +364,21 @@
       "exitTime": 1783235729076,
       "exitState": "reconcile",
       "pnl": null
+    },
+    {
+      "symbol": "ARUSDT",
+      "side": "long",
+      "entryPrice": 2.096,
+      "initialSL": 1.9910750000000002,
+      "currentSL": 1.9910750000000002,
+      "tp": 2.410775,
+      "quantity": 29.617965414559766,
+      "entryTime": 1783166462101,
+      "orderId": "3713270371897270272",
+      "algoId": "3713270380321574912",
+      "exitTime": 1783246529870,
+      "exitState": "reconcile",
+      "pnl": null
     }
   ],
   "cooldown": {
@@ -397,6 +400,7 @@
     "ZECUSDT": 1782990933436,
     "AUCTIONUSDT": 1783077330782,
     "AUSDT": 1783110654346,
-    "ETCUSDT": 1783235729076
+    "ETCUSDT": 1783235729076,
+    "ARUSDT": 1783246529870
   }
 }
