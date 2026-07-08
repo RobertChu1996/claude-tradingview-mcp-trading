@@ -25,18 +25,6 @@
       "algoId": "3695391618322141184"
     },
     {
-      "symbol": "WIFUSDT",
-      "side": "long",
-      "entryPrice": 0.1796,
-      "initialSL": 0.159795,
-      "currentSL": 0.159795,
-      "tp": 0.23901500000000006,
-      "quantity": 158.9331509569318,
-      "entryTime": 1782993656840,
-      "orderId": "3707471840938778624",
-      "algoId": "3707471850134835200"
-    },
-    {
       "symbol": "SOLUSDT",
       "side": "long",
       "entryPrice": 82.4,
@@ -391,6 +379,21 @@
       "exitTime": 1783246529870,
       "exitState": "reconcile",
       "pnl": null
+    },
+    {
+      "symbol": "WIFUSDT",
+      "side": "long",
+      "entryPrice": 0.1796,
+      "initialSL": 0.159795,
+      "currentSL": 0.159795,
+      "tp": 0.23901500000000006,
+      "quantity": 158.9331509569318,
+      "entryTime": 1782993656840,
+      "orderId": "3707471840938778624",
+      "algoId": "3707471850134835200",
+      "exitTime": 1783476069509,
+      "exitState": "reconcile",
+      "pnl": null
     }
   ],
   "cooldown": {
@@ -413,6 +416,7 @@
     "AUCTIONUSDT": 1783077330782,
     "AUSDT": 1783110654346,
     "ETCUSDT": 1783235729076,
-    "ARUSDT": 1783246529870
+    "ARUSDT": 1783246529870,
+    "WIFUSDT": 1783476069509
   }
 }
