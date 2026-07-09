@@ -23,42 +23,6 @@
       "entryTime": 1782338450705,
       "orderId": "3685486773215649792",
       "algoId": "3695391618322141184"
-    },
-    {
-      "symbol": "SOLUSDT",
-      "side": "long",
-      "entryPrice": 82.4,
-      "initialSL": 72.162,
-      "currentSL": 72.162,
-      "tp": 113.114,
-      "quantity": 0.3074498002248522,
-      "entryTime": 1782993656840,
-      "orderId": "3707471990356664320",
-      "algoId": "3707471998378315776"
-    },
-    {
-      "symbol": "BCHUSDT",
-      "side": "long",
-      "entryPrice": 240.9,
-      "initialSL": 223.85357142857143,
-      "currentSL": 223.85357142857143,
-      "tp": 262.20803571428576,
-      "quantity": 0.17812043398004507,
-      "entryTime": 1783238463756,
-      "orderId": "3715685911500644352",
-      "algoId": "3715685918582771712"
-    },
-    {
-      "symbol": "TRXUSDT",
-      "side": "long",
-      "entryPrice": 0.32928,
-      "initialSL": 0.32269403571428573,
-      "currentSL": 0.32269403571428573,
-      "tp": 0.33751245535714286,
-      "quantity": 460.3377056254968,
-      "entryTime": 1783267260535,
-      "orderId": "3716652377960046592",
-      "algoId": "3716652385679708160"
     }
   ],
   "closed": [
@@ -394,6 +358,51 @@
       "exitTime": 1783476069509,
       "exitState": "reconcile",
       "pnl": null
+    },
+    {
+      "symbol": "SOLUSDT",
+      "side": "long",
+      "entryPrice": 82.4,
+      "initialSL": 72.162,
+      "currentSL": 72.162,
+      "tp": 113.114,
+      "quantity": 0.3074498002248522,
+      "entryTime": 1782993656840,
+      "orderId": "3707471990356664320",
+      "algoId": "3707471998378315776",
+      "exitTime": 1783556133224,
+      "exitState": "reconcile",
+      "pnl": null
+    },
+    {
+      "symbol": "BCHUSDT",
+      "side": "long",
+      "entryPrice": 240.9,
+      "initialSL": 223.85357142857143,
+      "currentSL": 223.85357142857143,
+      "tp": 262.20803571428576,
+      "quantity": 0.17812043398004507,
+      "entryTime": 1783238463756,
+      "orderId": "3715685911500644352",
+      "algoId": "3715685918582771712",
+      "exitTime": 1783556133224,
+      "exitState": "reconcile",
+      "pnl": null
+    },
+    {
+      "symbol": "TRXUSDT",
+      "side": "long",
+      "entryPrice": 0.32928,
+      "initialSL": 0.32269403571428573,
+      "currentSL": 0.32269403571428573,
+      "tp": 0.33751245535714286,
+      "quantity": 460.3377056254968,
+      "entryTime": 1783267260535,
+      "orderId": "3716652377960046592",
+      "algoId": "3716652385679708160",
+      "exitTime": 1783556133224,
+      "exitState": "reconcile",
+      "pnl": null
     }
   ],
   "cooldown": {
@@ -417,6 +426,9 @@
     "AUSDT": 1783110654346,
     "ETCUSDT": 1783235729076,
     "ARUSDT": 1783246529870,
-    "WIFUSDT": 1783476069509
+    "WIFUSDT": 1783476069509,
+    "SOLUSDT": 1783556133224,
+    "BCHUSDT": 1783556133224,
+    "TRXUSDT": 1783556133224
   }
 }
