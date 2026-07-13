@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-07-13",
-  "generatedAt": "2026-07-13T00:15:47.827Z",
+  "generatedAt": "2026-07-13T00:31:18.243Z",
   "balance": {
-    "totalEq": 295.8049,
+    "totalEq": 295.5009,
     "availBal": 247.0616,
-    "frozenBal": 48.7433
+    "frozenBal": 48.4393
   },
   "todayCombined": {
     "trades": 0,
@@ -12,7 +12,7 @@
     "losses": 0,
     "winRate": "N/A",
     "totalPnl": "0.0000",
-    "totalUnrealizedPnl": 4.76
+    "totalUnrealizedPnl": 4.46
   },
   "strategies": {
     "dmc": {
@@ -36,56 +36,56 @@
           "symbol": "ARBUSDT",
           "side": "long",
           "entry": 0.09771,
-          "currentPrice": 0.09413,
+          "currentPrice": 0.09355,
           "sl": 0.08966,
           "tp": 0.10711,
-          "slDistPct": 4.75,
-          "tpDistPct": 13.79,
-          "unrealizedPct": -3.66,
-          "unrealizedPnl": -1.37,
+          "slDistPct": 4.16,
+          "tpDistPct": 14.49,
+          "unrealizedPct": -4.26,
+          "unrealizedPnl": -1.6,
           "since": "2026-07-11T16:01"
         },
         {
           "symbol": "FILUSDT",
           "side": "long",
           "entry": 0.8092,
-          "currentPrice": 0.7839,
+          "currentPrice": 0.7808,
           "sl": 0.7599,
           "tp": 0.8791,
-          "slDistPct": 3.06,
-          "tpDistPct": 12.14,
-          "unrealizedPct": -3.13,
-          "unrealizedPnl": -1.43,
+          "slDistPct": 2.68,
+          "tpDistPct": 12.59,
+          "unrealizedPct": -3.51,
+          "unrealizedPnl": -1.6,
           "since": "2026-07-10T12:01"
         },
         {
           "symbol": "KITEUSDT",
           "side": "short",
           "entry": 0.1496,
-          "currentPrice": 0.12259,
+          "currentPrice": 0.12275,
           "sl": 0.147,
           "tp": 0.08853,
-          "slDistPct": 19.91,
-          "tpDistPct": 27.78,
-          "unrealizedPct": 18.05,
-          "unrealizedPnl": 4.05,
+          "slDistPct": 19.76,
+          "tpDistPct": 27.88,
+          "unrealizedPct": 17.95,
+          "unrealizedPnl": 4.03,
           "since": "2026-06-24T22:01"
         },
         {
           "symbol": "BIGTIMEUSDT",
           "side": "short",
           "entry": 0.0083144161290324,
-          "currentPrice": 0.007181,
+          "currentPrice": 0.007143,
           "sl": 0.008313,
           "tp": 0.0054,
-          "slDistPct": 15.76,
-          "tpDistPct": 24.8,
-          "unrealizedPct": 13.63,
-          "unrealizedPnl": 3.51,
+          "slDistPct": 16.38,
+          "tpDistPct": 24.4,
+          "unrealizedPct": 14.09,
+          "unrealizedPnl": 3.63,
           "since": "2026-06-18T16:01"
         }
       ],
-      "totalUnrealizedPnl": 4.76
+      "totalUnrealizedPnl": 4.46
     }
   },
   "strategy": {
@@ -109,55 +109,55 @@
         "symbol": "ARBUSDT",
         "side": "long",
         "entry": 0.09771,
-        "currentPrice": 0.09413,
+        "currentPrice": 0.09355,
         "sl": 0.08966,
         "tp": 0.10711,
-        "slDistPct": 4.75,
-        "tpDistPct": 13.79,
-        "unrealizedPct": -3.66,
-        "unrealizedPnl": -1.37,
+        "slDistPct": 4.16,
+        "tpDistPct": 14.49,
+        "unrealizedPct": -4.26,
+        "unrealizedPnl": -1.6,
         "since": "2026-07-11T16:01"
       },
       {
         "symbol": "FILUSDT",
         "side": "long",
         "entry": 0.8092,
-        "currentPrice": 0.7839,
+        "currentPrice": 0.7808,
         "sl": 0.7599,
         "tp": 0.8791,
-        "slDistPct": 3.06,
-        "tpDistPct": 12.14,
-        "unrealizedPct": -3.13,
-        "unrealizedPnl": -1.43,
+        "slDistPct": 2.68,
+        "tpDistPct": 12.59,
+        "unrealizedPct": -3.51,
+        "unrealizedPnl": -1.6,
         "since": "2026-07-10T12:01"
       },
       {
         "symbol": "KITEUSDT",
         "side": "short",
         "entry": 0.1496,
-        "currentPrice": 0.12259,
+        "currentPrice": 0.12275,
         "sl": 0.147,
         "tp": 0.08853,
-        "slDistPct": 19.91,
-        "tpDistPct": 27.78,
-        "unrealizedPct": 18.05,
-        "unrealizedPnl": 4.05,
+        "slDistPct": 19.76,
+        "tpDistPct": 27.88,
+        "unrealizedPct": 17.95,
+        "unrealizedPnl": 4.03,
         "since": "2026-06-24T22:01"
       },
       {
         "symbol": "BIGTIMEUSDT",
         "side": "short",
         "entry": 0.0083144161290324,
-        "currentPrice": 0.007181,
+        "currentPrice": 0.007143,
         "sl": 0.008313,
         "tp": 0.0054,
-        "slDistPct": 15.76,
-        "tpDistPct": 24.8,
-        "unrealizedPct": 13.63,
-        "unrealizedPnl": 3.51,
+        "slDistPct": 16.38,
+        "tpDistPct": 24.4,
+        "unrealizedPct": 14.09,
+        "unrealizedPnl": 3.63,
         "since": "2026-06-18T16:01"
       }
     ],
-    "totalUnrealizedPnl": 4.76
+    "totalUnrealizedPnl": 4.46
   }
 }
