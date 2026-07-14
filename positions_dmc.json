@@ -23,18 +23,6 @@
       "entryTime": 1782338450705,
       "orderId": "3685486773215649792",
       "algoId": "3695391618322141184"
-    },
-    {
-      "symbol": "EGLDUSDT",
-      "side": "long",
-      "entryPrice": 3.135,
-      "initialSL": 2.889042857142857,
-      "currentSL": 3.135,
-      "tp": 3.4424464285714285,
-      "quantity": 11.895182067327857,
-      "entryTime": 1783929671137,
-      "orderId": "3738879199292383232",
-      "algoId": "3741294754735591424"
     }
   ],
   "closed": [
@@ -445,6 +433,21 @@
       "exitTime": 1783964733409,
       "exitState": "reconcile",
       "pnl": null
+    },
+    {
+      "symbol": "EGLDUSDT",
+      "side": "long",
+      "entryPrice": 3.135,
+      "initialSL": 2.889042857142857,
+      "currentSL": 3.135,
+      "tp": 3.4424464285714285,
+      "quantity": 11.895182067327857,
+      "entryTime": 1783929671137,
+      "orderId": "3738879199292383232",
+      "algoId": "3741294754735591424",
+      "exitTime": 1784034929621,
+      "exitState": "reconcile",
+      "pnl": null
     }
   ],
   "cooldown": {
@@ -473,6 +476,7 @@
     "BCHUSDT": 1783556133224,
     "TRXUSDT": 1783556133224,
     "FILUSDT": 1783912532574,
-    "ARBUSDT": 1783964733409
+    "ARBUSDT": 1783964733409,
+    "EGLDUSDT": 1784034929621
   }
 }
