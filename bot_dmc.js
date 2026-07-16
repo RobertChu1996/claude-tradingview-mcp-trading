@@ -1,7 +1,7 @@
 /**
  * Strategy B: DMC — SMA25 + Volume + Candle Strength (4H)
  * 最優化參數（2026-05-29 網格搜索）：
- *   SMA=25, VolRatio=1.5, Strength=0.7, SwingLB=8, ATRx=0.05, TP=3:1
+ *   SMA=25, VolRatio=1.5, Strength=0.7, SwingLB=8, ATRx=0.05, TP=1.25:1
  * 回測結果（OKX 4H, ~9個月, 48幣）：PF=2.09, 勝率=40%, MDD=4.2%, 淨PnL=+$257
  * 每15分鐘掃一次，模擬盤模式
  */
@@ -465,8 +465,24 @@ async function reconcileWithOKX(positions) {
           changed = true;
         }
       } else {
-        log(`[reconcile] ⚠️ ${pos.symbol} 不在 OKX 持倉，標記平倉`);
-        positions.closed.push({ ...pos, exitTime: now, exitState: "reconcile", pnl: null });
+        // 查 OKX 平倉歷史取得真實出場價與 PnL（OCO 在交易所端觸發時 bot 不在場）
+        let exitPrice = null, pnl = null;
+        try {
+          const hist = await okxGet(`/api/v5/account/positions-history?instType=SWAP&instId=${instId}&limit=10`);
+          const rec = (hist.data || []).find(h =>
+            h.direction === pos.side && parseInt(h.uTime) >= (pos.entryTime || 0));
+          if (rec) {
+            exitPrice = parseFloat(rec.closeAvgPx) || null;
+            const rp = parseFloat(rec.realizedPnl);
+            if (!isNaN(rp)) pnl = rp;
+          }
+        } catch (e) {
+          log(`[reconcile] 查詢 ${pos.symbol} 平倉歷史失敗: ${e.message}`);
+        }
+        const reason = pnl == null ? "OKX平倉" : pnl >= 0 ? "止盈" : "止損";
+        log(`[reconcile] ⚠️ ${pos.symbol} 不在 OKX 持倉，標記平倉 | 出場=${exitPrice ?? "?"} PnL=${pnl?.toFixed(2) ?? "?"}`);
+        appendCsv(pos, exitPrice, pnl, reason);
+        positions.closed.push({ ...pos, exitTime: now, exitState: "reconcile", exitPrice, pnl });
         positions.cooldown[pos.symbol] = now;
         positions.open = positions.open.filter(p => p !== pos);
         changed = true;
