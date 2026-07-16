@@ -27,6 +27,9 @@ const SMA_PREV_OFFSET = 5;   // 用幾根前的SMA判斷趨勢方向
 const COOLDOWN_BARS   = 2;   // 止損/止盈後冷卻 2 根4H棒（= 8小時）
 const MIN_PRICE       = 0.001; // 微價幣過濾（PEPE/SHIB等浮點問題）
 
+// 多頭專屬品質門檻（2026-07 回測：三窗口勝率/PnL/PF 全面優於基準，動態清單3月勝率 43.7%→49.4%）
+const LONG_MAX_SL_PCT = 0.10;  // 多單 SL 距離上限（空單維持 0.15）
+
 const CONFIG = {
   paperTrading:    process.env.DMC_PAPER_TRADING !== "false",
   portfolioValue:  parseFloat(process.env.PORTFOLIO_VALUE_USD  || "1000"),
@@ -198,12 +201,12 @@ function checkSignal(candles) {
   // 微價幣過濾
   if (price < MIN_PRICE) return null;
 
-  // Long
+  // Long（SL 距離門檻比空頭嚴格）
   if (smaNow > smaPrev && price > smaNow && volR > VOL_RATIO &&
       last.close > last.open && strength > STRENGTH && rec3 > prev3) {
     const sl    = swingLowOf(candles, SWING_LB) - atr * ATR_MULT;
     const slPct = (price - sl) / price;
-    if (sl >= price || slPct < 0.003 || slPct > 0.15) return null;
+    if (sl >= price || slPct < 0.003 || slPct > LONG_MAX_SL_PCT) return null;
     const tp = price + (price - sl) * TP_RATIO;
     return { side:"long", entry:price, sl, tp, slPct };
   }
