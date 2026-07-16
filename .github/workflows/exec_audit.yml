@@ -1,0 +1,27 @@
+name: Execution cost audit (one-off)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore trades CSV from state branch
+        run: |
+          git fetch origin state --depth=1
+          git show origin/state:trades_dmc.csv > trades_dmc.csv
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Run execution audit
+        env:
+          DATA_DIR: "."
+          OKX_API_KEY:    ${{ secrets.OKX_API_KEY }}
+          OKX_SECRET_KEY: ${{ secrets.OKX_SECRET_KEY }}
+          OKX_PASSPHRASE: ${{ secrets.OKX_PASSPHRASE }}
+        run: node analyze_execution.js
