@@ -30,6 +30,11 @@ const MIN_PRICE       = 0.001; // 微價幣過濾（PEPE/SHIB等浮點問題）
 // 多頭專屬品質門檻（2026-07 回測：三窗口勝率/PnL/PF 全面優於基準，動態清單3月勝率 43.7%→49.4%）
 const LONG_MAX_SL_PCT = 0.10;  // 多單 SL 距離上限（空單維持 0.15）
 
+// 時間止損：持倉 ≥ N 根 4H 且獲利 < 0.5R → 平倉釋放額度
+//（回測 20/30/42 棒皆有害、60 棒兩窗口無成本微幅更好；目的是清掉殭屍倉位）
+const TIME_SL_BARS  = 60;   // 60 根 4H = 10 天
+const TIME_SL_MIN_R = 0.5;
+
 const CONFIG = {
   paperTrading:    process.env.DMC_PAPER_TRADING !== "false",
   portfolioValue:  parseFloat(process.env.PORTFOLIO_VALUE_USD  || "1000"),
@@ -604,6 +609,48 @@ async function run() {
         }
       } catch(e) { log(`⚠️ 查詢OCO失敗 ${pos.symbol}: ${e.message}`); }
     }
+  }
+
+  // Step 1.5：時間止損 — 持倉 ≥ TIME_SL_BARS 根 4H 且獲利 < TIME_SL_MIN_R → 平倉釋放額度
+  for (const pos of [...positions.open]) {
+    try {
+      const barsHeld = (now - pos.entryTime) / (4 * 3600 * 1000);
+      if (barsHeld < TIME_SL_BARS) continue;
+
+      const raw = await fetchCandles4H(pos.symbol, 5);
+      const c   = completed4H(raw);
+      if (!c.length) continue;
+      const price  = c[c.length - 1].close;
+      const risk   = Math.abs(pos.entryPrice - (pos.initialSL ?? pos.currentSL));
+      if (!risk) continue;
+      const profit = pos.side === "long" ? price - pos.entryPrice : pos.entryPrice - price;
+      if (profit >= risk * TIME_SL_MIN_R) continue;
+
+      log(`[DMC] 時間止損 ${pos.symbol}(${pos.side})：持倉 ${barsHeld.toFixed(0)} 根4H、獲利 ${(profit / risk).toFixed(2)}R < ${TIME_SL_MIN_R}R，平倉`);
+      const sign = pos.side === "short" ? -1 : 1;
+      if (CONFIG.paperTrading) {
+        const pnl = sign * (price - pos.entryPrice) * pos.quantity;
+        appendCsv(pos, price, pnl, "時間止損");
+        positions.closed.push({ ...pos, exitTime: now, exitPrice: price, pnl });
+      } else {
+        const instId = toOkxInstId(pos.symbol) + "-SWAP";
+        const spec   = await fetchSpec(instId);
+        const sz     = String(floorLot(pos.quantity / spec.ctVal, spec.lotSz));
+        await okxPost("/api/v5/trade/cancel-algos", [{ algoId: pos.algoId, instId }]);
+        const closeRes = await closePosition(instId, pos.side === "short", sz);
+        if (closeRes.code !== "0") { log(`⚠️ 時間止損平倉失敗 ${pos.symbol}: ${closeRes.msg}`); continue; }
+        await new Promise(r => setTimeout(r, 3000));
+        let exitPrice = price, pnl = sign * (price - pos.entryPrice) * pos.quantity;
+        try {
+          const hist = await fetchClosedPnl(instId, pos.entryTime);
+          if (hist) { exitPrice = hist.exitPrice; pnl = hist.pnl; }
+        } catch {}
+        appendCsv(pos, exitPrice, pnl, "時間止損");
+        positions.closed.push({ ...pos, exitTime: now, exitPrice, pnl, exitState: "timeSL" });
+      }
+      positions.cooldown[pos.symbol] = now;
+      positions.open = positions.open.filter(p => p !== pos);
+    } catch (e) { log(`⚠️ 時間止損檢查失敗 ${pos.symbol}: ${e.message}`); }
   }
 
   // Step 2a：趨勢翻轉收緊止損（選項B）
