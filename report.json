@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-07-18",
-  "generatedAt": "2026-07-18T07:30:55.111Z",
+  "generatedAt": "2026-07-18T07:45:45.239Z",
   "balance": {
-    "totalEq": 299.2692,
+    "totalEq": 299.3348,
     "availBal": 232.2464,
-    "frozenBal": 67.0228
+    "frozenBal": 67.0883
   },
   "todayCombined": {
     "trades": 0,
@@ -12,7 +12,7 @@
     "losses": 0,
     "winRate": "N/A",
     "totalPnl": "0.0000",
-    "totalUnrealizedPnl": 10.74
+    "totalUnrealizedPnl": 10.82
   },
   "strategies": {
     "dmc": {
@@ -36,37 +36,37 @@
           "symbol": "INJUSDT",
           "side": "long",
           "entry": 5.091,
-          "currentPrice": 5.04,
+          "currentPrice": 5.05,
           "sl": 4.816,
           "tp": 5.449,
-          "slDistPct": 4.44,
-          "tpDistPct": 8.12,
-          "unrealizedPct": -1,
-          "unrealizedPnl": -0.54,
+          "slDistPct": 4.63,
+          "tpDistPct": 7.9,
+          "unrealizedPct": -0.81,
+          "unrealizedPnl": -0.43,
           "since": "2026-07-17T16:01"
         },
         {
           "symbol": "LDOUSDT",
           "side": "long",
           "entry": 0.3516,
-          "currentPrice": 0.3687,
+          "currentPrice": 0.3683,
           "sl": 0.351,
           "tp": 0.3942,
-          "slDistPct": 4.8,
-          "tpDistPct": 6.92,
-          "unrealizedPct": 4.86,
-          "unrealizedPnl": 1.45,
+          "slDistPct": 4.7,
+          "tpDistPct": 7.03,
+          "unrealizedPct": 4.75,
+          "unrealizedPnl": 1.42,
           "since": "2026-07-15T20:01"
         },
         {
           "symbol": "ETHUSDT",
           "side": "long",
           "entry": 1927.97,
-          "currentPrice": 1844.23,
+          "currentPrice": 1844.26,
           "sl": 1777.14,
           "tp": 2125.23,
           "slDistPct": 3.64,
-          "tpDistPct": 15.24,
+          "tpDistPct": 15.23,
           "unrealizedPct": -4.34,
           "unrealizedPnl": -1.59,
           "since": "2026-07-15T16:01"
@@ -75,12 +75,12 @@
           "symbol": "KITEUSDT",
           "side": "short",
           "entry": 0.1496,
-          "currentPrice": 0.10831,
+          "currentPrice": 0.10835,
           "sl": 0.147,
           "tp": 0.08853,
-          "slDistPct": 35.72,
-          "tpDistPct": 18.26,
-          "unrealizedPct": 27.6,
+          "slDistPct": 35.67,
+          "tpDistPct": 18.29,
+          "unrealizedPct": 27.57,
           "unrealizedPnl": 6.19,
           "since": "2026-06-24T22:01"
         },
@@ -98,7 +98,7 @@
           "since": "2026-06-18T16:01"
         }
       ],
-      "totalUnrealizedPnl": 10.74
+      "totalUnrealizedPnl": 10.82
     }
   },
   "strategy": {
@@ -122,37 +122,37 @@
         "symbol": "INJUSDT",
         "side": "long",
         "entry": 5.091,
-        "currentPrice": 5.04,
+        "currentPrice": 5.05,
         "sl": 4.816,
         "tp": 5.449,
-        "slDistPct": 4.44,
-        "tpDistPct": 8.12,
-        "unrealizedPct": -1,
-        "unrealizedPnl": -0.54,
+        "slDistPct": 4.63,
+        "tpDistPct": 7.9,
+        "unrealizedPct": -0.81,
+        "unrealizedPnl": -0.43,
         "since": "2026-07-17T16:01"
       },
       {
         "symbol": "LDOUSDT",
         "side": "long",
         "entry": 0.3516,
-        "currentPrice": 0.3687,
+        "currentPrice": 0.3683,
         "sl": 0.351,
         "tp": 0.3942,
-        "slDistPct": 4.8,
-        "tpDistPct": 6.92,
-        "unrealizedPct": 4.86,
-        "unrealizedPnl": 1.45,
+        "slDistPct": 4.7,
+        "tpDistPct": 7.03,
+        "unrealizedPct": 4.75,
+        "unrealizedPnl": 1.42,
         "since": "2026-07-15T20:01"
       },
       {
         "symbol": "ETHUSDT",
         "side": "long",
         "entry": 1927.97,
-        "currentPrice": 1844.23,
+        "currentPrice": 1844.26,
         "sl": 1777.14,
         "tp": 2125.23,
         "slDistPct": 3.64,
-        "tpDistPct": 15.24,
+        "tpDistPct": 15.23,
         "unrealizedPct": -4.34,
         "unrealizedPnl": -1.59,
         "since": "2026-07-15T16:01"
@@ -161,12 +161,12 @@
         "symbol": "KITEUSDT",
         "side": "short",
         "entry": 0.1496,
-        "currentPrice": 0.10831,
+        "currentPrice": 0.10835,
         "sl": 0.147,
         "tp": 0.08853,
-        "slDistPct": 35.72,
-        "tpDistPct": 18.26,
-        "unrealizedPct": 27.6,
+        "slDistPct": 35.67,
+        "tpDistPct": 18.29,
+        "unrealizedPct": 27.57,
         "unrealizedPnl": 6.19,
         "since": "2026-06-24T22:01"
       },
@@ -184,6 +184,6 @@
         "since": "2026-06-18T16:01"
       }
     ],
-    "totalUnrealizedPnl": 10.74
+    "totalUnrealizedPnl": 10.82
   }
 }
