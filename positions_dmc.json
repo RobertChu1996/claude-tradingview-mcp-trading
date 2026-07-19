@@ -25,18 +25,6 @@
       "algoId": "3695391618322141184"
     },
     {
-      "symbol": "ETHUSDT",
-      "side": "long",
-      "entryPrice": 1931.85,
-      "initialSL": 1777.1404285714286,
-      "currentSL": 1777.1404285714286,
-      "tp": 2125.236964285714,
-      "quantity": 0.019173370436670986,
-      "entryTime": 1784131274701,
-      "orderId": "3745643668932616192",
-      "algoId": "3745643678095118336"
-    },
-    {
       "symbol": "INJUSDT",
       "side": "long",
       "entryPrice": 5.098,
@@ -522,6 +510,22 @@
       "exitState": "reconcile",
       "exitPrice": 0.351,
       "pnl": -0.0965297795527903
+    },
+    {
+      "symbol": "ETHUSDT",
+      "side": "long",
+      "entryPrice": 1931.85,
+      "initialSL": 1777.1404285714286,
+      "currentSL": 1777.1404285714286,
+      "tp": 2125.236964285714,
+      "quantity": 0.019173370436670986,
+      "entryTime": 1784131274701,
+      "orderId": "3745643668932616192",
+      "algoId": "3745643678095118336",
+      "exitTime": 1784492131744,
+      "exitState": "reconcile",
+      "exitPrice": 1863.94,
+      "pnl": -1.2643608953461731
     }
   ],
   "cooldown": {
@@ -553,6 +557,7 @@
     "ARBUSDT": 1783964733409,
     "EGLDUSDT": 1784034929621,
     "OLUSDT": 1784319331195,
-    "LDOUSDT": 1784484047442
+    "LDOUSDT": 1784484047442,
+    "ETHUSDT": 1784492131744
   }
 }
