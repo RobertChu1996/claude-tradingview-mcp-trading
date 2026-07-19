@@ -23,18 +23,6 @@
       "entryTime": 1782338450705,
       "orderId": "3685486773215649792",
       "algoId": "3695391618322141184"
-    },
-    {
-      "symbol": "INJUSDT",
-      "side": "long",
-      "entryPrice": 5.098,
-      "initialSL": 4.816435714285714,
-      "currentSL": 5.098,
-      "tp": 5.449955357142857,
-      "quantity": 10.586483721422164,
-      "entryTime": 1784304052614,
-      "orderId": "3751441306068148224",
-      "algoId": "3757722268055900160"
     }
   ],
   "closed": [
@@ -526,6 +514,22 @@
       "exitState": "reconcile",
       "exitPrice": 1863.94,
       "pnl": -1.2643608953461731
+    },
+    {
+      "symbol": "INJUSDT",
+      "side": "long",
+      "entryPrice": 5.098,
+      "initialSL": 4.816435714285714,
+      "currentSL": 5.098,
+      "tp": 5.449955357142857,
+      "quantity": 10.586483721422164,
+      "entryTime": 1784304052614,
+      "orderId": "3751441306068148224",
+      "algoId": "3757722268055900160",
+      "exitTime": 1784498446457,
+      "exitState": "reconcile",
+      "exitPrice": 5.097,
+      "pnl": -0.0098723092434241
     }
   ],
   "cooldown": {
@@ -558,6 +562,7 @@
     "EGLDUSDT": 1784034929621,
     "OLUSDT": 1784319331195,
     "LDOUSDT": 1784484047442,
-    "ETHUSDT": 1784492131744
+    "ETHUSDT": 1784492131744,
+    "INJUSDT": 1784498446457
   }
 }
