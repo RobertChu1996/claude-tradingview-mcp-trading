@@ -37,18 +37,6 @@
       "algoId": "3745643678095118336"
     },
     {
-      "symbol": "LDOUSDT",
-      "side": "long",
-      "entryPrice": 0.351,
-      "initialSL": 0.3164082142857143,
-      "currentSL": 0.351,
-      "tp": 0.39423973214285707,
-      "quantity": 85.65794404840237,
-      "entryTime": 1784145669567,
-      "orderId": "3746126609886437376",
-      "algoId": "3748541954171604992"
-    },
-    {
       "symbol": "INJUSDT",
       "side": "long",
       "entryPrice": 5.098,
@@ -518,6 +506,22 @@
       "exitState": "reconcile",
       "exitPrice": 0.0050128024691358,
       "pnl": -0.24356237999821
+    },
+    {
+      "symbol": "LDOUSDT",
+      "side": "long",
+      "entryPrice": 0.351,
+      "initialSL": 0.3164082142857143,
+      "currentSL": 0.351,
+      "tp": 0.39423973214285707,
+      "quantity": 85.65794404840237,
+      "entryTime": 1784145669567,
+      "orderId": "3746126609886437376",
+      "algoId": "3748541954171604992",
+      "exitTime": 1784484047442,
+      "exitState": "reconcile",
+      "exitPrice": 0.351,
+      "pnl": -0.0965297795527903
     }
   ],
   "cooldown": {
@@ -548,6 +552,7 @@
     "FILUSDT": 1783912532574,
     "ARBUSDT": 1783964733409,
     "EGLDUSDT": 1784034929621,
-    "OLUSDT": 1784319331195
+    "OLUSDT": 1784319331195,
+    "LDOUSDT": 1784484047442
   }
 }
