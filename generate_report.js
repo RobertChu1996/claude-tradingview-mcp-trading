@@ -156,6 +156,22 @@ async function main() {
 
   console.log(`[report][dmc] 開倉:${openPositions.length} | 未實現:$${totalUnrealized.toFixed(2)}`);
 
+  // DN（Donchian 模擬盤）：統計自 trades_dn.csv，持倉自 positions_dn.json
+  const dnExits      = readExits(`${D}/trades_dn.csv`);
+  const dnTodayExits = dnExits.filter(r => r.date === today);
+  let dnOpen = [];
+  try {
+    if (existsSync(`${D}/positions_dn.json`)) {
+      const dnPos = JSON.parse(readFileSync(`${D}/positions_dn.json`, "utf8"));
+      dnOpen = (dnPos.open || []).map(p => ({
+        symbol: p.symbol, side: p.side, entry: p.entryPrice,
+        sl: p.currentSL ?? p.sl ?? null, tp: p.tp ?? null,
+        since: p.entryTime ? new Date(p.entryTime).toISOString().slice(0, 16) : null,
+      }));
+    }
+  } catch (e) { console.error("[report][dn] 讀取持倉失敗:", e.message); }
+  console.log(`[report][dn] 開倉:${dnOpen.length} | 已平:${dnExits.length}`);
+
   const report = {
     reportDate:  today,
     generatedAt: new Date().toISOString(),
@@ -171,6 +187,13 @@ async function main() {
         today:              calcStats(todayExits),
         openPositions,
         totalUnrealizedPnl: parseFloat(totalUnrealized.toFixed(2)),
+      },
+      dn: {
+        label:         "DN: Donchian 30/15 [4H] PAPER 起:2026-07-20",
+        mode:          "PAPER",
+        overall:       calcStats(dnExits),
+        today:         calcStats(dnTodayExits),
+        openPositions: dnOpen,
       },
     },
     strategy: {

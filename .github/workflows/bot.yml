@@ -28,6 +28,11 @@ jobs:
           git show origin/state:safety-check-log-dmc.json > safety-check-log-dmc.json 2>/dev/null || true
           git show origin/state:report.json        > report.json        2>/dev/null || true
           git show origin/state:watchlist_dmc.json > watchlist_dmc.json 2>/dev/null || true
+          # DN（模擬盤）：repo 裡有 Railway 時代的舊 state 檔，必須明確覆蓋
+          git show origin/state:positions_dn.json  > positions_dn.json  2>/dev/null || echo '{"open":[],"closed":[],"cooldown":{}}' > positions_dn.json
+          git show origin/state:trades_dn.csv      > trades_dn.csv      2>/dev/null || echo 'Date,Time(UTC),Symbol,Side,Entry,Exit,PnL,Reason,Mode,OrderID' > trades_dn.csv
+          git show origin/state:safety-check-log-dn.json > safety-check-log-dn.json 2>/dev/null || true
+          git show origin/state:watchlist_dn.json  > watchlist_dn.json  2>/dev/null || true
           echo "State restored"
 
       - name: Setup Node.js
@@ -54,6 +59,17 @@ jobs:
         run: node bot_dmc.js
         continue-on-error: true
 
+      - name: Run DN bot (Donchian, PAPER only)
+        env:
+          DATA_DIR: "."
+          # 刻意不給 OKX 金鑰：即使誤把 DONCHIAN_PAPER_TRADING 設成 false 也下不了真單
+          DONCHIAN_PAPER_TRADING: "true"
+          PORTFOLIO_VALUE_USD:  ${{ vars.PORTFOLIO_VALUE_USD }}
+          RISK_PCT:             ${{ vars.RISK_PCT }}
+          DAILY_LOSS_LIMIT_PCT: ${{ vars.DAILY_LOSS_LIMIT_PCT }}
+        run: node bot_donchian.js
+        continue-on-error: true
+
       - name: Generate report
         env:
           DATA_DIR: "."
@@ -72,7 +88,8 @@ jobs:
           git fetch origin state:refs/heads/state 2>/dev/null || true
 
           git read-tree --empty
-          for f in positions_dmc.json trades_dmc.csv safety-check-log-dmc.json report.json watchlist_dmc.json; do
+          for f in positions_dmc.json trades_dmc.csv safety-check-log-dmc.json report.json watchlist_dmc.json \
+                   positions_dn.json trades_dn.csv safety-check-log-dn.json watchlist_dn.json; do
             [ -f "$f" ] && git update-index --add "$f"
           done
 
