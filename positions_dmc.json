@@ -23,54 +23,6 @@
       "entryTime": 1782338450705,
       "orderId": "3685486773215649792",
       "algoId": "3695391618322141184"
-    },
-    {
-      "symbol": "INJUSDT",
-      "side": "long",
-      "entryPrice": 5.298,
-      "initialSL": 5.027710714285715,
-      "currentSL": 5.027710714285715,
-      "tp": 5.635861607142856,
-      "quantity": 10.993710757523795,
-      "entryTime": 1784548849820,
-      "orderId": "3759655300964769792",
-      "algoId": "3759655307140927488"
-    },
-    {
-      "symbol": "CELOUSDT",
-      "side": "long",
-      "entryPrice": 0.0721,
-      "initialSL": 0.06771982142857144,
-      "currentSL": 0.06771982142857144,
-      "tp": 0.0775752232142857,
-      "quantity": 676.8244280941477,
-      "entryTime": 1784606445259,
-      "orderId": "3761587706642784256",
-      "algoId": "3761587714026901504"
-    },
-    {
-      "symbol": "ETHUSDT",
-      "side": "long",
-      "entryPrice": 1926.72,
-      "initialSL": 1841.2638928571428,
-      "currentSL": 1841.2638928571428,
-      "tp": 2033.5401339285715,
-      "quantity": 0.03469163241430388,
-      "entryTime": 1784606445259,
-      "orderId": "3761587777375526912",
-      "algoId": "3761587784759644160"
-    },
-    {
-      "symbol": "XTZUSDT",
-      "side": "long",
-      "entryPrice": 0.2354,
-      "initialSL": 0.22392392857142857,
-      "currentSL": 0.22392392857142857,
-      "tp": 0.2497450892857143,
-      "quantity": 252.03316723727698,
-      "entryTime": 1784851302110,
-      "orderId": "3769804112156909568",
-      "algoId": "3769804120145006592"
     }
   ],
   "closed": [
@@ -610,6 +562,70 @@
       "exitState": "reconcile",
       "exitPrice": 0.7392,
       "pnl": -2.9176948926122086
+    },
+    {
+      "symbol": "INJUSDT",
+      "side": "long",
+      "entryPrice": 5.298,
+      "initialSL": 5.027710714285715,
+      "currentSL": 5.027710714285715,
+      "tp": 5.635861607142856,
+      "quantity": 10.993710757523795,
+      "entryTime": 1784548849820,
+      "orderId": "3759655300964769792",
+      "algoId": "3759655307140927488",
+      "exitTime": 1784938525646,
+      "exitState": "reconcile",
+      "exitPrice": 5.162,
+      "pnl": -1.5346293084370843
+    },
+    {
+      "symbol": "CELOUSDT",
+      "side": "long",
+      "entryPrice": 0.0721,
+      "initialSL": 0.06771982142857144,
+      "currentSL": 0.06771982142857144,
+      "tp": 0.0775752232142857,
+      "quantity": 676.8244280941477,
+      "entryTime": 1784606445259,
+      "orderId": "3761587706642784256",
+      "algoId": "3761587714026901504",
+      "exitTime": 1784938525646,
+      "exitState": "reconcile",
+      "exitPrice": 0.06829,
+      "pnl": -2.6980021553674205
+    },
+    {
+      "symbol": "ETHUSDT",
+      "side": "long",
+      "entryPrice": 1926.72,
+      "initialSL": 1841.2638928571428,
+      "currentSL": 1841.2638928571428,
+      "tp": 2033.5401339285715,
+      "quantity": 0.03469163241430388,
+      "entryTime": 1784606445259,
+      "orderId": "3761587777375526912",
+      "algoId": "3761587784759644160",
+      "exitTime": 1784938525646,
+      "exitState": "reconcile",
+      "exitPrice": 1860.37,
+      "pnl": -2.2759004220645647
+    },
+    {
+      "symbol": "XTZUSDT",
+      "side": "long",
+      "entryPrice": 0.2354,
+      "initialSL": 0.22392392857142857,
+      "currentSL": 0.22392392857142857,
+      "tp": 0.2497450892857143,
+      "quantity": 252.03316723727698,
+      "entryTime": 1784851302110,
+      "orderId": "3769804112156909568",
+      "algoId": "3769804120145006592",
+      "exitTime": 1784938525646,
+      "exitState": "reconcile",
+      "exitPrice": 0.2277,
+      "pnl": -1.86478488
     }
   ],
   "cooldown": {
@@ -642,8 +658,10 @@
     "EGLDUSDT": 1784034929621,
     "OLUSDT": 1784319331195,
     "LDOUSDT": 1784484047442,
-    "ETHUSDT": 1784492131744,
-    "INJUSDT": 1784498446457,
-    "SUIUSDT": 1784829655190
+    "ETHUSDT": 1784938525646,
+    "INJUSDT": 1784938525646,
+    "SUIUSDT": 1784829655190,
+    "CELOUSDT": 1784938525646,
+    "XTZUSDT": 1784938525646
   }
 }

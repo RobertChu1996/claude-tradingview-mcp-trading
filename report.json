@@ -1,65 +1,65 @@
 {
   "reportDate": "2026-07-25",
-  "generatedAt": "2026-07-25T00:01:15.255Z",
+  "generatedAt": "2026-07-25T00:15:53.783Z",
   "balance": {
-    "totalEq": 286.0478,
+    "totalEq": 286.0412,
     "availBal": 257.6846,
-    "frozenBal": 28.3633
+    "frozenBal": 28.3567
   },
   "todayCombined": {
-    "trades": 0,
+    "trades": 4,
     "wins": 0,
-    "losses": 0,
-    "winRate": "N/A",
-    "totalPnl": "0.0000",
-    "totalUnrealizedPnl": 12
+    "losses": 4,
+    "winRate": "0.0%",
+    "totalPnl": "-8.3700",
+    "totalUnrealizedPnl": 11.99
   },
   "strategies": {
     "dmc": {
       "label": "B: DMC/SMA25 [4H] 起:2026-05-29",
       "overall": {
-        "trades": 27,
+        "trades": 31,
         "wins": 5,
-        "losses": 22,
-        "winRate": "18.5%",
-        "totalPnl": "-31.2872"
+        "losses": 26,
+        "winRate": "16.1%",
+        "totalPnl": "-39.6572"
       },
       "today": {
-        "trades": 0,
+        "trades": 4,
         "wins": 0,
-        "losses": 0,
-        "winRate": "N/A",
-        "totalPnl": "0.0000"
+        "losses": 4,
+        "winRate": "0.0%",
+        "totalPnl": "-8.3700"
       },
       "openPositions": [
         {
           "symbol": "KITEUSDT",
           "side": "short",
           "entry": 0.1496,
-          "currentPrice": 0.10843,
+          "currentPrice": 0.10835,
           "sl": 0.147,
           "tp": 0.08853,
-          "slDistPct": 35.57,
-          "tpDistPct": 18.35,
-          "unrealizedPct": 27.52,
-          "unrealizedPnl": 6.18,
+          "slDistPct": 35.67,
+          "tpDistPct": 18.29,
+          "unrealizedPct": 27.57,
+          "unrealizedPnl": 6.19,
           "since": "2026-06-24T22:01"
         },
         {
           "symbol": "BIGTIMEUSDT",
           "side": "short",
           "entry": 0.0083144161290324,
-          "currentPrice": 0.006437,
+          "currentPrice": 0.006443,
           "sl": 0.008313,
           "tp": 0.0054,
-          "slDistPct": 29.14,
-          "tpDistPct": 16.11,
-          "unrealizedPct": 22.58,
-          "unrealizedPnl": 5.82,
+          "slDistPct": 29.02,
+          "tpDistPct": 16.19,
+          "unrealizedPct": 22.51,
+          "unrealizedPnl": 5.8,
           "since": "2026-06-18T16:01"
         }
       ],
-      "totalUnrealizedPnl": 12
+      "totalUnrealizedPnl": 11.99
     },
     "dn": {
       "label": "DN: Donchian 30/15 [4H] PAPER 起:2026-07-20",
@@ -125,47 +125,47 @@
   "strategy": {
     "label": "B: DMC/SMA25 [4H] 起:2026-05-29",
     "overall": {
-      "trades": 27,
+      "trades": 31,
       "wins": 5,
-      "losses": 22,
-      "winRate": "18.5%",
-      "totalPnl": "-31.2872"
+      "losses": 26,
+      "winRate": "16.1%",
+      "totalPnl": "-39.6572"
     },
     "today": {
-      "trades": 0,
+      "trades": 4,
       "wins": 0,
-      "losses": 0,
-      "winRate": "N/A",
-      "totalPnl": "0.0000"
+      "losses": 4,
+      "winRate": "0.0%",
+      "totalPnl": "-8.3700"
     },
     "openPositions": [
       {
         "symbol": "KITEUSDT",
         "side": "short",
         "entry": 0.1496,
-        "currentPrice": 0.10843,
+        "currentPrice": 0.10835,
         "sl": 0.147,
         "tp": 0.08853,
-        "slDistPct": 35.57,
-        "tpDistPct": 18.35,
-        "unrealizedPct": 27.52,
-        "unrealizedPnl": 6.18,
+        "slDistPct": 35.67,
+        "tpDistPct": 18.29,
+        "unrealizedPct": 27.57,
+        "unrealizedPnl": 6.19,
         "since": "2026-06-24T22:01"
       },
       {
         "symbol": "BIGTIMEUSDT",
         "side": "short",
         "entry": 0.0083144161290324,
-        "currentPrice": 0.006437,
+        "currentPrice": 0.006443,
         "sl": 0.008313,
         "tp": 0.0054,
-        "slDistPct": 29.14,
-        "tpDistPct": 16.11,
-        "unrealizedPct": 22.58,
-        "unrealizedPnl": 5.82,
+        "slDistPct": 29.02,
+        "tpDistPct": 16.19,
+        "unrealizedPct": 22.51,
+        "unrealizedPnl": 5.8,
         "since": "2026-06-18T16:01"
       }
     ],
-    "totalUnrealizedPnl": 12
+    "totalUnrealizedPnl": 11.99
   }
 }
