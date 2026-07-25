@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-07-25",
-  "generatedAt": "2026-07-25T02:31:00.087Z",
+  "generatedAt": "2026-07-25T02:45:53.218Z",
   "balance": {
-    "totalEq": 286.1604,
+    "totalEq": 286.175,
     "availBal": 257.6846,
-    "frozenBal": 28.4759
+    "frozenBal": 28.4905
   },
   "todayCombined": {
     "trades": 4,
@@ -12,7 +12,7 @@
     "losses": 4,
     "winRate": "0.0%",
     "totalPnl": "-8.3700",
-    "totalUnrealizedPnl": 12.11
+    "totalUnrealizedPnl": 12.12
   },
   "strategies": {
     "dmc": {
@@ -36,30 +36,30 @@
           "symbol": "KITEUSDT",
           "side": "short",
           "entry": 0.1496,
-          "currentPrice": 0.1077,
+          "currentPrice": 0.10752,
           "sl": 0.147,
           "tp": 0.08853,
-          "slDistPct": 36.49,
-          "tpDistPct": 17.8,
-          "unrealizedPct": 28.01,
-          "unrealizedPnl": 6.29,
+          "slDistPct": 36.72,
+          "tpDistPct": 17.66,
+          "unrealizedPct": 28.13,
+          "unrealizedPnl": 6.31,
           "since": "2026-06-24T22:01"
         },
         {
           "symbol": "BIGTIMEUSDT",
           "side": "short",
           "entry": 0.0083144161290324,
-          "currentPrice": 0.006436,
+          "currentPrice": 0.00644,
           "sl": 0.008313,
           "tp": 0.0054,
-          "slDistPct": 29.16,
-          "tpDistPct": 16.1,
-          "unrealizedPct": 22.59,
-          "unrealizedPnl": 5.82,
+          "slDistPct": 29.08,
+          "tpDistPct": 16.15,
+          "unrealizedPct": 22.54,
+          "unrealizedPnl": 5.81,
           "since": "2026-06-18T16:01"
         }
       ],
-      "totalUnrealizedPnl": 12.11
+      "totalUnrealizedPnl": 12.12
     },
     "dn": {
       "label": "DN: Donchian 30/15 [4H] PAPER 起:2026-07-20",
@@ -143,29 +143,29 @@
         "symbol": "KITEUSDT",
         "side": "short",
         "entry": 0.1496,
-        "currentPrice": 0.1077,
+        "currentPrice": 0.10752,
         "sl": 0.147,
         "tp": 0.08853,
-        "slDistPct": 36.49,
-        "tpDistPct": 17.8,
-        "unrealizedPct": 28.01,
-        "unrealizedPnl": 6.29,
+        "slDistPct": 36.72,
+        "tpDistPct": 17.66,
+        "unrealizedPct": 28.13,
+        "unrealizedPnl": 6.31,
         "since": "2026-06-24T22:01"
       },
       {
         "symbol": "BIGTIMEUSDT",
         "side": "short",
         "entry": 0.0083144161290324,
-        "currentPrice": 0.006436,
+        "currentPrice": 0.00644,
         "sl": 0.008313,
         "tp": 0.0054,
-        "slDistPct": 29.16,
-        "tpDistPct": 16.1,
-        "unrealizedPct": 22.59,
-        "unrealizedPnl": 5.82,
+        "slDistPct": 29.08,
+        "tpDistPct": 16.15,
+        "unrealizedPct": 22.54,
+        "unrealizedPnl": 5.81,
         "since": "2026-06-18T16:01"
       }
     ],
-    "totalUnrealizedPnl": 12.11
+    "totalUnrealizedPnl": 12.12
   }
 }
