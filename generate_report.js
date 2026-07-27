@@ -14,7 +14,7 @@ const DMC_LABEL = "B: DMC/SMA25 [4H] 起:2026-05-29";
 let _serverTimeOffset = 0;
 async function initOkxTime() {
   try {
-    const r = await fetch(`${OKX_BASE}/api/v5/public/time`);
+    const r = await fetch(`${OKX_BASE}/api/v5/public/time`, { signal: AbortSignal.timeout(15000) });
     const d = await r.json();
     if (d.data?.[0]?.ts) _serverTimeOffset = parseInt(d.data[0].ts) - Date.now();
   } catch {}
@@ -27,6 +27,7 @@ function okxSign(ts, method, path, body = "") {
 async function okxGet(path) {
   const ts  = new Date(Date.now() + _serverTimeOffset).toISOString();
   const res = await fetch(`${OKX_BASE}${path}`, {
+    signal: AbortSignal.timeout(15000),
     headers: {
       "OK-ACCESS-KEY":       process.env.OKX_API_KEY,
       "OK-ACCESS-SIGN":      okxSign(ts, "GET", path),

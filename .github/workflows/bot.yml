@@ -11,6 +11,7 @@ permissions:
 jobs:
   run-bot:
     runs-on: ubuntu-latest
+    timeout-minutes: 5   # 防止 fetch 卡住空燒整輪（正常 run <1 分鐘）
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 

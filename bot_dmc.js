@@ -129,7 +129,7 @@ function toOkxInstId(sym) {
 async function fetchCandles4H(symbol, limit = 350) {
   const instId = toOkxInstId(symbol);
   const url    = `https://www.okx.com/api/v5/market/candles?instId=${instId}&bar=4H&limit=${Math.min(limit,300)}`;
-  const res    = await fetch(url);
+  const res    = await fetch(url, { signal: AbortSignal.timeout(15000) });
   if (!res.ok) throw new Error(`OKX ${res.status}`);
   const data   = await res.json();
   if (!data.data?.length) throw new Error(`OKX no data for ${symbol}`);
@@ -141,7 +141,7 @@ async function fetchCandles4H(symbol, limit = 350) {
 async function fetchCandles1D(symbol, limit = 60) {
   const instId = toOkxInstId(symbol);
   const url    = `https://www.okx.com/api/v5/market/candles?instId=${instId}&bar=1D&limit=${Math.min(limit,300)}`;
-  const res    = await fetch(url);
+  const res    = await fetch(url, { signal: AbortSignal.timeout(15000) });
   if (!res.ok) throw new Error(`OKX 1D ${res.status}`);
   const data   = await res.json();
   if (!data.data?.length) return [];
@@ -274,6 +274,7 @@ async function okxPost(path, bodyObj) {
   const body = JSON.stringify(bodyObj);
   const res  = await fetch(`${CONFIG.okx.baseUrl}${path}`, {
     method:"POST",
+    signal: AbortSignal.timeout(15000),
     headers:{
       "Content-Type":"application/json",
       "OK-ACCESS-KEY":CONFIG.okx.apiKey,
@@ -288,6 +289,7 @@ async function okxPost(path, bodyObj) {
 async function okxGet(path) {
   const ts  = new Date().toISOString();
   const res = await fetch(`${CONFIG.okx.baseUrl}${path}`, {
+    signal: AbortSignal.timeout(15000),
     headers:{
       "OK-ACCESS-KEY":CONFIG.okx.apiKey,
       "OK-ACCESS-SIGN":sign(ts,"GET",path),

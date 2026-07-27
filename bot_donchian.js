@@ -158,7 +158,7 @@ async function fetchCandles(symbol, interval, limit) {
   const instId = toOkxInstId(symbol);
   const bar    = OKX_BAR[interval] || interval;
   const url    = `https://www.okx.com/api/v5/market/candles?instId=${instId}&bar=${bar}&limit=${Math.min(limit, 300)}`;
-  const res    = await fetch(url);
+  const res    = await fetch(url, { signal: AbortSignal.timeout(15000) });
   if (!res.ok) throw new Error(`OKX ${res.status}`);
   const data = await res.json();
   if (!data.data?.length) throw new Error(`OKX no data for ${symbol}`);
@@ -292,6 +292,7 @@ async function okxPost(path, bodyObj) {
   const body = JSON.stringify(bodyObj);
   const res  = await fetch(`${CONFIG.okx.baseUrl}${path}`, {
     method: "POST",
+    signal: AbortSignal.timeout(15000),
     headers: {
       "Content-Type": "application/json",
       "OK-ACCESS-KEY":        CONFIG.okx.apiKey,
@@ -306,6 +307,7 @@ async function okxPost(path, bodyObj) {
 async function okxGet(path) {
   const ts  = new Date().toISOString();
   const res = await fetch(`${CONFIG.okx.baseUrl}${path}`, {
+    signal: AbortSignal.timeout(15000),
     headers: {
       "OK-ACCESS-KEY":        CONFIG.okx.apiKey,
       "OK-ACCESS-SIGN":       sign(ts, "GET", path),
