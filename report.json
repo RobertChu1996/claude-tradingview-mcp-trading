@@ -1,14 +1,18 @@
 {
   "reportDate": "2026-07-28",
-  "generatedAt": "2026-07-28T18:15:55.587Z",
-  "balance": null,
+  "generatedAt": "2026-07-28T18:30:52.260Z",
+  "balance": {
+    "totalEq": 292.4586,
+    "availBal": 213.2811,
+    "frozenBal": 79.1775
+  },
   "todayCombined": {
     "trades": 0,
     "wins": 0,
     "losses": 0,
     "winRate": "N/A",
     "totalPnl": "0.0000",
-    "totalUnrealizedPnl": 0
+    "totalUnrealizedPnl": 18.66
   },
   "strategies": {
     "dmc": {
@@ -27,8 +31,87 @@
         "winRate": "N/A",
         "totalPnl": "0.0000"
       },
-      "openPositions": [],
-      "totalUnrealizedPnl": 0
+      "openPositions": [
+        {
+          "symbol": "BARDUSDT",
+          "side": "short",
+          "entry": 0.1126,
+          "currentPrice": 0.1117,
+          "sl": 0.1287,
+          "tp": 0.0933,
+          "slDistPct": 15.22,
+          "tpDistPct": 16.47,
+          "unrealizedPct": 0.8,
+          "unrealizedPnl": 0.16,
+          "since": "2026-07-27T16:01"
+        },
+        {
+          "symbol": "ZKUSDT",
+          "side": "short",
+          "entry": 0.0088274884696018,
+          "currentPrice": 0.008591,
+          "sl": 0.009454,
+          "tp": 0.008096,
+          "slDistPct": 10.05,
+          "tpDistPct": 5.76,
+          "unrealizedPct": 2.68,
+          "unrealizedPnl": 1.13,
+          "since": "2026-07-27T16:00"
+        },
+        {
+          "symbol": "IOTAUSDT",
+          "side": "short",
+          "entry": 0.03252,
+          "currentPrice": 0.03246,
+          "sl": 0.03536,
+          "tp": 0.02982,
+          "slDistPct": 8.93,
+          "tpDistPct": 8.13,
+          "unrealizedPct": 0.18,
+          "unrealizedPnl": 0.07,
+          "since": "2026-07-27T16:00"
+        },
+        {
+          "symbol": "MOVEUSDT",
+          "side": "short",
+          "entry": 0.00911,
+          "currentPrice": 0.00843,
+          "sl": 0.00916,
+          "tp": 0.00814,
+          "slDistPct": 8.66,
+          "tpDistPct": 3.44,
+          "unrealizedPct": 7.46,
+          "unrealizedPnl": 2.41,
+          "since": "2026-07-27T12:00"
+        },
+        {
+          "symbol": "KITEUSDT",
+          "side": "short",
+          "entry": 0.1496,
+          "currentPrice": 0.09844,
+          "sl": 0.147,
+          "tp": 0.08853,
+          "slDistPct": 49.33,
+          "tpDistPct": 10.07,
+          "unrealizedPct": 34.2,
+          "unrealizedPnl": 7.67,
+          "since": "2026-06-24T22:01"
+        },
+        {
+          "symbol": "BIGTIMEUSDT",
+          "side": "short",
+          "entry": 0.0083144161290324,
+          "currentPrice": 0.005986,
+          "sl": 0.008313,
+          "tp": 0.0054,
+          "slDistPct": 38.87,
+          "tpDistPct": 9.79,
+          "unrealizedPct": 28,
+          "unrealizedPnl": 7.22,
+          "since": "2026-06-18T16:01"
+        }
+      ],
+      "totalUnrealizedPnl": 18.66
     },
     "dn": {
       "label": "DN: Donchian 30/15 [4H] PAPER 起:2026-07-20",
@@ -131,7 +214,86 @@
       "winRate": "N/A",
       "totalPnl": "0.0000"
     },
-    "openPositions": [],
-    "totalUnrealizedPnl": 0
+    "openPositions": [
+      {
+        "symbol": "BARDUSDT",
+        "side": "short",
+        "entry": 0.1126,
+        "currentPrice": 0.1117,
+        "sl": 0.1287,
+        "tp": 0.0933,
+        "slDistPct": 15.22,
+        "tpDistPct": 16.47,
+        "unrealizedPct": 0.8,
+        "unrealizedPnl": 0.16,
+        "since": "2026-07-27T16:01"
+      },
+      {
+        "symbol": "ZKUSDT",
+        "side": "short",
+        "entry": 0.0088274884696018,
+        "currentPrice": 0.008591,
+        "sl": 0.009454,
+        "tp": 0.008096,
+        "slDistPct": 10.05,
+        "tpDistPct": 5.76,
+        "unrealizedPct": 2.68,
+        "unrealizedPnl": 1.13,
+        "since": "2026-07-27T16:00"
+      },
+      {
+        "symbol": "IOTAUSDT",
+        "side": "short",
+        "entry": 0.03252,
+        "currentPrice": 0.03246,
+        "sl": 0.03536,
+        "tp": 0.02982,
+        "slDistPct": 8.93,
+        "tpDistPct": 8.13,
+        "unrealizedPct": 0.18,
+        "unrealizedPnl": 0.07,
+        "since": "2026-07-27T16:00"
+      },
+      {
+        "symbol": "MOVEUSDT",
+        "side": "short",
+        "entry": 0.00911,
+        "currentPrice": 0.00843,
+        "sl": 0.00916,
+        "tp": 0.00814,
+        "slDistPct": 8.66,
+        "tpDistPct": 3.44,
+        "unrealizedPct": 7.46,
+        "unrealizedPnl": 2.41,
+        "since": "2026-07-27T12:00"
+      },
+      {
+        "symbol": "KITEUSDT",
+        "side": "short",
+        "entry": 0.1496,
+        "currentPrice": 0.09844,
+        "sl": 0.147,
+        "tp": 0.08853,
+        "slDistPct": 49.33,
+        "tpDistPct": 10.07,
+        "unrealizedPct": 34.2,
+        "unrealizedPnl": 7.67,
+        "since": "2026-06-24T22:01"
+      },
+      {
+        "symbol": "BIGTIMEUSDT",
+        "side": "short",
+        "entry": 0.0083144161290324,
+        "currentPrice": 0.005986,
+        "sl": 0.008313,
+        "tp": 0.0054,
+        "slDistPct": 38.87,
+        "tpDistPct": 9.79,
+        "unrealizedPct": 28,
+        "unrealizedPnl": 7.22,
+        "since": "2026-06-18T16:01"
+      }
+    ],
+    "totalUnrealizedPnl": 18.66
   }
 }
