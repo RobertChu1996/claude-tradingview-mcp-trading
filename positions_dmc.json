@@ -13,18 +13,6 @@
       "algoId": "3695391618322141184"
     },
     {
-      "symbol": "BARDUSDT",
-      "side": "short",
-      "entryPrice": 0.113,
-      "initialSL": 0.12874642857142857,
-      "currentSL": 0.113,
-      "tp": 0.0933169642857143,
-      "quantity": 183.00456535218652,
-      "entryTime": 1785168051324,
-      "orderId": "3780432260254883840",
-      "algoId": "3804591295878316032"
-    },
-    {
       "symbol": "STRKUSDT",
       "side": "short",
       "entryPrice": 0.02757,
@@ -718,6 +706,22 @@
       "exitState": "reconcile",
       "exitPrice": 0.1867,
       "pnl": -0.7753570439920398
+    },
+    {
+      "symbol": "BARDUSDT",
+      "side": "short",
+      "entryPrice": 0.113,
+      "initialSL": 0.12874642857142857,
+      "currentSL": 0.113,
+      "tp": 0.0933169642857143,
+      "quantity": 183.00456535218652,
+      "entryTime": 1785168051324,
+      "orderId": "3780432260254883840",
+      "algoId": "3804591295878316032",
+      "exitTime": 1785889839538,
+      "exitState": "reconcile",
+      "exitPrice": 0.113,
+      "pnl": -0.518113545664902
     }
   ],
   "cooldown": {
@@ -757,6 +761,7 @@
     "XTZUSDT": 1784938525646,
     "MOVEUSDT": 1785294935841,
     "IOTAUSDT": 1785888930833,
-    "EIGENUSDT": 1785888930833
+    "EIGENUSDT": 1785888930833,
+    "BARDUSDT": 1785889839538
   }
 }
