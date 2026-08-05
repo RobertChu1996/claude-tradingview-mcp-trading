@@ -13,18 +13,6 @@
       "algoId": "3695391618322141184"
     },
     {
-      "symbol": "IOTAUSDT",
-      "side": "short",
-      "entryPrice": 0.0329,
-      "initialSL": 0.035362000000000005,
-      "currentSL": 0.035362000000000005,
-      "tp": 0.02982249999999999,
-      "quantity": 1170.458292674057,
-      "entryTime": 1785168051324,
-      "orderId": "3780432064598990848",
-      "algoId": "3780432071748227072"
-    },
-    {
       "symbol": "BARDUSDT",
       "side": "short",
       "entryPrice": 0.113,
@@ -47,18 +35,6 @@
       "entryTime": 1785297651841,
       "orderId": "3784780819783704576",
       "algoId": "3789129617853124608"
-    },
-    {
-      "symbol": "EIGENUSDT",
-      "side": "short",
-      "entryPrice": 0.1814,
-      "initialSL": 0.20261607142857144,
-      "currentSL": 0.20261607142857144,
-      "tp": 0.15487991071428572,
-      "quantity": 140.50751002332566,
-      "entryTime": 1785330043872,
-      "orderId": "3785867785644236800",
-      "algoId": "3785867795880480768"
     }
   ],
   "closed": [
@@ -710,6 +686,38 @@
       "exitState": "reconcile",
       "exitPrice": 0.0054,
       "pnl": 9.204396346097875
+    },
+    {
+      "symbol": "IOTAUSDT",
+      "side": "short",
+      "entryPrice": 0.0329,
+      "initialSL": 0.035362000000000005,
+      "currentSL": 0.035362000000000005,
+      "tp": 0.02982249999999999,
+      "quantity": 1170.458292674057,
+      "entryTime": 1785168051324,
+      "orderId": "3780432064598990848",
+      "algoId": "3780432071748227072",
+      "exitTime": 1785888930833,
+      "exitState": "reconcile",
+      "exitPrice": 0.03313,
+      "pnl": -0.7729994402587342
+    },
+    {
+      "symbol": "EIGENUSDT",
+      "side": "short",
+      "entryPrice": 0.1814,
+      "initialSL": 0.20261607142857144,
+      "currentSL": 0.20261607142857144,
+      "tp": 0.15487991071428572,
+      "quantity": 140.50751002332566,
+      "entryTime": 1785330043872,
+      "orderId": "3785867785644236800",
+      "algoId": "3785867795880480768",
+      "exitTime": 1785888930833,
+      "exitState": "reconcile",
+      "exitPrice": 0.1867,
+      "pnl": -0.7753570439920398
     }
   ],
   "cooldown": {
@@ -747,6 +755,8 @@
     "SUIUSDT": 1784829655190,
     "CELOUSDT": 1784938525646,
     "XTZUSDT": 1784938525646,
-    "MOVEUSDT": 1785294935841
+    "MOVEUSDT": 1785294935841,
+    "IOTAUSDT": 1785888930833,
+    "EIGENUSDT": 1785888930833
   }
 }
