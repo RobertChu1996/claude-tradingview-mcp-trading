@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-08-05",
-  "generatedAt": "2026-08-05T03:15:45.870Z",
+  "generatedAt": "2026-08-05T03:31:02.999Z",
   "balance": {
-    "totalEq": 297.4304,
+    "totalEq": 297.5602,
     "availBal": 271.0136,
-    "frozenBal": 26.4168
+    "frozenBal": 26.5467
   },
   "todayCombined": {
     "trades": 3,
@@ -12,7 +12,7 @@
     "losses": 3,
     "winRate": "0.0%",
     "totalPnl": "-2.0700",
-    "totalUnrealizedPnl": 9.64
+    "totalUnrealizedPnl": 9.77
   },
   "strategies": {
     "dmc": {
@@ -36,13 +36,13 @@
           "symbol": "STRKUSDT",
           "side": "short",
           "entry": 0.02744,
-          "currentPrice": 0.02564,
+          "currentPrice": 0.02551,
           "sl": 0.02757,
           "tp": 0.02385,
-          "slDistPct": 7.53,
-          "tpDistPct": 6.98,
-          "unrealizedPct": 6.56,
-          "unrealizedPnl": 1.8,
+          "slDistPct": 8.08,
+          "tpDistPct": 6.51,
+          "unrealizedPct": 7.03,
+          "unrealizedPnl": 1.93,
           "since": "2026-07-29T04:00"
         },
         {
@@ -59,7 +59,7 @@
           "since": "2026-06-24T22:01"
         }
       ],
-      "totalUnrealizedPnl": 9.64
+      "totalUnrealizedPnl": 9.77
     },
     "dn": {
       "label": "DN: Donchian 30/15 [4H] PAPER 起:2026-07-20",
@@ -159,13 +159,13 @@
         "symbol": "STRKUSDT",
         "side": "short",
         "entry": 0.02744,
-        "currentPrice": 0.02564,
+        "currentPrice": 0.02551,
         "sl": 0.02757,
         "tp": 0.02385,
-        "slDistPct": 7.53,
-        "tpDistPct": 6.98,
-        "unrealizedPct": 6.56,
-        "unrealizedPnl": 1.8,
+        "slDistPct": 8.08,
+        "tpDistPct": 6.51,
+        "unrealizedPct": 7.03,
+        "unrealizedPnl": 1.93,
         "since": "2026-07-29T04:00"
       },
       {
@@ -182,6 +182,6 @@
         "since": "2026-06-24T22:01"
       }
     ],
-    "totalUnrealizedPnl": 9.64
+    "totalUnrealizedPnl": 9.77
   }
 }
