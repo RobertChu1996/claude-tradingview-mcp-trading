@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-08-07",
-  "generatedAt": "2026-08-07T13:01:06.180Z",
+  "generatedAt": "2026-08-07T13:15:46.297Z",
   "balance": {
-    "totalEq": 297.29,
+    "totalEq": 297.274,
     "availBal": 241.575,
-    "frozenBal": 55.715
+    "frozenBal": 55.699
   },
   "todayCombined": {
     "trades": 0,
@@ -12,7 +12,7 @@
     "losses": 0,
     "winRate": "N/A",
     "totalPnl": "0.0000",
-    "totalUnrealizedPnl": 9.55
+    "totalUnrealizedPnl": 9.54
   },
   "strategies": {
     "dmc": {
@@ -36,26 +36,26 @@
           "symbol": "ETHUSDT",
           "side": "long",
           "entry": 1917.03,
-          "currentPrice": 1930.61,
+          "currentPrice": 1928.09,
           "sl": 1852.92,
           "tp": 1997.13,
-          "slDistPct": 4.02,
-          "tpDistPct": 3.45,
-          "unrealizedPct": 0.71,
-          "unrealizedPnl": 0.62,
+          "slDistPct": 3.9,
+          "tpDistPct": 3.58,
+          "unrealizedPct": 0.58,
+          "unrealizedPnl": 0.51,
           "since": "2026-08-05T20:00"
         },
         {
           "symbol": "STRKUSDT",
           "side": "short",
           "entry": 0.02744,
-          "currentPrice": 0.02531,
+          "currentPrice": 0.02521,
           "sl": 0.02757,
           "tp": 0.02385,
-          "slDistPct": 8.93,
-          "tpDistPct": 5.77,
-          "unrealizedPct": 7.76,
-          "unrealizedPnl": 2.13,
+          "slDistPct": 9.36,
+          "tpDistPct": 5.39,
+          "unrealizedPct": 8.13,
+          "unrealizedPnl": 2.23,
           "since": "2026-07-29T04:00"
         },
         {
@@ -72,7 +72,7 @@
           "since": "2026-06-24T22:01"
         }
       ],
-      "totalUnrealizedPnl": 9.55
+      "totalUnrealizedPnl": 9.54
     },
     "dn": {
       "label": "DN: Donchian 30/15 [4H] PAPER 起:2026-07-20",
@@ -180,26 +180,26 @@
         "symbol": "ETHUSDT",
         "side": "long",
         "entry": 1917.03,
-        "currentPrice": 1930.61,
+        "currentPrice": 1928.09,
         "sl": 1852.92,
         "tp": 1997.13,
-        "slDistPct": 4.02,
-        "tpDistPct": 3.45,
-        "unrealizedPct": 0.71,
-        "unrealizedPnl": 0.62,
+        "slDistPct": 3.9,
+        "tpDistPct": 3.58,
+        "unrealizedPct": 0.58,
+        "unrealizedPnl": 0.51,
         "since": "2026-08-05T20:00"
       },
       {
         "symbol": "STRKUSDT",
         "side": "short",
         "entry": 0.02744,
-        "currentPrice": 0.02531,
+        "currentPrice": 0.02521,
         "sl": 0.02757,
         "tp": 0.02385,
-        "slDistPct": 8.93,
-        "tpDistPct": 5.77,
-        "unrealizedPct": 7.76,
-        "unrealizedPnl": 2.13,
+        "slDistPct": 9.36,
+        "tpDistPct": 5.39,
+        "unrealizedPct": 8.13,
+        "unrealizedPnl": 2.23,
         "since": "2026-07-29T04:00"
       },
       {
@@ -216,6 +216,6 @@
         "since": "2026-06-24T22:01"
       }
     ],
-    "totalUnrealizedPnl": 9.55
+    "totalUnrealizedPnl": 9.54
   }
 }
