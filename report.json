@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-08-08",
-  "generatedAt": "2026-08-08T15:45:46.533Z",
+  "generatedAt": "2026-08-08T16:01:07.792Z",
   "balance": {
-    "totalEq": 297.6716,
+    "totalEq": 297.753,
     "availBal": 241.575,
-    "frozenBal": 56.0966
+    "frozenBal": 56.178
   },
   "todayCombined": {
     "trades": 0,
@@ -12,7 +12,7 @@
     "losses": 0,
     "winRate": "N/A",
     "totalPnl": "0.0000",
-    "totalUnrealizedPnl": 9.93
+    "totalUnrealizedPnl": 10.02
   },
   "strategies": {
     "dmc": {
@@ -36,43 +36,43 @@
           "symbol": "ETHUSDT",
           "side": "long",
           "entry": 1917.03,
-          "currentPrice": 1920.81,
+          "currentPrice": 1921.99,
           "sl": 1852.92,
           "tp": 1997.13,
-          "slDistPct": 3.53,
-          "tpDistPct": 3.97,
-          "unrealizedPct": 0.2,
-          "unrealizedPnl": 0.17,
+          "slDistPct": 3.59,
+          "tpDistPct": 3.91,
+          "unrealizedPct": 0.26,
+          "unrealizedPnl": 0.23,
           "since": "2026-08-05T20:00"
         },
         {
           "symbol": "STRKUSDT",
           "side": "short",
           "entry": 0.02744,
-          "currentPrice": 0.02527,
+          "currentPrice": 0.02523,
           "sl": 0.02757,
           "tp": 0.02385,
-          "slDistPct": 9.1,
-          "tpDistPct": 5.62,
-          "unrealizedPct": 7.91,
-          "unrealizedPnl": 2.17,
+          "slDistPct": 9.27,
+          "tpDistPct": 5.47,
+          "unrealizedPct": 8.05,
+          "unrealizedPnl": 2.21,
           "since": "2026-07-29T04:00"
         },
         {
           "symbol": "KITEUSDT",
           "side": "short",
           "entry": 0.1496,
-          "currentPrice": 0.09898,
+          "currentPrice": 0.09908,
           "sl": 0.147,
           "tp": 0.08853,
-          "slDistPct": 48.51,
-          "tpDistPct": 10.56,
-          "unrealizedPct": 33.84,
-          "unrealizedPnl": 7.59,
+          "slDistPct": 48.36,
+          "tpDistPct": 10.65,
+          "unrealizedPct": 33.77,
+          "unrealizedPnl": 7.58,
           "since": "2026-06-24T22:01"
         }
       ],
-      "totalUnrealizedPnl": 9.93
+      "totalUnrealizedPnl": 10.02
     },
     "dn": {
       "label": "DN: Donchian 30/15 [4H] PAPER 起:2026-07-20",
@@ -144,7 +144,7 @@
           "symbol": "NEARUSDT",
           "side": "short",
           "entry": 1.69,
-          "sl": 1.886,
+          "sl": 1.86,
           "tp": 0.43899999999999917,
           "since": "2026-07-28T00:00"
         },
@@ -180,42 +180,42 @@
         "symbol": "ETHUSDT",
         "side": "long",
         "entry": 1917.03,
-        "currentPrice": 1920.81,
+        "currentPrice": 1921.99,
         "sl": 1852.92,
         "tp": 1997.13,
-        "slDistPct": 3.53,
-        "tpDistPct": 3.97,
-        "unrealizedPct": 0.2,
-        "unrealizedPnl": 0.17,
+        "slDistPct": 3.59,
+        "tpDistPct": 3.91,
+        "unrealizedPct": 0.26,
+        "unrealizedPnl": 0.23,
         "since": "2026-08-05T20:00"
       },
       {
         "symbol": "STRKUSDT",
         "side": "short",
         "entry": 0.02744,
-        "currentPrice": 0.02527,
+        "currentPrice": 0.02523,
         "sl": 0.02757,
         "tp": 0.02385,
-        "slDistPct": 9.1,
-        "tpDistPct": 5.62,
-        "unrealizedPct": 7.91,
-        "unrealizedPnl": 2.17,
+        "slDistPct": 9.27,
+        "tpDistPct": 5.47,
+        "unrealizedPct": 8.05,
+        "unrealizedPnl": 2.21,
         "since": "2026-07-29T04:00"
       },
       {
         "symbol": "KITEUSDT",
         "side": "short",
         "entry": 0.1496,
-        "currentPrice": 0.09898,
+        "currentPrice": 0.09908,
         "sl": 0.147,
         "tp": 0.08853,
-        "slDistPct": 48.51,
-        "tpDistPct": 10.56,
-        "unrealizedPct": 33.84,
-        "unrealizedPnl": 7.59,
+        "slDistPct": 48.36,
+        "tpDistPct": 10.65,
+        "unrealizedPct": 33.77,
+        "unrealizedPnl": 7.58,
         "since": "2026-06-24T22:01"
       }
     ],
-    "totalUnrealizedPnl": 9.93
+    "totalUnrealizedPnl": 10.02
   }
 }
