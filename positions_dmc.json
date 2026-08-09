@@ -13,18 +13,6 @@
       "algoId": "3695391618322141184"
     },
     {
-      "symbol": "STRKUSDT",
-      "side": "short",
-      "entryPrice": 0.02757,
-      "initialSL": 0.03054267857142857,
-      "currentSL": 0.02757,
-      "tp": 0.02385415178571429,
-      "quantity": 999.0165205473701,
-      "entryTime": 1785297651841,
-      "orderId": "3784780819783704576",
-      "algoId": "3789129617853124608"
-    },
-    {
       "symbol": "ETHUSDT",
       "side": "long",
       "entryPrice": 1917.02,
@@ -746,6 +734,22 @@
       "exitState": "reconcile",
       "exitPrice": 0.113,
       "pnl": -0.518113545664902
+    },
+    {
+      "symbol": "STRKUSDT",
+      "side": "short",
+      "entryPrice": 0.02757,
+      "initialSL": 0.03054267857142857,
+      "currentSL": 0.02757,
+      "tp": 0.02385415178571429,
+      "quantity": 999.0165205473701,
+      "entryTime": 1785297651841,
+      "orderId": "3784780819783704576",
+      "algoId": "3789129617853124608",
+      "exitTime": 1786318245116,
+      "exitState": "reconcile",
+      "exitPrice": 0.02386,
+      "pnl": 3.558986930402635
     }
   ],
   "cooldown": {
@@ -786,6 +790,7 @@
     "MOVEUSDT": 1785294935841,
     "IOTAUSDT": 1785888930833,
     "EIGENUSDT": 1785888930833,
-    "BARDUSDT": 1785889839538
+    "BARDUSDT": 1785889839538,
+    "STRKUSDT": 1786318245116
   }
 }
