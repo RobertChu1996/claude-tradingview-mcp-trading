@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-08-10",
-  "generatedAt": "2026-08-10T08:00:57.882Z",
+  "generatedAt": "2026-08-10T08:15:45.004Z",
   "balance": {
-    "totalEq": 298.3349,
+    "totalEq": 298.3428,
     "availBal": 223.0658,
-    "frozenBal": 75.2691
+    "frozenBal": 75.277
   },
   "todayCombined": {
     "trades": 0,
@@ -12,7 +12,7 @@
     "losses": 0,
     "winRate": "N/A",
     "totalPnl": "0.0000",
-    "totalUnrealizedPnl": 7.1
+    "totalUnrealizedPnl": 7.11
   },
   "strategies": {
     "dmc": {
@@ -36,26 +36,26 @@
           "symbol": "UNIUSDT",
           "side": "long",
           "entry": 4.066,
-          "currentPrice": 4.042,
+          "currentPrice": 4.041,
           "sl": 3.943,
           "tp": 4.234,
-          "slDistPct": 2.45,
-          "tpDistPct": 4.75,
-          "unrealizedPct": -0.59,
-          "unrealizedPnl": -0.55,
+          "slDistPct": 2.43,
+          "tpDistPct": 4.78,
+          "unrealizedPct": -0.61,
+          "unrealizedPnl": -0.57,
           "since": "2026-08-09T16:00"
         },
         {
           "symbol": "ETHUSDT",
           "side": "long",
           "entry": 1917.03,
-          "currentPrice": 1924.99,
+          "currentPrice": 1925.66,
           "sl": 1852.92,
           "tp": 1997.13,
-          "slDistPct": 3.74,
-          "tpDistPct": 3.75,
-          "unrealizedPct": 0.42,
-          "unrealizedPnl": 0.37,
+          "slDistPct": 3.78,
+          "tpDistPct": 3.71,
+          "unrealizedPct": 0.45,
+          "unrealizedPnl": 0.4,
           "since": "2026-08-05T20:00"
         },
         {
@@ -72,7 +72,7 @@
           "since": "2026-06-24T22:01"
         }
       ],
-      "totalUnrealizedPnl": 7.1
+      "totalUnrealizedPnl": 7.11
     },
     "dn": {
       "label": "DN: Donchian 30/15 [4H] PAPER 起:2026-07-20",
@@ -180,26 +180,26 @@
         "symbol": "UNIUSDT",
         "side": "long",
         "entry": 4.066,
-        "currentPrice": 4.042,
+        "currentPrice": 4.041,
         "sl": 3.943,
         "tp": 4.234,
-        "slDistPct": 2.45,
-        "tpDistPct": 4.75,
-        "unrealizedPct": -0.59,
-        "unrealizedPnl": -0.55,
+        "slDistPct": 2.43,
+        "tpDistPct": 4.78,
+        "unrealizedPct": -0.61,
+        "unrealizedPnl": -0.57,
         "since": "2026-08-09T16:00"
       },
       {
         "symbol": "ETHUSDT",
         "side": "long",
         "entry": 1917.03,
-        "currentPrice": 1924.99,
+        "currentPrice": 1925.66,
         "sl": 1852.92,
         "tp": 1997.13,
-        "slDistPct": 3.74,
-        "tpDistPct": 3.75,
-        "unrealizedPct": 0.42,
-        "unrealizedPnl": 0.37,
+        "slDistPct": 3.78,
+        "tpDistPct": 3.71,
+        "unrealizedPct": 0.45,
+        "unrealizedPnl": 0.4,
         "since": "2026-08-05T20:00"
       },
       {
@@ -216,6 +216,6 @@
         "since": "2026-06-24T22:01"
       }
     ],
-    "totalUnrealizedPnl": 7.1
+    "totalUnrealizedPnl": 7.11
   }
 }
