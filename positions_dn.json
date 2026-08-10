@@ -13,18 +13,6 @@
       "algoId": null
     },
     {
-      "symbol": "ATOMUSDT",
-      "side": "short",
-      "entryPrice": 1.443,
-      "initialSL": 1.612,
-      "currentSL": 1.405,
-      "tp": 0.9359999999999999,
-      "quantity": 17.751479289940825,
-      "entryTime": 1784822481878,
-      "orderId": "DONCHIAN-PAPER-1784822485875",
-      "algoId": null
-    },
-    {
       "symbol": "JUPUSDT",
       "side": "short",
       "entryPrice": 0.1867,
@@ -112,9 +100,25 @@
       "exitTime": 1785888064659,
       "exitPrice": 0.8685,
       "pnl": -2.8585152838427956
+    },
+    {
+      "symbol": "ATOMUSDT",
+      "side": "short",
+      "entryPrice": 1.443,
+      "initialSL": 1.612,
+      "currentSL": 1.405,
+      "tp": 0.9359999999999999,
+      "quantity": 17.751479289940825,
+      "entryTime": 1784822481878,
+      "orderId": "DONCHIAN-PAPER-1784822485875",
+      "algoId": null,
+      "exitTime": 1786377654911,
+      "exitPrice": 1.405,
+      "pnl": 0.6745562130177519
     }
   ],
   "cooldown": {
-    "DOTUSDT": 1785888064659
+    "DOTUSDT": 1785888064659,
+    "ATOMUSDT": 1786377654911
   }
 }
