@@ -37,18 +37,6 @@
       "algoId": "3831650364715614208"
     },
     {
-      "symbol": "STRKUSDT",
-      "side": "short",
-      "entryPrice": 0.02308,
-      "initialSL": 0.025010035714285714,
-      "currentSL": 0.02308,
-      "tp": 0.020667455357142858,
-      "quantity": 1545.5685980834278,
-      "entryTime": 1786464047612,
-      "orderId": "3823918555958300672",
-      "algoId": "3842279333856985088"
-    },
-    {
       "symbol": "BATUSDT",
       "side": "short",
       "entryPrice": 0.05889,
@@ -854,6 +842,22 @@
       "exitState": "reconcile",
       "exitPrice": 0.0041836228070175,
       "pnl": -0.7951502144343678
+    },
+    {
+      "symbol": "STRKUSDT",
+      "side": "short",
+      "entryPrice": 0.02308,
+      "initialSL": 0.025010035714285714,
+      "currentSL": 0.02308,
+      "tp": 0.020667455357142858,
+      "quantity": 1545.5685980834278,
+      "entryTime": 1786464047612,
+      "orderId": "3823918555958300672",
+      "algoId": "3842279333856985088",
+      "exitTime": 1787014839489,
+      "exitState": "reconcile",
+      "exitPrice": 0.02308,
+      "pnl": -0.1944388202991375
     }
   ],
   "cooldown": {
@@ -895,7 +899,7 @@
     "IOTAUSDT": 1785888930833,
     "EIGENUSDT": 1785888930833,
     "BARDUSDT": 1785889839538,
-    "STRKUSDT": 1786318245116,
+    "STRKUSDT": 1787014839489,
     "UNIUSDT": 1786375852271,
     "ACHUSDT": 1787012124819
   }
