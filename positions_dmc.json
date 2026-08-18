@@ -59,18 +59,6 @@
       "entryTime": 1786564852287,
       "orderId": "3827300936287211520",
       "algoId": "3842279358116839424"
-    },
-    {
-      "symbol": "ACHUSDT",
-      "side": "short",
-      "entryPrice": 0.004095,
-      "initialSL": 0.004355225,
-      "currentSL": 0.004355225,
-      "tp": 0.0037697187499999996,
-      "quantity": 11444.978790878578,
-      "entryTime": 1786581931503,
-      "orderId": "3827874137690034176",
-      "algoId": "3827874144173604864"
     }
   ],
   "closed": [
@@ -850,6 +838,22 @@
       "exitState": "reconcile",
       "exitPrice": 0.006697,
       "pnl": -0.334675482146006
+    },
+    {
+      "symbol": "ACHUSDT",
+      "side": "short",
+      "entryPrice": 0.004095,
+      "initialSL": 0.004355225,
+      "currentSL": 0.004355225,
+      "tp": 0.0037697187499999996,
+      "quantity": 11444.978790878578,
+      "entryTime": 1786581931503,
+      "orderId": "3827874137690034176",
+      "algoId": "3827874144173604864",
+      "exitTime": 1787012124819,
+      "exitState": "reconcile",
+      "exitPrice": 0.0041836228070175,
+      "pnl": -0.7951502144343678
     }
   ],
   "cooldown": {
@@ -892,6 +896,7 @@
     "EIGENUSDT": 1785888930833,
     "BARDUSDT": 1785889839538,
     "STRKUSDT": 1786318245116,
-    "UNIUSDT": 1786375852271
+    "UNIUSDT": 1786375852271,
+    "ACHUSDT": 1787012124819
   }
 }
