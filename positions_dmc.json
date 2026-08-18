@@ -35,18 +35,6 @@
       "entryTime": 1786435250628,
       "orderId": "3822952318172352512",
       "algoId": "3831650364715614208"
-    },
-    {
-      "symbol": "BATUSDT",
-      "side": "short",
-      "entryPrice": 0.05889,
-      "initialSL": 0.065145,
-      "currentSL": 0.05889,
-      "tp": 0.05107125,
-      "quantity": 478.1740411205021,
-      "entryTime": 1786564852287,
-      "orderId": "3827300936287211520",
-      "algoId": "3842279358116839424"
     }
   ],
   "closed": [
@@ -858,6 +846,22 @@
       "exitState": "reconcile",
       "exitPrice": 0.02308,
       "pnl": -0.1944388202991375
+    },
+    {
+      "symbol": "BATUSDT",
+      "side": "short",
+      "entryPrice": 0.05889,
+      "initialSL": 0.065145,
+      "currentSL": 0.05889,
+      "tp": 0.05107125,
+      "quantity": 478.1740411205021,
+      "entryTime": 1786564852287,
+      "orderId": "3827300936287211520",
+      "algoId": "3842279358116839424",
+      "exitTime": 1787049032753,
+      "exitState": "reconcile",
+      "exitPrice": 0.0589076595744681,
+      "pnl": -0.0630906782796538
     }
   ],
   "cooldown": {
@@ -875,7 +879,7 @@
     "NEOUSDT": 1782338451387,
     "DOGEUSDT": 1782339338817,
     "PENGUUSDT": 1782572452150,
-    "BATUSDT": 1786466736161,
+    "BATUSDT": 1787049032753,
     "ZECUSDT": 1782990933436,
     "AUCTIONUSDT": 1783077330782,
     "AUSDT": 1783110654346,
