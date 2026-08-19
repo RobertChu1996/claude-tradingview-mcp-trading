@@ -13,18 +13,6 @@
       "algoId": "3695391618322141184"
     },
     {
-      "symbol": "NIGHTUSDT",
-      "side": "short",
-      "entryPrice": 0.017818,
-      "initialSL": 0.019047167857142857,
-      "currentSL": 0.017818,
-      "tp": 0.01628154017857143,
-      "quantity": 2386.6324130322055,
-      "entryTime": 1786406451213,
-      "orderId": "3821985953114443776",
-      "algoId": "3833098615809556480"
-    },
-    {
       "symbol": "BLURUSDT",
       "side": "short",
       "entryPrice": 0.01349,
@@ -862,6 +850,22 @@
       "exitState": "reconcile",
       "exitPrice": 0.0589076595744681,
       "pnl": -0.0630906782796538
+    },
+    {
+      "symbol": "NIGHTUSDT",
+      "side": "short",
+      "entryPrice": 0.017818,
+      "initialSL": 0.019047167857142857,
+      "currentSL": 0.017818,
+      "tp": 0.01628154017857143,
+      "quantity": 2386.6324130322055,
+      "entryTime": 1786406451213,
+      "orderId": "3821985953114443776",
+      "algoId": "3833098615809556480",
+      "exitTime": 1787129157774,
+      "exitState": "reconcile",
+      "exitPrice": 0.0178168695652174,
+      "pnl": -0.1826518898095309
     }
   ],
   "cooldown": {
@@ -905,6 +909,7 @@
     "BARDUSDT": 1785889839538,
     "STRKUSDT": 1787014839489,
     "UNIUSDT": 1786375852271,
-    "ACHUSDT": 1787012124819
+    "ACHUSDT": 1787012124819,
+    "NIGHTUSDT": 1787129157774
   }
 }
