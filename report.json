@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-08-20",
-  "generatedAt": "2026-08-20T15:45:37.157Z",
+  "generatedAt": "2026-08-20T16:00:53.560Z",
   "balance": {
-    "totalEq": 294.6922,
+    "totalEq": 294.6329,
     "availBal": 279.1859,
-    "frozenBal": 15.5063
+    "frozenBal": 15.447
   },
   "todayCombined": {
     "trades": 0,
@@ -12,7 +12,7 @@
     "losses": 0,
     "winRate": "N/A",
     "totalPnl": "0.0000",
-    "totalUnrealizedPnl": 7.81
+    "totalUnrealizedPnl": 7.75
   },
   "strategies": {
     "dmc": {
@@ -36,17 +36,17 @@
           "symbol": "KITEUSDT",
           "side": "short",
           "entry": 0.1496,
-          "currentPrice": 0.09753,
+          "currentPrice": 0.09793,
           "sl": 0.147,
           "tp": 0.08853,
-          "slDistPct": 50.72,
-          "tpDistPct": 9.23,
-          "unrealizedPct": 34.81,
-          "unrealizedPnl": 7.81,
+          "slDistPct": 50.11,
+          "tpDistPct": 9.6,
+          "unrealizedPct": 34.54,
+          "unrealizedPnl": 7.75,
           "since": "2026-06-24T22:01"
         }
       ],
-      "totalUnrealizedPnl": 7.81
+      "totalUnrealizedPnl": 7.75
     },
     "dn": {
       "label": "DN: Donchian 30/15 [4H] PAPER 起:2026-07-20",
@@ -121,6 +121,14 @@
           "sl": 0.08123,
           "tp": 0.15786999999999998,
           "since": "2026-08-20T12:00"
+        },
+        {
+          "symbol": "AVAXUSDT",
+          "side": "long",
+          "entry": 7.056,
+          "sl": 6.106,
+          "tp": 9.906,
+          "since": "2026-08-20T16:00"
         }
       ]
     }
@@ -146,16 +154,16 @@
         "symbol": "KITEUSDT",
         "side": "short",
         "entry": 0.1496,
-        "currentPrice": 0.09753,
+        "currentPrice": 0.09793,
         "sl": 0.147,
         "tp": 0.08853,
-        "slDistPct": 50.72,
-        "tpDistPct": 9.23,
-        "unrealizedPct": 34.81,
-        "unrealizedPnl": 7.81,
+        "slDistPct": 50.11,
+        "tpDistPct": 9.6,
+        "unrealizedPct": 34.54,
+        "unrealizedPnl": 7.75,
         "since": "2026-06-24T22:01"
       }
     ],
-    "totalUnrealizedPnl": 7.81
+    "totalUnrealizedPnl": 7.75
   }
 }
