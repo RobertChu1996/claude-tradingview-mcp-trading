@@ -1,42 +1,6 @@
 {
   "open": [
     {
-      "symbol": "SEIUSDT",
-      "side": "short",
-      "entryPrice": 0.04583,
-      "initialSL": 0.05158,
-      "currentSL": 0.04225,
-      "tp": 0.028580000000000008,
-      "quantity": 521.7391304347827,
-      "entryTime": 1784534875645,
-      "orderId": "DONCHIAN-PAPER-1784534881300",
-      "algoId": null
-    },
-    {
-      "symbol": "JUPUSDT",
-      "side": "short",
-      "entryPrice": 0.1867,
-      "initialSL": 0.2205,
-      "currentSL": 0.1906,
-      "tp": 0.08530000000000001,
-      "quantity": 88.75739644970416,
-      "entryTime": 1784836861979,
-      "orderId": "DONCHIAN-PAPER-1784836868999",
-      "algoId": null
-    },
-    {
-      "symbol": "STXUSDT",
-      "side": "short",
-      "entryPrice": 0.1485,
-      "initialSL": 0.1786,
-      "currentSL": 0.1358,
-      "tp": 0.058199999999999946,
-      "quantity": 99.66777408637869,
-      "entryTime": 1784865650160,
-      "orderId": "DONCHIAN-PAPER-1784865659383",
-      "algoId": null
-    },
-    {
       "symbol": "ETHUSDT",
       "side": "long",
       "entryPrice": 2252.67,
@@ -94,6 +58,30 @@
       "quantity": 1.1912641637166999,
       "entryTime": 1787184049826,
       "orderId": "DONCHIAN-PAPER-1787184054794",
+      "algoId": null
+    },
+    {
+      "symbol": "BTCUSDT",
+      "side": "long",
+      "entryPrice": 71923.8,
+      "initialSL": 62521.8,
+      "currentSL": 62521.8,
+      "tp": 100129.8,
+      "quantity": 0.0003150886830520155,
+      "entryTime": 1787227249543,
+      "orderId": "DONCHIAN-PAPER-1787227252462",
+      "algoId": null
+    },
+    {
+      "symbol": "ENAUSDT",
+      "side": "long",
+      "entryPrice": 0.10039,
+      "initialSL": 0.08123,
+      "currentSL": 0.08123,
+      "tp": 0.15786999999999998,
+      "quantity": 154.617108457988,
+      "entryTime": 1787227249543,
+      "orderId": "DONCHIAN-PAPER-1787227257408",
       "algoId": null
     }
   ],
@@ -202,6 +190,51 @@
       "exitTime": 1787184049826,
       "exitPrice": 1.0802,
       "pnl": -1.9670923325964011
+    },
+    {
+      "symbol": "SEIUSDT",
+      "side": "short",
+      "entryPrice": 0.04583,
+      "initialSL": 0.05158,
+      "currentSL": 0.04225,
+      "tp": 0.028580000000000008,
+      "quantity": 521.7391304347827,
+      "entryTime": 1784534875645,
+      "orderId": "DONCHIAN-PAPER-1784534881300",
+      "algoId": null,
+      "exitTime": 1787227249543,
+      "exitPrice": 0.04225,
+      "pnl": 1.8678260869565222
+    },
+    {
+      "symbol": "JUPUSDT",
+      "side": "short",
+      "entryPrice": 0.1867,
+      "initialSL": 0.2205,
+      "currentSL": 0.1906,
+      "tp": 0.08530000000000001,
+      "quantity": 88.75739644970416,
+      "entryTime": 1784836861979,
+      "orderId": "DONCHIAN-PAPER-1784836868999",
+      "algoId": null,
+      "exitTime": 1787227249543,
+      "exitPrice": 0.1906,
+      "pnl": -0.34615384615384504
+    },
+    {
+      "symbol": "STXUSDT",
+      "side": "short",
+      "entryPrice": 0.1485,
+      "initialSL": 0.1786,
+      "currentSL": 0.1358,
+      "tp": 0.058199999999999946,
+      "quantity": 99.66777408637869,
+      "entryTime": 1784865650160,
+      "orderId": "DONCHIAN-PAPER-1784865659383",
+      "algoId": null,
+      "exitTime": 1787227249543,
+      "exitPrice": 0.1358,
+      "pnl": 1.2657807308970082
     }
   ],
   "cooldown": {
@@ -211,6 +244,9 @@
     "RENDERUSDT": 1787184049826,
     "NEARUSDT": 1787184049826,
     "XLMUSDT": 1787184049826,
-    "XRPUSDT": 1787184049826
+    "XRPUSDT": 1787184049826,
+    "SEIUSDT": 1787227249543,
+    "JUPUSDT": 1787227249543,
+    "STXUSDT": 1787227249543
   }
 }
