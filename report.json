@@ -1,10 +1,10 @@
 {
-  "reportDate": "2026-08-20",
-  "generatedAt": "2026-08-20T23:45:34.285Z",
+  "reportDate": "2026-08-21",
+  "generatedAt": "2026-08-21T00:00:49.054Z",
   "balance": {
-    "totalEq": 294.5512,
+    "totalEq": 294.5249,
     "availBal": 279.1859,
-    "frozenBal": 15.3653
+    "frozenBal": 15.339
   },
   "todayCombined": {
     "trades": 0,
@@ -12,7 +12,7 @@
     "losses": 0,
     "winRate": "N/A",
     "totalPnl": "0.0000",
-    "totalUnrealizedPnl": 7.67
+    "totalUnrealizedPnl": 7.64
   },
   "strategies": {
     "dmc": {
@@ -36,17 +36,17 @@
           "symbol": "KITEUSDT",
           "side": "short",
           "entry": 0.1496,
-          "currentPrice": 0.09848,
+          "currentPrice": 0.09866,
           "sl": 0.147,
           "tp": 0.08853,
-          "slDistPct": 49.27,
-          "tpDistPct": 10.1,
-          "unrealizedPct": 34.17,
-          "unrealizedPnl": 7.67,
+          "slDistPct": 49,
+          "tpDistPct": 10.27,
+          "unrealizedPct": 34.05,
+          "unrealizedPnl": 7.64,
           "since": "2026-06-24T22:01"
         }
       ],
-      "totalUnrealizedPnl": 7.67
+      "totalUnrealizedPnl": 7.64
     },
     "dn": {
       "label": "DN: Donchian 30/15 [4H] PAPER 起:2026-07-20",
@@ -59,11 +59,11 @@
         "totalPnl": "-0.9800"
       },
       "today": {
-        "trades": 8,
-        "wins": 3,
-        "losses": 5,
-        "winRate": "37.5%",
-        "totalPnl": "1.2100"
+        "trades": 0,
+        "wins": 0,
+        "losses": 0,
+        "winRate": "N/A",
+        "totalPnl": "0.0000"
       },
       "openPositions": [
         {
@@ -154,16 +154,16 @@
         "symbol": "KITEUSDT",
         "side": "short",
         "entry": 0.1496,
-        "currentPrice": 0.09848,
+        "currentPrice": 0.09866,
         "sl": 0.147,
         "tp": 0.08853,
-        "slDistPct": 49.27,
-        "tpDistPct": 10.1,
-        "unrealizedPct": 34.17,
-        "unrealizedPnl": 7.67,
+        "slDistPct": 49,
+        "tpDistPct": 10.27,
+        "unrealizedPct": 34.05,
+        "unrealizedPnl": 7.64,
         "since": "2026-06-24T22:01"
       }
     ],
-    "totalUnrealizedPnl": 7.67
+    "totalUnrealizedPnl": 7.64
   }
 }
