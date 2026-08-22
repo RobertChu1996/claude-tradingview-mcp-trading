@@ -37,18 +37,6 @@
       "algoId": null
     },
     {
-      "symbol": "DOGEUSDT",
-      "side": "long",
-      "entryPrice": 0.07503,
-      "initialSL": 0.06824,
-      "currentSL": 0.06884,
-      "tp": 0.09540000000000001,
-      "quantity": 438.6097804553384,
-      "entryTime": 1787184049826,
-      "orderId": "DONCHIAN-PAPER-1787184054205",
-      "algoId": null
-    },
-    {
       "symbol": "LINKUSDT",
       "side": "long",
       "entryPrice": 10.556,
@@ -73,18 +61,6 @@
       "algoId": null
     },
     {
-      "symbol": "ENAUSDT",
-      "side": "long",
-      "entryPrice": 0.10039,
-      "initialSL": 0.08123,
-      "currentSL": 0.08123,
-      "tp": 0.15786999999999998,
-      "quantity": 154.617108457988,
-      "entryTime": 1787227249543,
-      "orderId": "DONCHIAN-PAPER-1787227257408",
-      "algoId": null
-    },
-    {
       "symbol": "AVAXUSDT",
       "side": "long",
       "entryPrice": 7.056,
@@ -94,6 +70,30 @@
       "quantity": 3.1477245555495217,
       "entryTime": 1787241649311,
       "orderId": "DONCHIAN-PAPER-1787241652793",
+      "algoId": null
+    },
+    {
+      "symbol": "LTCUSDT",
+      "side": "long",
+      "entryPrice": 54.25,
+      "initialSL": 43.4,
+      "currentSL": 43.4,
+      "tp": 86.80000000000001,
+      "quantity": 0.2756072191494973,
+      "entryTime": 1787371244183,
+      "orderId": "DONCHIAN-PAPER-1787371246947",
+      "algoId": null
+    },
+    {
+      "symbol": "ATOMUSDT",
+      "side": "long",
+      "entryPrice": 1.637,
+      "initialSL": 1.337,
+      "currentSL": 1.337,
+      "tp": 2.537,
+      "quantity": 9.96779442590682,
+      "entryTime": 1787371244183,
+      "orderId": "DONCHIAN-PAPER-1787371247587",
       "algoId": null
     }
   ],
@@ -247,6 +247,36 @@
       "exitTime": 1787227249543,
       "exitPrice": 0.1358,
       "pnl": 1.2657807308970082
+    },
+    {
+      "symbol": "DOGEUSDT",
+      "side": "long",
+      "entryPrice": 0.07503,
+      "initialSL": 0.06824,
+      "currentSL": 0.06884,
+      "tp": 0.09540000000000001,
+      "quantity": 438.6097804553384,
+      "entryTime": 1787184049826,
+      "orderId": "DONCHIAN-PAPER-1787184054205",
+      "algoId": null,
+      "exitTime": 1787371244183,
+      "exitPrice": 0.09540000000000001,
+      "pnl": 8.93448122787525
+    },
+    {
+      "symbol": "ENAUSDT",
+      "side": "long",
+      "entryPrice": 0.10039,
+      "initialSL": 0.08123,
+      "currentSL": 0.08123,
+      "tp": 0.15786999999999998,
+      "quantity": 154.617108457988,
+      "entryTime": 1787227249543,
+      "orderId": "DONCHIAN-PAPER-1787227257408",
+      "algoId": null,
+      "exitTime": 1787371244183,
+      "exitPrice": 0.15786999999999998,
+      "pnl": 8.887391394165148
     }
   ],
   "cooldown": {
@@ -259,6 +289,8 @@
     "XRPUSDT": 1787184049826,
     "SEIUSDT": 1787227249543,
     "JUPUSDT": 1787227249543,
-    "STXUSDT": 1787227249543
+    "STXUSDT": 1787227249543,
+    "DOGEUSDT": 1787371244183,
+    "ENAUSDT": 1787371244183
   }
 }
