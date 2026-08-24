@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-08-24",
-  "generatedAt": "2026-08-24T07:30:44.130Z",
+  "generatedAt": "2026-08-24T07:45:39.351Z",
   "balance": {
-    "totalEq": 292.034,
+    "totalEq": 291.896,
     "availBal": 279.1859,
-    "frozenBal": 12.8481
+    "frozenBal": 12.7101
   },
   "todayCombined": {
     "trades": 0,
@@ -12,7 +12,7 @@
     "losses": 0,
     "winRate": "N/A",
     "totalPnl": "0.0000",
-    "totalUnrealizedPnl": 5.13
+    "totalUnrealizedPnl": 5
   },
   "strategies": {
     "dmc": {
@@ -36,17 +36,17 @@
           "symbol": "KITEUSDT",
           "side": "short",
           "entry": 0.1496,
-          "currentPrice": 0.11537,
+          "currentPrice": 0.11629,
           "sl": 0.147,
           "tp": 0.08853,
-          "slDistPct": 27.42,
-          "tpDistPct": 23.26,
-          "unrealizedPct": 22.88,
-          "unrealizedPnl": 5.13,
+          "slDistPct": 26.41,
+          "tpDistPct": 23.87,
+          "unrealizedPct": 22.27,
+          "unrealizedPnl": 5,
           "since": "2026-06-24T22:01"
         }
       ],
-      "totalUnrealizedPnl": 5.13
+      "totalUnrealizedPnl": 5
     },
     "dn": {
       "label": "DN: Donchian 30/15 [4H] PAPER 起:2026-07-20",
@@ -154,16 +154,16 @@
         "symbol": "KITEUSDT",
         "side": "short",
         "entry": 0.1496,
-        "currentPrice": 0.11537,
+        "currentPrice": 0.11629,
         "sl": 0.147,
         "tp": 0.08853,
-        "slDistPct": 27.42,
-        "tpDistPct": 23.26,
-        "unrealizedPct": 22.88,
-        "unrealizedPnl": 5.13,
+        "slDistPct": 26.41,
+        "tpDistPct": 23.87,
+        "unrealizedPct": 22.27,
+        "unrealizedPnl": 5,
         "since": "2026-06-24T22:01"
       }
     ],
-    "totalUnrealizedPnl": 5.13
+    "totalUnrealizedPnl": 5
   }
 }
