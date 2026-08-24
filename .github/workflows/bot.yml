@@ -60,16 +60,18 @@ jobs:
         run: node bot_dmc.js
         continue-on-error: true
 
-      - name: Run DN bot (Donchian, PAPER — sub-account key needs fixing)
+      - name: Run DN bot (Donchian, LIVE on dnbot01 sub-account)
         env:
           DATA_DIR: "."
-          # 暫時鎖回 PAPER：上線首輪發現 OKX_DN_* 金鑰讀到的是主帳戶餘額（$92）
-          # 而非子帳戶 dnbot01（$200），金鑰未正確綁到子帳戶。不傳金鑰、硬鎖 paper
-          # 直到金鑰確認綁定 dnbot01 為止，避免誤在主帳戶下單撞上 DMC。
-          DONCHIAN_PAPER_TRADING: "true"
-          PORTFOLIO_VALUE_USD:  "200"
-          RISK_PCT:             "0.01"
-          DONCHIAN_MAX_OPEN:    "4"
+          # LIVE：跑在獨立的 OKX 子帳戶 dnbot01（與 DMC 主帳戶完全隔離，$200 上限）
+          # 用 OKX_DN_* 金鑰（已重建並綁定 dnbot01），DMC 用主帳戶的 OKX_*
+          DONCHIAN_PAPER_TRADING: "false"
+          OKX_API_KEY:          ${{ secrets.OKX_DN_API_KEY }}
+          OKX_SECRET_KEY:       ${{ secrets.OKX_DN_SECRET_KEY }}
+          OKX_PASSPHRASE:       ${{ secrets.OKX_DN_PASSPHRASE }}
+          PORTFOLIO_VALUE_USD:  "200"      # live 時實際讀子帳戶餘額，此為 fallback
+          RISK_PCT:             "0.01"     # $200 × 1% = 每筆約 $2 敞口（極小額驗證）
+          DONCHIAN_MAX_OPEN:    "4"        # 上限降到 4 筆
           DAILY_LOSS_LIMIT_PCT: ${{ vars.DAILY_LOSS_LIMIT_PCT }}
         run: node bot_donchian.js
         continue-on-error: true
