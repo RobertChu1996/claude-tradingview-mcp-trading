@@ -111,7 +111,7 @@ function readExits(csvFile) {
     .trim().split("\n").slice(1)
     .map(line => {
       const p = line.split(",");
-      return { date: p[0], symbol: p[2], side: p[3], pnl: parseFloat(p[6]) || 0, reason: p[7] };
+      return { date: p[0], symbol: p[2], side: p[3], pnl: parseFloat(p[6]) || 0, reason: p[7], mode: p[8], orderId: p[9] };
     })
     .filter(r => r.reason && r.reason !== "開倉");
 }
@@ -157,9 +157,14 @@ async function main() {
 
   console.log(`[report][dmc] 開倉:${openPositions.length} | 未實現:$${totalUnrealized.toFixed(2)}`);
 
-  // DN（Donchian 模擬盤）：統計自 trades_dn.csv，持倉自 positions_dn.json
-  const dnExits      = readExits(`${D}/trades_dn.csv`);
-  const dnTodayExits = dnExits.filter(r => r.date === today);
+  // DN（Donchian）：分開計算模擬盤（上線前）與真錢（2026-08-24 起，子帳戶 dnbot01）
+  //   paper = orderId 以 DONCHIAN-PAPER- 開頭或 Mode 欄為 PAPER；其餘視為 LIVE
+  const dnExitsAll   = readExits(`${D}/trades_dn.csv`);
+  const isDnPaper    = r => (r.orderId || "").startsWith("DONCHIAN-PAPER-") || r.mode === "PAPER";
+  const dnPaperExits = dnExitsAll.filter(isDnPaper);
+  const dnLiveExits  = dnExitsAll.filter(r => !isDnPaper(r));
+  const dnExits      = dnLiveExits;                       // 對外「overall」只算真錢
+  const dnTodayExits = dnLiveExits.filter(r => r.date === today);
   let dnOpen = [];
   try {
     if (existsSync(`${D}/positions_dn.json`)) {
@@ -190,10 +195,11 @@ async function main() {
         totalUnrealizedPnl: parseFloat(totalUnrealized.toFixed(2)),
       },
       dn: {
-        label:         "DN: Donchian 30/15 [4H] PAPER 起:2026-07-20",
-        mode:          "PAPER",
-        overall:       calcStats(dnExits),
+        label:         "DN: Donchian 30/15 [4H] LIVE(dnbot01) 起:2026-08-24",
+        mode:          "LIVE",
+        overall:       calcStats(dnExits),        // 真錢
         today:         calcStats(dnTodayExits),
+        paperRecord:   calcStats(dnPaperExits),   // 上線前模擬盤參考
         openPositions: dnOpen,
       },
     },
