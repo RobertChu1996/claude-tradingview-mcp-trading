@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-08-25",
-  "generatedAt": "2026-08-25T01:15:48.665Z",
+  "generatedAt": "2026-08-25T01:30:47.443Z",
   "balance": {
-    "totalEq": 91.8752,
+    "totalEq": 91.8647,
     "availBal": 79.1859,
-    "frozenBal": 12.6893
+    "frozenBal": 12.6788
   },
   "todayCombined": {
     "trades": 0,
@@ -12,7 +12,7 @@
     "losses": 0,
     "winRate": "N/A",
     "totalPnl": "0.0000",
-    "totalUnrealizedPnl": 4.98
+    "totalUnrealizedPnl": 4.97
   },
   "strategies": {
     "dmc": {
@@ -36,27 +36,27 @@
           "symbol": "KITEUSDT",
           "side": "short",
           "entry": 0.1496,
-          "currentPrice": 0.11641,
+          "currentPrice": 0.11648,
           "sl": 0.147,
           "tp": 0.08853,
-          "slDistPct": 26.28,
-          "tpDistPct": 23.95,
-          "unrealizedPct": 22.19,
-          "unrealizedPnl": 4.98,
+          "slDistPct": 26.2,
+          "tpDistPct": 24,
+          "unrealizedPct": 22.14,
+          "unrealizedPnl": 4.97,
           "since": "2026-06-24T22:01"
         }
       ],
-      "totalUnrealizedPnl": 4.98
+      "totalUnrealizedPnl": 4.97
     },
     "dn": {
-      "label": "DN: Donchian 30/15 [4H] PAPER 起:2026-07-20",
-      "mode": "PAPER",
+      "label": "DN: Donchian 30/15 [4H] LIVE(dnbot01) 起:2026-08-24",
+      "mode": "LIVE",
       "overall": {
-        "trades": 12,
-        "wins": 6,
-        "losses": 6,
-        "winRate": "50.0%",
-        "totalPnl": "16.8400"
+        "trades": 0,
+        "wins": 0,
+        "losses": 0,
+        "winRate": "N/A",
+        "totalPnl": "0.0000"
       },
       "today": {
         "trades": 0,
@@ -64,6 +64,13 @@
         "losses": 0,
         "winRate": "N/A",
         "totalPnl": "0.0000"
+      },
+      "paperRecord": {
+        "trades": 12,
+        "wins": 6,
+        "losses": 6,
+        "winRate": "50.0%",
+        "totalPnl": "16.8400"
       },
       "openPositions": []
     }
@@ -89,16 +96,16 @@
         "symbol": "KITEUSDT",
         "side": "short",
         "entry": 0.1496,
-        "currentPrice": 0.11641,
+        "currentPrice": 0.11648,
         "sl": 0.147,
         "tp": 0.08853,
-        "slDistPct": 26.28,
-        "tpDistPct": 23.95,
-        "unrealizedPct": 22.19,
-        "unrealizedPnl": 4.98,
+        "slDistPct": 26.2,
+        "tpDistPct": 24,
+        "unrealizedPct": 22.14,
+        "unrealizedPnl": 4.97,
         "since": "2026-06-24T22:01"
       }
     ],
-    "totalUnrealizedPnl": 4.98
+    "totalUnrealizedPnl": 4.97
   }
 }
