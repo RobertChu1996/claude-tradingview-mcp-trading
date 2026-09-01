@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-09-01",
-  "generatedAt": "2026-09-01T18:15:39.225Z",
+  "generatedAt": "2026-09-01T18:30:52.178Z",
   "balance": {
-    "totalEq": 90.7767,
+    "totalEq": 90.7578,
     "availBal": 72.6972,
-    "frozenBal": 18.0795
+    "frozenBal": 18.0606
   },
   "todayCombined": {
     "trades": 0,
@@ -12,7 +12,7 @@
     "losses": 0,
     "winRate": "N/A",
     "totalPnl": "0.0000",
-    "totalUnrealizedPnl": 3.85
+    "totalUnrealizedPnl": 3.83
   },
   "strategies": {
     "dmc": {
@@ -36,43 +36,43 @@
           "symbol": "BASEDUSDT",
           "side": "short",
           "entry": 0.06765,
-          "currentPrice": 0.06664,
+          "currentPrice": 0.06691,
           "sl": 0.07311,
           "tp": 0.06113,
-          "slDistPct": 9.71,
-          "tpDistPct": 8.27,
-          "unrealizedPct": 1.49,
-          "unrealizedPnl": 0.17,
+          "slDistPct": 9.27,
+          "tpDistPct": 8.64,
+          "unrealizedPct": 1.09,
+          "unrealizedPnl": 0.13,
           "since": "2026-08-31T00:00"
         },
         {
           "symbol": "GALAUSDT",
           "side": "short",
           "entry": 0.001633,
-          "currentPrice": 0.001747,
+          "currentPrice": 0.001743,
           "sl": 0.001834,
           "tp": 0.00141,
-          "slDistPct": 4.98,
-          "tpDistPct": 19.29,
-          "unrealizedPct": -6.98,
-          "unrealizedPnl": -0.55,
+          "slDistPct": 5.22,
+          "tpDistPct": 19.1,
+          "unrealizedPct": -6.74,
+          "unrealizedPnl": -0.53,
           "since": "2026-08-31T00:00"
         },
         {
           "symbol": "KITEUSDT",
           "side": "short",
           "entry": 0.1496,
-          "currentPrice": 0.12142,
+          "currentPrice": 0.12137,
           "sl": 0.147,
           "tp": 0.08853,
-          "slDistPct": 21.07,
-          "tpDistPct": 27.09,
-          "unrealizedPct": 18.84,
+          "slDistPct": 21.12,
+          "tpDistPct": 27.06,
+          "unrealizedPct": 18.87,
           "unrealizedPnl": 4.23,
           "since": "2026-06-24T22:01"
         }
       ],
-      "totalUnrealizedPnl": 3.85
+      "totalUnrealizedPnl": 3.83
     },
     "dn": {
       "label": "DN: Donchian 30/15 [4H] LIVE(dnbot01) 起:2026-08-24",
@@ -139,42 +139,42 @@
         "symbol": "BASEDUSDT",
         "side": "short",
         "entry": 0.06765,
-        "currentPrice": 0.06664,
+        "currentPrice": 0.06691,
         "sl": 0.07311,
         "tp": 0.06113,
-        "slDistPct": 9.71,
-        "tpDistPct": 8.27,
-        "unrealizedPct": 1.49,
-        "unrealizedPnl": 0.17,
+        "slDistPct": 9.27,
+        "tpDistPct": 8.64,
+        "unrealizedPct": 1.09,
+        "unrealizedPnl": 0.13,
         "since": "2026-08-31T00:00"
       },
       {
         "symbol": "GALAUSDT",
         "side": "short",
         "entry": 0.001633,
-        "currentPrice": 0.001747,
+        "currentPrice": 0.001743,
         "sl": 0.001834,
         "tp": 0.00141,
-        "slDistPct": 4.98,
-        "tpDistPct": 19.29,
-        "unrealizedPct": -6.98,
-        "unrealizedPnl": -0.55,
+        "slDistPct": 5.22,
+        "tpDistPct": 19.1,
+        "unrealizedPct": -6.74,
+        "unrealizedPnl": -0.53,
         "since": "2026-08-31T00:00"
       },
       {
         "symbol": "KITEUSDT",
         "side": "short",
         "entry": 0.1496,
-        "currentPrice": 0.12142,
+        "currentPrice": 0.12137,
         "sl": 0.147,
         "tp": 0.08853,
-        "slDistPct": 21.07,
-        "tpDistPct": 27.09,
-        "unrealizedPct": 18.84,
+        "slDistPct": 21.12,
+        "tpDistPct": 27.06,
+        "unrealizedPct": 18.87,
         "unrealizedPnl": 4.23,
         "since": "2026-06-24T22:01"
       }
     ],
-    "totalUnrealizedPnl": 3.85
+    "totalUnrealizedPnl": 3.83
   }
 }
