@@ -1,18 +1,6 @@
 {
   "open": [
     {
-      "symbol": "KITEUSDT",
-      "side": "short",
-      "entryPrice": 0.147,
-      "initialSL": 0.16648989285714286,
-      "currentSL": 0.147,
-      "tp": 0.0885303214285714,
-      "quantity": 158.8267015863389,
-      "entryTime": 1782338450705,
-      "orderId": "3685486773215649792",
-      "algoId": "3695391618322141184"
-    },
-    {
       "symbol": "GALAUSDT",
       "side": "short",
       "entryPrice": 0.001646,
@@ -35,6 +23,30 @@
       "entryTime": 1788134439155,
       "orderId": "3879967751999803392",
       "algoId": "3879967759825551360"
+    },
+    {
+      "symbol": "CFXUSDT",
+      "side": "long",
+      "entryPrice": 0.04771,
+      "initialSL": 0.045710928571428576,
+      "currentSL": 0.045710928571428576,
+      "tp": 0.050208839285714284,
+      "quantity": 442.028104498472,
+      "entryTime": 1788364842641,
+      "orderId": "3887698655383867392",
+      "algoId": "3887698659787063296"
+    },
+    {
+      "symbol": "ASTERUSDT",
+      "side": "long",
+      "entryPrice": 0.7299,
+      "initialSL": 0.6863367857142858,
+      "currentSL": 0.6863367857142858,
+      "tp": 0.7843540178571428,
+      "quantity": 20.28421843560466,
+      "entryTime": 1788364842641,
+      "orderId": "3887698817418219520",
+      "algoId": "3887698821687197696"
     }
   ],
   "closed": [
@@ -849,6 +861,22 @@
       "exitState": "reconcile",
       "exitPrice": 0.01349,
       "pnl": -0.0606328387711407
+    },
+    {
+      "symbol": "KITEUSDT",
+      "side": "short",
+      "entryPrice": 0.147,
+      "initialSL": 0.16648989285714286,
+      "currentSL": 0.147,
+      "tp": 0.0885303214285714,
+      "quantity": 158.8267015863389,
+      "entryTime": 1782338450705,
+      "orderId": "3685486773215649792",
+      "algoId": "3695391618322141184",
+      "exitTime": 1788364842641,
+      "exitPrice": 0.137558,
+      "pnl": 2.0582518991865433,
+      "exitState": "timeSL"
     }
   ],
   "cooldown": {
@@ -894,6 +922,7 @@
     "UNIUSDT": 1786375852271,
     "ACHUSDT": 1787012124819,
     "NIGHTUSDT": 1787129157774,
-    "BLURUSDT": 1787152536179
+    "BLURUSDT": 1787152536179,
+    "KITEUSDT": 1788364842641
   }
 }
