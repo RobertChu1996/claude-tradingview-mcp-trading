@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-09-03",
-  "generatedAt": "2026-09-03T15:45:44.796Z",
+  "generatedAt": "2026-09-03T16:01:04.484Z",
   "balance": {
-    "totalEq": 87.3226,
+    "totalEq": 87.2563,
     "availBal": 81.9961,
-    "frozenBal": 5.3264
+    "frozenBal": 5.2601
   },
   "todayCombined": {
     "trades": 2,
@@ -12,7 +12,7 @@
     "losses": 2,
     "winRate": "0.0%",
     "totalPnl": "-0.2500",
-    "totalUnrealizedPnl": -1.18
+    "totalUnrealizedPnl": -1.24
   },
   "strategies": {
     "dmc": {
@@ -36,30 +36,30 @@
           "symbol": "BASEDUSDT",
           "side": "short",
           "entry": 0.06765,
-          "currentPrice": 0.06968,
+          "currentPrice": 0.06985,
           "sl": 0.07311,
           "tp": 0.06113,
-          "slDistPct": 4.92,
-          "tpDistPct": 12.27,
-          "unrealizedPct": -3,
-          "unrealizedPnl": -0.35,
+          "slDistPct": 4.67,
+          "tpDistPct": 12.48,
+          "unrealizedPct": -3.25,
+          "unrealizedPnl": -0.37,
           "since": "2026-08-31T00:00"
         },
         {
           "symbol": "GALAUSDT",
           "side": "short",
           "entry": 0.001633,
-          "currentPrice": 0.001803,
+          "currentPrice": 0.001811,
           "sl": 0.001834,
           "tp": 0.00141,
-          "slDistPct": 1.72,
-          "tpDistPct": 21.8,
-          "unrealizedPct": -10.41,
-          "unrealizedPnl": -0.83,
+          "slDistPct": 1.27,
+          "tpDistPct": 22.14,
+          "unrealizedPct": -10.9,
+          "unrealizedPnl": -0.87,
           "since": "2026-08-31T00:00"
         }
       ],
-      "totalUnrealizedPnl": -1.18
+      "totalUnrealizedPnl": -1.24
     },
     "dn": {
       "label": "DN: Donchian 30/15 [4H] LIVE(dnbot01) 起:2026-08-24",
@@ -90,7 +90,7 @@
           "symbol": "BTCUSDT",
           "side": "long",
           "entry": 80486.1,
-          "sl": 64471.6,
+          "sl": 67830.3,
           "tp": 134379,
           "since": "2026-08-25T04:00"
         },
@@ -98,9 +98,17 @@
           "symbol": "GMXUSDT",
           "side": "long",
           "entry": 8.197,
-          "sl": 6.45,
+          "sl": 6.591,
           "tp": 13.539999999999996,
           "since": "2026-08-29T20:00"
+        },
+        {
+          "symbol": "BNBUSDT",
+          "side": "long",
+          "entry": 727.8,
+          "sl": 614.4,
+          "tp": 1068,
+          "since": "2026-09-03T16:00"
         }
       ]
     }
@@ -126,29 +134,29 @@
         "symbol": "BASEDUSDT",
         "side": "short",
         "entry": 0.06765,
-        "currentPrice": 0.06968,
+        "currentPrice": 0.06985,
         "sl": 0.07311,
         "tp": 0.06113,
-        "slDistPct": 4.92,
-        "tpDistPct": 12.27,
-        "unrealizedPct": -3,
-        "unrealizedPnl": -0.35,
+        "slDistPct": 4.67,
+        "tpDistPct": 12.48,
+        "unrealizedPct": -3.25,
+        "unrealizedPnl": -0.37,
         "since": "2026-08-31T00:00"
       },
       {
         "symbol": "GALAUSDT",
         "side": "short",
         "entry": 0.001633,
-        "currentPrice": 0.001803,
+        "currentPrice": 0.001811,
         "sl": 0.001834,
         "tp": 0.00141,
-        "slDistPct": 1.72,
-        "tpDistPct": 21.8,
-        "unrealizedPct": -10.41,
-        "unrealizedPnl": -0.83,
+        "slDistPct": 1.27,
+        "tpDistPct": 22.14,
+        "unrealizedPct": -10.9,
+        "unrealizedPnl": -0.87,
         "since": "2026-08-31T00:00"
       }
     ],
-    "totalUnrealizedPnl": -1.18
+    "totalUnrealizedPnl": -1.24
   }
 }
