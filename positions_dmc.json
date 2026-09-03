@@ -1,30 +1,5 @@
 {
-  "open": [
-    {
-      "symbol": "GALAUSDT",
-      "side": "short",
-      "entryPrice": 0.001646,
-      "initialSL": 0.0018343,
-      "currentSL": 0.0018343,
-      "tp": 0.0014106249999999996,
-      "quantity": 4863.385570126183,
-      "entryTime": 1788134439155,
-      "orderId": "3879967515743047680",
-      "algoId": "3879967522327281664"
-    },
-    {
-      "symbol": "BASEDUSDT",
-      "side": "short",
-      "entryPrice": 0.06779,
-      "initialSL": 0.07311328571428571,
-      "currentSL": 0.07311328571428571,
-      "tp": 0.06113589285714287,
-      "quantity": 172.032002790525,
-      "entryTime": 1788134439155,
-      "orderId": "3879967751999803392",
-      "algoId": "3879967759825551360"
-    }
-  ],
+  "open": [],
   "closed": [
     {
       "symbol": "DOTUSDT",
@@ -885,6 +860,38 @@
       "exitState": "reconcile",
       "exitPrice": 0.7244,
       "pnl": -0.1417651591334249
+    },
+    {
+      "symbol": "GALAUSDT",
+      "side": "short",
+      "entryPrice": 0.001646,
+      "initialSL": 0.0018343,
+      "currentSL": 0.0018343,
+      "tp": 0.0014106249999999996,
+      "quantity": 4863.385570126183,
+      "entryTime": 1788134439155,
+      "orderId": "3879967515743047680",
+      "algoId": "3879967522327281664",
+      "exitTime": 1788466536171,
+      "exitState": "reconcile",
+      "exitPrice": 0.001805,
+      "pnl": -0.8367234376280884
+    },
+    {
+      "symbol": "BASEDUSDT",
+      "side": "short",
+      "entryPrice": 0.06779,
+      "initialSL": 0.07311328571428571,
+      "currentSL": 0.07311328571428571,
+      "tp": 0.06113589285714287,
+      "quantity": 172.032002790525,
+      "entryTime": 1788134439155,
+      "orderId": "3879967751999803392",
+      "algoId": "3879967759825551360",
+      "exitTime": 1788466536171,
+      "exitState": "reconcile",
+      "exitPrice": 0.0696717647058824,
+      "pnl": -0.342084045000008
     }
   ],
   "cooldown": {
@@ -933,6 +940,8 @@
     "BLURUSDT": 1787152536179,
     "KITEUSDT": 1788364842641,
     "CFXUSDT": 1788394530334,
-    "ASTERUSDT": 1788394530334
+    "ASTERUSDT": 1788394530334,
+    "GALAUSDT": 1788466536171,
+    "BASEDUSDT": 1788466536171
   }
 }
