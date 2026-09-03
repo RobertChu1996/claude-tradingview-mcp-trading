@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-09-03",
-  "generatedAt": "2026-09-03T11:00:57.551Z",
+  "generatedAt": "2026-09-03T11:15:38.469Z",
   "balance": {
-    "totalEq": 87.6597,
+    "totalEq": 87.6354,
     "availBal": 81.9961,
-    "frozenBal": 5.6635
+    "frozenBal": 5.6392
   },
   "todayCombined": {
     "trades": 2,
@@ -12,7 +12,7 @@
     "losses": 2,
     "winRate": "0.0%",
     "totalPnl": "-0.2500",
-    "totalUnrealizedPnl": -0.84
+    "totalUnrealizedPnl": -0.86
   },
   "strategies": {
     "dmc": {
@@ -49,17 +49,17 @@
           "symbol": "GALAUSDT",
           "side": "short",
           "entry": 0.001633,
-          "currentPrice": 0.001758,
+          "currentPrice": 0.001763,
           "sl": 0.001834,
           "tp": 0.00141,
-          "slDistPct": 4.32,
-          "tpDistPct": 19.8,
-          "unrealizedPct": -7.65,
-          "unrealizedPnl": -0.61,
+          "slDistPct": 4.03,
+          "tpDistPct": 20.02,
+          "unrealizedPct": -7.96,
+          "unrealizedPnl": -0.63,
           "since": "2026-08-31T00:00"
         }
       ],
-      "totalUnrealizedPnl": -0.84
+      "totalUnrealizedPnl": -0.86
     },
     "dn": {
       "label": "DN: Donchian 30/15 [4H] LIVE(dnbot01) 起:2026-08-24",
@@ -139,16 +139,16 @@
         "symbol": "GALAUSDT",
         "side": "short",
         "entry": 0.001633,
-        "currentPrice": 0.001758,
+        "currentPrice": 0.001763,
         "sl": 0.001834,
         "tp": 0.00141,
-        "slDistPct": 4.32,
-        "tpDistPct": 19.8,
-        "unrealizedPct": -7.65,
-        "unrealizedPnl": -0.61,
+        "slDistPct": 4.03,
+        "tpDistPct": 20.02,
+        "unrealizedPct": -7.96,
+        "unrealizedPnl": -0.63,
         "since": "2026-08-31T00:00"
       }
     ],
-    "totalUnrealizedPnl": -0.84
+    "totalUnrealizedPnl": -0.86
   }
 }
