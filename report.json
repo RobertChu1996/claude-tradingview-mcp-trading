@@ -1,65 +1,65 @@
 {
   "reportDate": "2026-09-03",
-  "generatedAt": "2026-09-03T00:01:12.107Z",
+  "generatedAt": "2026-09-03T00:15:48.513Z",
   "balance": {
-    "totalEq": 88.0891,
+    "totalEq": 88.0983,
     "availBal": 81.9961,
-    "frozenBal": 6.0929
+    "frozenBal": 6.1022
   },
   "todayCombined": {
-    "trades": 0,
+    "trades": 2,
     "wins": 0,
-    "losses": 0,
-    "winRate": "N/A",
-    "totalPnl": "0.0000",
-    "totalUnrealizedPnl": -0.4
+    "losses": 2,
+    "winRate": "0.0%",
+    "totalPnl": "-0.2500",
+    "totalUnrealizedPnl": -0.39
   },
   "strategies": {
     "dmc": {
       "label": "B: DMC/SMA25 [4H] 起:2026-05-29",
       "overall": {
-        "trades": 48,
+        "trades": 50,
         "wins": 11,
-        "losses": 37,
-        "winRate": "22.9%",
-        "totalPnl": "-24.6872"
+        "losses": 39,
+        "winRate": "22.0%",
+        "totalPnl": "-24.9372"
       },
       "today": {
-        "trades": 0,
+        "trades": 2,
         "wins": 0,
-        "losses": 0,
-        "winRate": "N/A",
-        "totalPnl": "0.0000"
+        "losses": 2,
+        "winRate": "0.0%",
+        "totalPnl": "-0.2500"
       },
       "openPositions": [
         {
           "symbol": "BASEDUSDT",
           "side": "short",
           "entry": 0.06765,
-          "currentPrice": 0.0673,
+          "currentPrice": 0.06736,
           "sl": 0.07311,
           "tp": 0.06113,
-          "slDistPct": 8.63,
-          "tpDistPct": 9.17,
-          "unrealizedPct": 0.52,
-          "unrealizedPnl": 0.06,
+          "slDistPct": 8.54,
+          "tpDistPct": 9.25,
+          "unrealizedPct": 0.43,
+          "unrealizedPnl": 0.05,
           "since": "2026-08-31T00:00"
         },
         {
           "symbol": "GALAUSDT",
           "side": "short",
           "entry": 0.001633,
-          "currentPrice": 0.001728,
+          "currentPrice": 0.001724,
           "sl": 0.001834,
           "tp": 0.00141,
-          "slDistPct": 6.13,
-          "tpDistPct": 18.4,
-          "unrealizedPct": -5.82,
-          "unrealizedPnl": -0.46,
+          "slDistPct": 6.38,
+          "tpDistPct": 18.21,
+          "unrealizedPct": -5.57,
+          "unrealizedPnl": -0.44,
           "since": "2026-08-31T00:00"
         }
       ],
-      "totalUnrealizedPnl": -0.4
+      "totalUnrealizedPnl": -0.39
     },
     "dn": {
       "label": "DN: Donchian 30/15 [4H] LIVE(dnbot01) 起:2026-08-24",
@@ -108,47 +108,47 @@
   "strategy": {
     "label": "B: DMC/SMA25 [4H] 起:2026-05-29",
     "overall": {
-      "trades": 48,
+      "trades": 50,
       "wins": 11,
-      "losses": 37,
-      "winRate": "22.9%",
-      "totalPnl": "-24.6872"
+      "losses": 39,
+      "winRate": "22.0%",
+      "totalPnl": "-24.9372"
     },
     "today": {
-      "trades": 0,
+      "trades": 2,
       "wins": 0,
-      "losses": 0,
-      "winRate": "N/A",
-      "totalPnl": "0.0000"
+      "losses": 2,
+      "winRate": "0.0%",
+      "totalPnl": "-0.2500"
     },
     "openPositions": [
       {
         "symbol": "BASEDUSDT",
         "side": "short",
         "entry": 0.06765,
-        "currentPrice": 0.0673,
+        "currentPrice": 0.06736,
         "sl": 0.07311,
         "tp": 0.06113,
-        "slDistPct": 8.63,
-        "tpDistPct": 9.17,
-        "unrealizedPct": 0.52,
-        "unrealizedPnl": 0.06,
+        "slDistPct": 8.54,
+        "tpDistPct": 9.25,
+        "unrealizedPct": 0.43,
+        "unrealizedPnl": 0.05,
         "since": "2026-08-31T00:00"
       },
       {
         "symbol": "GALAUSDT",
         "side": "short",
         "entry": 0.001633,
-        "currentPrice": 0.001728,
+        "currentPrice": 0.001724,
         "sl": 0.001834,
         "tp": 0.00141,
-        "slDistPct": 6.13,
-        "tpDistPct": 18.4,
-        "unrealizedPct": -5.82,
-        "unrealizedPnl": -0.46,
+        "slDistPct": 6.38,
+        "tpDistPct": 18.21,
+        "unrealizedPct": -5.57,
+        "unrealizedPnl": -0.44,
         "since": "2026-08-31T00:00"
       }
     ],
-    "totalUnrealizedPnl": -0.4
+    "totalUnrealizedPnl": -0.39
   }
 }
