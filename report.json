@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-09-05",
-  "generatedAt": "2026-09-05T14:00:45.357Z",
+  "generatedAt": "2026-09-05T14:15:32.063Z",
   "balance": {
-    "totalEq": 87.6701,
+    "totalEq": 87.8031,
     "availBal": 83.1114,
-    "frozenBal": 4.5587
+    "frozenBal": 4.6917
   },
   "todayCombined": {
     "trades": 0,
@@ -12,7 +12,7 @@
     "losses": 0,
     "winRate": "N/A",
     "totalPnl": "0.0000",
-    "totalUnrealizedPnl": 0.37
+    "totalUnrealizedPnl": 0.5
   },
   "strategies": {
     "dmc": {
@@ -36,17 +36,17 @@
           "symbol": "TRBUSDT",
           "side": "long",
           "entry": 17.95,
-          "currentPrice": 18.48,
+          "currentPrice": 18.67,
           "sl": 16.69,
           "tp": 19.47,
-          "slDistPct": 9.69,
-          "tpDistPct": 5.36,
-          "unrealizedPct": 2.95,
-          "unrealizedPnl": 0.37,
+          "slDistPct": 10.61,
+          "tpDistPct": 4.28,
+          "unrealizedPct": 4.01,
+          "unrealizedPnl": 0.5,
           "since": "2026-09-05T08:00"
         }
       ],
-      "totalUnrealizedPnl": 0.37
+      "totalUnrealizedPnl": 0.5
     },
     "dn": {
       "label": "DN: Donchian 30/15 [4H] LIVE(dnbot01) 起:2026-08-24",
@@ -129,16 +129,16 @@
         "symbol": "TRBUSDT",
         "side": "long",
         "entry": 17.95,
-        "currentPrice": 18.48,
+        "currentPrice": 18.67,
         "sl": 16.69,
         "tp": 19.47,
-        "slDistPct": 9.69,
-        "tpDistPct": 5.36,
-        "unrealizedPct": 2.95,
-        "unrealizedPnl": 0.37,
+        "slDistPct": 10.61,
+        "tpDistPct": 4.28,
+        "unrealizedPct": 4.01,
+        "unrealizedPnl": 0.5,
         "since": "2026-09-05T08:00"
       }
     ],
-    "totalUnrealizedPnl": 0.37
+    "totalUnrealizedPnl": 0.5
   }
 }
