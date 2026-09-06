@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-09-06",
-  "generatedAt": "2026-09-06T17:30:43.000Z",
+  "generatedAt": "2026-09-06T17:45:33.338Z",
   "balance": {
-    "totalEq": 88.4277,
+    "totalEq": 88.6614,
     "availBal": 69.901,
-    "frozenBal": 18.5266
+    "frozenBal": 18.7603
   },
   "todayCombined": {
     "trades": 1,
@@ -12,7 +12,7 @@
     "losses": 0,
     "winRate": "100.0%",
     "totalPnl": "1.0400",
-    "totalUnrealizedPnl": 0.12
+    "totalUnrealizedPnl": 0.35
   },
   "strategies": {
     "dmc": {
@@ -36,56 +36,56 @@
           "symbol": "ATHUSDT",
           "side": "long",
           "entry": 0.004751,
-          "currentPrice": 0.004665,
+          "currentPrice": 0.004678,
           "sl": 0.00448,
           "tp": 0.005116,
-          "slDistPct": 3.97,
-          "tpDistPct": 9.67,
-          "unrealizedPct": -1.81,
-          "unrealizedPnl": -0.27,
+          "slDistPct": 4.23,
+          "tpDistPct": 9.36,
+          "unrealizedPct": -1.54,
+          "unrealizedPnl": -0.23,
           "since": "2026-09-06T12:00"
         },
         {
           "symbol": "BLURUSDT",
           "side": "long",
           "entry": 0.01733,
-          "currentPrice": 0.01737,
+          "currentPrice": 0.01747,
           "sl": 0.01635,
           "tp": 0.01847,
-          "slDistPct": 5.87,
-          "tpDistPct": 6.33,
-          "unrealizedPct": 0.23,
-          "unrealizedPnl": 0.04,
+          "slDistPct": 6.41,
+          "tpDistPct": 5.72,
+          "unrealizedPct": 0.81,
+          "unrealizedPnl": 0.13,
           "since": "2026-09-06T12:00"
         },
         {
           "symbol": "IOTAUSDT",
           "side": "long",
           "entry": 0.04166,
-          "currentPrice": 0.04183,
+          "currentPrice": 0.04211,
           "sl": 0.03869,
           "tp": 0.04548,
-          "slDistPct": 7.51,
-          "tpDistPct": 8.73,
-          "unrealizedPct": 0.41,
-          "unrealizedPnl": 0.05,
+          "slDistPct": 8.12,
+          "tpDistPct": 8,
+          "unrealizedPct": 1.08,
+          "unrealizedPnl": 0.13,
           "since": "2026-09-06T04:00"
         },
         {
           "symbol": "TRBUSDT",
           "side": "long",
           "entry": 17.95,
-          "currentPrice": 18.38,
+          "currentPrice": 18.41,
           "sl": 16.69,
           "tp": 19.47,
-          "slDistPct": 9.19,
-          "tpDistPct": 5.93,
-          "unrealizedPct": 2.4,
-          "unrealizedPnl": 0.3,
+          "slDistPct": 9.34,
+          "tpDistPct": 5.76,
+          "unrealizedPct": 2.56,
+          "unrealizedPnl": 0.32,
           "since": "2026-09-05T08:00"
         }
       ],
-      "totalUnrealizedPnl": 0.12
+      "totalUnrealizedPnl": 0.35
     },
     "dn": {
       "label": "DN: Donchian 30/15 [4H] LIVE(dnbot01) 起:2026-08-24",
@@ -168,55 +168,55 @@
         "symbol": "ATHUSDT",
         "side": "long",
         "entry": 0.004751,
-        "currentPrice": 0.004665,
+        "currentPrice": 0.004678,
         "sl": 0.00448,
         "tp": 0.005116,
-        "slDistPct": 3.97,
-        "tpDistPct": 9.67,
-        "unrealizedPct": -1.81,
-        "unrealizedPnl": -0.27,
+        "slDistPct": 4.23,
+        "tpDistPct": 9.36,
+        "unrealizedPct": -1.54,
+        "unrealizedPnl": -0.23,
         "since": "2026-09-06T12:00"
       },
       {
         "symbol": "BLURUSDT",
         "side": "long",
         "entry": 0.01733,
-        "currentPrice": 0.01737,
+        "currentPrice": 0.01747,
         "sl": 0.01635,
         "tp": 0.01847,
-        "slDistPct": 5.87,
-        "tpDistPct": 6.33,
-        "unrealizedPct": 0.23,
-        "unrealizedPnl": 0.04,
+        "slDistPct": 6.41,
+        "tpDistPct": 5.72,
+        "unrealizedPct": 0.81,
+        "unrealizedPnl": 0.13,
         "since": "2026-09-06T12:00"
       },
       {
         "symbol": "IOTAUSDT",
         "side": "long",
         "entry": 0.04166,
-        "currentPrice": 0.04183,
+        "currentPrice": 0.04211,
         "sl": 0.03869,
         "tp": 0.04548,
-        "slDistPct": 7.51,
-        "tpDistPct": 8.73,
-        "unrealizedPct": 0.41,
-        "unrealizedPnl": 0.05,
+        "slDistPct": 8.12,
+        "tpDistPct": 8,
+        "unrealizedPct": 1.08,
+        "unrealizedPnl": 0.13,
         "since": "2026-09-06T04:00"
       },
       {
         "symbol": "TRBUSDT",
         "side": "long",
         "entry": 17.95,
-        "currentPrice": 18.38,
+        "currentPrice": 18.41,
         "sl": 16.69,
         "tp": 19.47,
-        "slDistPct": 9.19,
-        "tpDistPct": 5.93,
-        "unrealizedPct": 2.4,
-        "unrealizedPnl": 0.3,
+        "slDistPct": 9.34,
+        "tpDistPct": 5.76,
+        "unrealizedPct": 2.56,
+        "unrealizedPnl": 0.32,
         "since": "2026-09-05T08:00"
       }
     ],
-    "totalUnrealizedPnl": 0.12
+    "totalUnrealizedPnl": 0.35
   }
 }
