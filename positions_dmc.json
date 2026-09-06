@@ -25,18 +25,6 @@
       "algoId": "3897845532170567680"
     },
     {
-      "symbol": "ZAMAUSDT",
-      "side": "long",
-      "entryPrice": 0.05447,
-      "initialSL": 0.04982932142857143,
-      "currentSL": 0.0582405513392857,
-      "tp": 0.0602708482142857,
-      "quantity": 188.74375145907004,
-      "entryTime": 1788681634325,
-      "orderId": "3898328370507370496",
-      "algoId": "3898841344799326208"
-    },
-    {
       "symbol": "BLURUSDT",
       "side": "long",
       "entryPrice": 0.0173,
@@ -938,6 +926,22 @@
       "exitState": "reconcile",
       "exitPrice": 0.0696717647058824,
       "pnl": -0.342084045000008
+    },
+    {
+      "symbol": "ZAMAUSDT",
+      "side": "long",
+      "entryPrice": 0.05447,
+      "initialSL": 0.04982932142857143,
+      "currentSL": 0.0582405513392857,
+      "tp": 0.0602708482142857,
+      "quantity": 188.74375145907004,
+      "entryTime": 1788681634325,
+      "orderId": "3898328370507370496",
+      "algoId": "3898841344799326208",
+      "exitTime": 1788697831228,
+      "exitState": "reconcile",
+      "exitPrice": 0.0602,
+      "pnl": 1.0386588259478706
     }
   ],
   "cooldown": {
@@ -988,6 +992,7 @@
     "CFXUSDT": 1788394530334,
     "ASTERUSDT": 1788394530334,
     "GALAUSDT": 1788466536171,
-    "BASEDUSDT": 1788466536171
+    "BASEDUSDT": 1788466536171,
+    "ZAMAUSDT": 1788697831228
   }
 }
