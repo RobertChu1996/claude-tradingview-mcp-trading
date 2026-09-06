@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-09-06",
-  "generatedAt": "2026-09-06T03:45:34.027Z",
+  "generatedAt": "2026-09-06T04:00:53.910Z",
   "balance": {
-    "totalEq": 87.4582,
-    "availBal": 83.1114,
-    "frozenBal": 4.3468
+    "totalEq": 87.4433,
+    "availBal": 79.2173,
+    "frozenBal": 8.226
   },
   "todayCombined": {
     "trades": 0,
@@ -12,7 +12,7 @@
     "losses": 0,
     "winRate": "N/A",
     "totalPnl": "0.0000",
-    "totalUnrealizedPnl": 0.16
+    "totalUnrealizedPnl": 0.15
   },
   "strategies": {
     "dmc": {
@@ -33,6 +33,19 @@
       },
       "openPositions": [
         {
+          "symbol": "IOTAUSDT",
+          "side": "long",
+          "entry": 0.04166,
+          "currentPrice": 0.04163,
+          "sl": 0.03869,
+          "tp": 0.04548,
+          "slDistPct": 7.06,
+          "tpDistPct": 9.25,
+          "unrealizedPct": -0.07,
+          "unrealizedPnl": -0.01,
+          "since": "2026-09-06T04:00"
+        },
+        {
           "symbol": "TRBUSDT",
           "side": "long",
           "entry": 17.95,
@@ -46,7 +59,7 @@
           "since": "2026-09-05T08:00"
         }
       ],
-      "totalUnrealizedPnl": 0.16
+      "totalUnrealizedPnl": 0.15
     },
     "dn": {
       "label": "DN: Donchian 30/15 [4H] LIVE(dnbot01) 起:2026-08-24",
@@ -126,6 +139,19 @@
     },
     "openPositions": [
       {
+        "symbol": "IOTAUSDT",
+        "side": "long",
+        "entry": 0.04166,
+        "currentPrice": 0.04163,
+        "sl": 0.03869,
+        "tp": 0.04548,
+        "slDistPct": 7.06,
+        "tpDistPct": 9.25,
+        "unrealizedPct": -0.07,
+        "unrealizedPnl": -0.01,
+        "since": "2026-09-06T04:00"
+      },
+      {
         "symbol": "TRBUSDT",
         "side": "long",
         "entry": 17.95,
@@ -139,6 +165,6 @@
         "since": "2026-09-05T08:00"
       }
     ],
-    "totalUnrealizedPnl": 0.16
+    "totalUnrealizedPnl": 0.15
   }
 }
