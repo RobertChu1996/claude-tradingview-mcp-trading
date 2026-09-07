@@ -71,18 +71,6 @@
       "entryTime": 1788768040704,
       "orderId": "3901227854107201536",
       "algoId": "3901227860724989952"
-    },
-    {
-      "symbol": "BTCUSDT",
-      "side": "short",
-      "entryPrice": 79163.3,
-      "initialSL": 79388,
-      "currentSL": 79163.3,
-      "tp": 78905.3,
-      "quantity": 0.0001,
-      "entryTime": 1788790600191,
-      "orderId": "2900838195",
-      "algoId": "3902012615875805184"
     }
   ],
   "closed": [
@@ -978,6 +966,22 @@
       "exitState": "reconcile",
       "exitPrice": 0.0602,
       "pnl": 1.0386588259478706
+    },
+    {
+      "symbol": "BTCUSDT",
+      "side": "short",
+      "entryPrice": 79163.3,
+      "initialSL": 79388,
+      "currentSL": 79163.3,
+      "tp": 78905.3,
+      "quantity": 0.0001,
+      "entryTime": 1788790600191,
+      "orderId": "2900838195",
+      "algoId": "3902012615875805184",
+      "exitTime": 1788793240801,
+      "exitState": "reconcile",
+      "exitPrice": 79172,
+      "pnl": -0.008786765
     }
   ],
   "cooldown": {
@@ -1029,6 +1033,7 @@
     "ASTERUSDT": 1788394530334,
     "GALAUSDT": 1788466536171,
     "BASEDUSDT": 1788466536171,
-    "ZAMAUSDT": 1788697831228
+    "ZAMAUSDT": 1788697831228,
+    "BTCUSDT": 1788793240801
   }
 }
