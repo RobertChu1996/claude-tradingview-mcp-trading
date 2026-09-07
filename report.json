@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-09-07",
-  "generatedAt": "2026-09-07T04:30:40.775Z",
+  "generatedAt": "2026-09-07T04:45:45.834Z",
   "balance": {
-    "totalEq": 88.4152,
+    "totalEq": 88.5324,
     "availBal": 66.5707,
-    "frozenBal": 21.8445
+    "frozenBal": 21.9617
   },
   "todayCombined": {
     "trades": 0,
@@ -12,7 +12,7 @@
     "losses": 0,
     "winRate": "N/A",
     "totalPnl": "0.0000",
-    "totalUnrealizedPnl": 0.13
+    "totalUnrealizedPnl": 0.25
   },
   "strategies": {
     "dmc": {
@@ -36,26 +36,26 @@
           "symbol": "BIGTIMEUSDT",
           "side": "long",
           "entry": 0.0072817737226278,
-          "currentPrice": 0.007268,
+          "currentPrice": 0.007316,
           "sl": 0.006685,
           "tp": 0.008124,
-          "slDistPct": 8.02,
-          "tpDistPct": 11.78,
-          "unrealizedPct": -0.19,
-          "unrealizedPnl": -0.02,
+          "slDistPct": 8.62,
+          "tpDistPct": 11.04,
+          "unrealizedPct": 0.47,
+          "unrealizedPnl": 0.05,
           "since": "2026-09-07T04:00"
         },
         {
           "symbol": "ATHUSDT",
           "side": "long",
           "entry": 0.004751,
-          "currentPrice": 0.004689,
+          "currentPrice": 0.004702,
           "sl": 0.00448,
           "tp": 0.005116,
-          "slDistPct": 4.46,
-          "tpDistPct": 9.11,
-          "unrealizedPct": -1.3,
-          "unrealizedPnl": -0.19,
+          "slDistPct": 4.72,
+          "tpDistPct": 8.8,
+          "unrealizedPct": -1.03,
+          "unrealizedPnl": -0.15,
           "since": "2026-09-06T12:00"
         },
         {
@@ -75,13 +75,13 @@
           "symbol": "IOTAUSDT",
           "side": "long",
           "entry": 0.04166,
-          "currentPrice": 0.04194,
+          "currentPrice": 0.04198,
           "sl": 0.03869,
           "tp": 0.04548,
-          "slDistPct": 7.75,
-          "tpDistPct": 8.44,
-          "unrealizedPct": 0.67,
-          "unrealizedPnl": 0.08,
+          "slDistPct": 7.84,
+          "tpDistPct": 8.34,
+          "unrealizedPct": 0.77,
+          "unrealizedPnl": 0.09,
           "since": "2026-09-06T04:00"
         },
         {
@@ -98,7 +98,7 @@
           "since": "2026-09-05T08:00"
         }
       ],
-      "totalUnrealizedPnl": 0.13
+      "totalUnrealizedPnl": 0.25
     },
     "dn": {
       "label": "DN: Donchian 30/15 [4H] LIVE(dnbot01) 起:2026-08-24",
@@ -181,26 +181,26 @@
         "symbol": "BIGTIMEUSDT",
         "side": "long",
         "entry": 0.0072817737226278,
-        "currentPrice": 0.007268,
+        "currentPrice": 0.007316,
         "sl": 0.006685,
         "tp": 0.008124,
-        "slDistPct": 8.02,
-        "tpDistPct": 11.78,
-        "unrealizedPct": -0.19,
-        "unrealizedPnl": -0.02,
+        "slDistPct": 8.62,
+        "tpDistPct": 11.04,
+        "unrealizedPct": 0.47,
+        "unrealizedPnl": 0.05,
         "since": "2026-09-07T04:00"
       },
       {
         "symbol": "ATHUSDT",
         "side": "long",
         "entry": 0.004751,
-        "currentPrice": 0.004689,
+        "currentPrice": 0.004702,
         "sl": 0.00448,
         "tp": 0.005116,
-        "slDistPct": 4.46,
-        "tpDistPct": 9.11,
-        "unrealizedPct": -1.3,
-        "unrealizedPnl": -0.19,
+        "slDistPct": 4.72,
+        "tpDistPct": 8.8,
+        "unrealizedPct": -1.03,
+        "unrealizedPnl": -0.15,
         "since": "2026-09-06T12:00"
       },
       {
@@ -220,13 +220,13 @@
         "symbol": "IOTAUSDT",
         "side": "long",
         "entry": 0.04166,
-        "currentPrice": 0.04194,
+        "currentPrice": 0.04198,
         "sl": 0.03869,
         "tp": 0.04548,
-        "slDistPct": 7.75,
-        "tpDistPct": 8.44,
-        "unrealizedPct": 0.67,
-        "unrealizedPnl": 0.08,
+        "slDistPct": 7.84,
+        "tpDistPct": 8.34,
+        "unrealizedPct": 0.77,
+        "unrealizedPnl": 0.09,
         "since": "2026-09-06T04:00"
       },
       {
@@ -243,6 +243,6 @@
         "since": "2026-09-05T08:00"
       }
     ],
-    "totalUnrealizedPnl": 0.13
+    "totalUnrealizedPnl": 0.25
   }
 }
