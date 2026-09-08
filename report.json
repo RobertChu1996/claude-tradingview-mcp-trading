@@ -1,65 +1,38 @@
 {
   "reportDate": "2026-09-08",
-  "generatedAt": "2026-09-08T13:30:45.617Z",
+  "generatedAt": "2026-09-08T13:45:38.040Z",
   "balance": {
-    "totalEq": 88.3375,
-    "availBal": 79.9831,
-    "frozenBal": 8.3544
+    "totalEq": 88.0677,
+    "availBal": 88.0677,
+    "frozenBal": 0
   },
   "todayCombined": {
-    "trades": 4,
-    "wins": 1,
-    "losses": 3,
-    "winRate": "25.0%",
+    "trades": 6,
+    "wins": 2,
+    "losses": 4,
+    "winRate": "33.3%",
     "totalPnl": "-0.2600",
-    "totalUnrealizedPnl": 0.3
+    "totalUnrealizedPnl": 0
   },
   "strategies": {
     "dmc": {
       "label": "B: DMC/SMA25 [4H] 起:2026-05-29",
       "overall": {
-        "trades": 58,
-        "wins": 13,
-        "losses": 45,
-        "winRate": "22.4%",
+        "trades": 60,
+        "wins": 14,
+        "losses": 46,
+        "winRate": "23.3%",
         "totalPnl": "-25.3472"
       },
       "today": {
-        "trades": 4,
-        "wins": 1,
-        "losses": 3,
-        "winRate": "25.0%",
+        "trades": 6,
+        "wins": 2,
+        "losses": 4,
+        "winRate": "33.3%",
         "totalPnl": "-0.2600"
       },
-      "openPositions": [
-        {
-          "symbol": "IOTAUSDT",
-          "side": "long",
-          "entry": 0.04166,
-          "currentPrice": 0.0418,
-          "sl": 0.04171,
-          "tp": 0.04548,
-          "slDistPct": 0.22,
-          "tpDistPct": 8.8,
-          "unrealizedPct": 0.34,
-          "unrealizedPnl": 0.04,
-          "since": "2026-09-06T04:00"
-        },
-        {
-          "symbol": "TRBUSDT",
-          "side": "long",
-          "entry": 17.95,
-          "currentPrice": 18.32,
-          "sl": 17.93,
-          "tp": 19.47,
-          "slDistPct": 2.13,
-          "tpDistPct": 6.28,
-          "unrealizedPct": 2.06,
-          "unrealizedPnl": 0.26,
-          "since": "2026-09-05T08:00"
-        }
-      ],
-      "totalUnrealizedPnl": 0.3
+      "openPositions": [],
+      "totalUnrealizedPnl": 0
     },
     "dn": {
       "label": "DN: Donchian 30/15 [4H] LIVE(dnbot01) 起:2026-08-24",
@@ -124,47 +97,20 @@
   "strategy": {
     "label": "B: DMC/SMA25 [4H] 起:2026-05-29",
     "overall": {
-      "trades": 58,
-      "wins": 13,
-      "losses": 45,
-      "winRate": "22.4%",
+      "trades": 60,
+      "wins": 14,
+      "losses": 46,
+      "winRate": "23.3%",
       "totalPnl": "-25.3472"
     },
     "today": {
-      "trades": 4,
-      "wins": 1,
-      "losses": 3,
-      "winRate": "25.0%",
+      "trades": 6,
+      "wins": 2,
+      "losses": 4,
+      "winRate": "33.3%",
       "totalPnl": "-0.2600"
     },
-    "openPositions": [
-      {
-        "symbol": "IOTAUSDT",
-        "side": "long",
-        "entry": 0.04166,
-        "currentPrice": 0.0418,
-        "sl": 0.04171,
-        "tp": 0.04548,
-        "slDistPct": 0.22,
-        "tpDistPct": 8.8,
-        "unrealizedPct": 0.34,
-        "unrealizedPnl": 0.04,
-        "since": "2026-09-06T04:00"
-      },
-      {
-        "symbol": "TRBUSDT",
-        "side": "long",
-        "entry": 17.95,
-        "currentPrice": 18.32,
-        "sl": 17.93,
-        "tp": 19.47,
-        "slDistPct": 2.13,
-        "tpDistPct": 6.28,
-        "unrealizedPct": 2.06,
-        "unrealizedPnl": 0.26,
-        "since": "2026-09-05T08:00"
-      }
-    ],
-    "totalUnrealizedPnl": 0.3
+    "openPositions": [],
+    "totalUnrealizedPnl": 0
   }
 }
