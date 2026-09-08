@@ -23,18 +23,6 @@
       "entryTime": 1788667242755,
       "orderId": "3897845524613255168",
       "algoId": "3903643466732584960"
-    },
-    {
-      "symbol": "ATHUSDT",
-      "side": "long",
-      "entryPrice": 0.004763,
-      "initialSL": 0.004480175,
-      "currentSL": 0.004763,
-      "tp": 0.0051165312499999996,
-      "quantity": 3136.3191625444206,
-      "entryTime": 1788696041626,
-      "orderId": "3898812063449567232",
-      "algoId": "3903643512836374528"
     }
   ],
   "closed": [
@@ -994,6 +982,22 @@
       "exitState": "reconcile",
       "exitPrice": 0.01729,
       "pnl": -0.0619389422424924
+    },
+    {
+      "symbol": "ATHUSDT",
+      "side": "long",
+      "entryPrice": 0.004763,
+      "initialSL": 0.004480175,
+      "currentSL": 0.004763,
+      "tp": 0.0051165312499999996,
+      "quantity": 3136.3191625444206,
+      "entryTime": 1788696041626,
+      "orderId": "3898812063449567232",
+      "algoId": "3903643512836374528",
+      "exitTime": 1788849033055,
+      "exitState": "reconcile",
+      "exitPrice": 0.004762,
+      "pnl": 0.01199049
     }
   ],
   "cooldown": {
@@ -1047,6 +1051,7 @@
     "BASEDUSDT": 1788466536171,
     "ZAMAUSDT": 1788697831228,
     "BTCUSDT": 1788793240801,
-    "ARKMUSDT": 1788840928907
+    "ARKMUSDT": 1788840928907,
+    "ATHUSDT": 1788849033055
   }
 }
