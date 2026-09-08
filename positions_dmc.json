@@ -25,18 +25,6 @@
       "algoId": "3903643466732584960"
     },
     {
-      "symbol": "BLURUSDT",
-      "side": "long",
-      "entryPrice": 0.0173,
-      "initialSL": 0.0163575,
-      "currentSL": 0.0173,
-      "tp": 0.018478124999999998,
-      "quantity": 941.1453232324936,
-      "entryTime": 1788696041626,
-      "orderId": "3898811893630586881",
-      "algoId": "3903643490254241792"
-    },
-    {
       "symbol": "ATHUSDT",
       "side": "long",
       "entryPrice": 0.004763,
@@ -990,6 +978,22 @@
       "exitState": "reconcile",
       "exitPrice": 0.11221,
       "pnl": -0.1933673180000035
+    },
+    {
+      "symbol": "BLURUSDT",
+      "side": "long",
+      "entryPrice": 0.0173,
+      "initialSL": 0.0163575,
+      "currentSL": 0.0173,
+      "tp": 0.018478124999999998,
+      "quantity": 941.1453232324936,
+      "entryTime": 1788696041626,
+      "orderId": "3898811893630586881",
+      "algoId": "3903643490254241792",
+      "exitTime": 1788841839240,
+      "exitState": "reconcile",
+      "exitPrice": 0.01729,
+      "pnl": -0.0619389422424924
     }
   ],
   "cooldown": {
@@ -1035,7 +1039,7 @@
     "UNIUSDT": 1786375852271,
     "ACHUSDT": 1787012124819,
     "NIGHTUSDT": 1787129157774,
-    "BLURUSDT": 1787152536179,
+    "BLURUSDT": 1788841839240,
     "KITEUSDT": 1788364842641,
     "CFXUSDT": 1788394530334,
     "ASTERUSDT": 1788394530334,

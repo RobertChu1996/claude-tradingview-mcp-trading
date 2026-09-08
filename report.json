@@ -1,87 +1,74 @@
 {
   "reportDate": "2026-09-08",
-  "generatedAt": "2026-09-08T04:15:36.989Z",
+  "generatedAt": "2026-09-08T04:30:46.614Z",
   "balance": {
-    "totalEq": 89.1281,
-    "availBal": 69.6781,
-    "frozenBal": 19.4499
+    "totalEq": 89.0761,
+    "availBal": 75.0544,
+    "frozenBal": 14.0217
   },
   "todayCombined": {
-    "trades": 2,
+    "trades": 3,
     "wins": 0,
-    "losses": 2,
+    "losses": 3,
     "winRate": "0.0%",
-    "totalPnl": "-0.2100",
+    "totalPnl": "-0.2700",
     "totalUnrealizedPnl": 1.06
   },
   "strategies": {
     "dmc": {
       "label": "B: DMC/SMA25 [4H] 起:2026-05-29",
       "overall": {
-        "trades": 56,
+        "trades": 57,
         "wins": 12,
-        "losses": 44,
-        "winRate": "21.4%",
-        "totalPnl": "-25.2972"
+        "losses": 45,
+        "winRate": "21.1%",
+        "totalPnl": "-25.3572"
       },
       "today": {
-        "trades": 2,
+        "trades": 3,
         "wins": 0,
-        "losses": 2,
+        "losses": 3,
         "winRate": "0.0%",
-        "totalPnl": "-0.2100"
+        "totalPnl": "-0.2700"
       },
       "openPositions": [
         {
           "symbol": "ATHUSDT",
           "side": "long",
           "entry": 0.004751,
-          "currentPrice": 0.004912,
+          "currentPrice": 0.0049,
           "sl": 0.004763,
           "tp": 0.005116,
-          "slDistPct": 3.03,
-          "tpDistPct": 4.15,
-          "unrealizedPct": 3.39,
-          "unrealizedPnl": 0.5,
-          "since": "2026-09-06T12:00"
-        },
-        {
-          "symbol": "BLURUSDT",
-          "side": "long",
-          "entry": 0.01733,
-          "currentPrice": 0.0173,
-          "sl": 0.0173,
-          "tp": 0.01847,
-          "slDistPct": 0,
-          "tpDistPct": 6.76,
-          "unrealizedPct": -0.17,
-          "unrealizedPnl": -0.03,
+          "slDistPct": 2.8,
+          "tpDistPct": 4.41,
+          "unrealizedPct": 3.14,
+          "unrealizedPnl": 0.46,
           "since": "2026-09-06T12:00"
         },
         {
           "symbol": "IOTAUSDT",
           "side": "long",
           "entry": 0.04166,
-          "currentPrice": 0.04264,
+          "currentPrice": 0.0427,
           "sl": 0.04171,
           "tp": 0.04548,
-          "slDistPct": 2.18,
-          "tpDistPct": 6.66,
-          "unrealizedPct": 2.35,
-          "unrealizedPnl": 0.27,
+          "slDistPct": 2.32,
+          "tpDistPct": 6.51,
+          "unrealizedPct": 2.5,
+          "unrealizedPnl": 0.29,
           "since": "2026-09-06T04:00"
         },
         {
           "symbol": "TRBUSDT",
           "side": "long",
           "entry": 17.95,
-          "currentPrice": 18.41,
+          "currentPrice": 18.39,
           "sl": 17.93,
           "tp": 19.47,
-          "slDistPct": 2.61,
-          "tpDistPct": 5.76,
-          "unrealizedPct": 2.56,
-          "unrealizedPnl": 0.32,
+          "slDistPct": 2.5,
+          "tpDistPct": 5.87,
+          "unrealizedPct": 2.45,
+          "unrealizedPnl": 0.31,
           "since": "2026-09-05T08:00"
         }
       ],
@@ -150,70 +137,57 @@
   "strategy": {
     "label": "B: DMC/SMA25 [4H] 起:2026-05-29",
     "overall": {
-      "trades": 56,
+      "trades": 57,
       "wins": 12,
-      "losses": 44,
-      "winRate": "21.4%",
-      "totalPnl": "-25.2972"
+      "losses": 45,
+      "winRate": "21.1%",
+      "totalPnl": "-25.3572"
     },
     "today": {
-      "trades": 2,
+      "trades": 3,
       "wins": 0,
-      "losses": 2,
+      "losses": 3,
       "winRate": "0.0%",
-      "totalPnl": "-0.2100"
+      "totalPnl": "-0.2700"
     },
     "openPositions": [
       {
         "symbol": "ATHUSDT",
         "side": "long",
         "entry": 0.004751,
-        "currentPrice": 0.004912,
+        "currentPrice": 0.0049,
         "sl": 0.004763,
         "tp": 0.005116,
-        "slDistPct": 3.03,
-        "tpDistPct": 4.15,
-        "unrealizedPct": 3.39,
-        "unrealizedPnl": 0.5,
-        "since": "2026-09-06T12:00"
-      },
-      {
-        "symbol": "BLURUSDT",
-        "side": "long",
-        "entry": 0.01733,
-        "currentPrice": 0.0173,
-        "sl": 0.0173,
-        "tp": 0.01847,
-        "slDistPct": 0,
-        "tpDistPct": 6.76,
-        "unrealizedPct": -0.17,
-        "unrealizedPnl": -0.03,
+        "slDistPct": 2.8,
+        "tpDistPct": 4.41,
+        "unrealizedPct": 3.14,
+        "unrealizedPnl": 0.46,
         "since": "2026-09-06T12:00"
       },
       {
         "symbol": "IOTAUSDT",
         "side": "long",
         "entry": 0.04166,
-        "currentPrice": 0.04264,
+        "currentPrice": 0.0427,
         "sl": 0.04171,
         "tp": 0.04548,
-        "slDistPct": 2.18,
-        "tpDistPct": 6.66,
-        "unrealizedPct": 2.35,
-        "unrealizedPnl": 0.27,
+        "slDistPct": 2.32,
+        "tpDistPct": 6.51,
+        "unrealizedPct": 2.5,
+        "unrealizedPnl": 0.29,
         "since": "2026-09-06T04:00"
       },
       {
         "symbol": "TRBUSDT",
         "side": "long",
         "entry": 17.95,
-        "currentPrice": 18.41,
+        "currentPrice": 18.39,
         "sl": 17.93,
         "tp": 19.47,
-        "slDistPct": 2.61,
-        "tpDistPct": 5.76,
-        "unrealizedPct": 2.56,
-        "unrealizedPnl": 0.32,
+        "slDistPct": 2.5,
+        "tpDistPct": 5.87,
+        "unrealizedPct": 2.45,
+        "unrealizedPnl": 0.31,
         "since": "2026-09-05T08:00"
       }
     ],
