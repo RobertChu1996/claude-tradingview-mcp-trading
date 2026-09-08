@@ -47,30 +47,6 @@
       "entryTime": 1788696041626,
       "orderId": "3898812063449567232",
       "algoId": "3903643512836374528"
-    },
-    {
-      "symbol": "BIGTIMEUSDT",
-      "side": "long",
-      "entryPrice": 0.007325,
-      "initialSL": 0.006685207142857143,
-      "currentSL": 0.006685207142857143,
-      "tp": 0.008124741071428571,
-      "quantity": 1378.1118711791535,
-      "entryTime": 1788753636387,
-      "orderId": "3900744340546998272",
-      "algoId": "3900744346527252480"
-    },
-    {
-      "symbol": "ARKMUSDT",
-      "side": "long",
-      "entryPrice": 0.11367,
-      "initialSL": 0.10643207142857143,
-      "currentSL": 0.10643207142857143,
-      "tp": 0.1227174107142857,
-      "quantity": 121.77768332708305,
-      "entryTime": 1788768040704,
-      "orderId": "3901227854107201536",
-      "algoId": "3901227860724989952"
     }
   ],
   "closed": [
@@ -982,6 +958,38 @@
       "exitState": "reconcile",
       "exitPrice": 79172,
       "pnl": -0.008786765
+    },
+    {
+      "symbol": "BIGTIMEUSDT",
+      "side": "long",
+      "entryPrice": 0.007325,
+      "initialSL": 0.006685207142857143,
+      "currentSL": 0.006685207142857143,
+      "tp": 0.008124741071428571,
+      "quantity": 1378.1118711791535,
+      "entryTime": 1788753636387,
+      "orderId": "3900744340546998272",
+      "algoId": "3900744346527252480",
+      "exitTime": 1788840928907,
+      "exitState": "reconcile",
+      "exitPrice": 0.007275,
+      "pnl": -0.0207527783725475
+    },
+    {
+      "symbol": "ARKMUSDT",
+      "side": "long",
+      "entryPrice": 0.11367,
+      "initialSL": 0.10643207142857143,
+      "currentSL": 0.10643207142857143,
+      "tp": 0.1227174107142857,
+      "quantity": 121.77768332708305,
+      "entryTime": 1788768040704,
+      "orderId": "3901227854107201536",
+      "algoId": "3901227860724989952",
+      "exitTime": 1788840928907,
+      "exitState": "reconcile",
+      "exitPrice": 0.11221,
+      "pnl": -0.1933673180000035
     }
   ],
   "cooldown": {
@@ -991,7 +999,7 @@
     "ZROUSDT": 1781176316090,
     "PENDLEUSDT": 1781339455760,
     "KSMUSDT": 1781179764993,
-    "BIGTIMEUSDT": 1785875441631,
+    "BIGTIMEUSDT": 1788840928907,
     "SPKUSDT": 1781712053129,
     "LITUSDT": 1781749839241,
     "ZKUSDT": 1785330044599,
@@ -1034,6 +1042,7 @@
     "GALAUSDT": 1788466536171,
     "BASEDUSDT": 1788466536171,
     "ZAMAUSDT": 1788697831228,
-    "BTCUSDT": 1788793240801
+    "BTCUSDT": 1788793240801,
+    "ARKMUSDT": 1788840928907
   }
 }
