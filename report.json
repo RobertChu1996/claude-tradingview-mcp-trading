@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-09-10",
-  "generatedAt": "2026-09-10T19:45:34.636Z",
+  "generatedAt": "2026-09-10T20:00:49.564Z",
   "balance": {
-    "totalEq": 88.0677,
-    "availBal": 88.0677,
-    "frozenBal": 0
+    "totalEq": 88.0647,
+    "availBal": 86.0394,
+    "frozenBal": 2.0253
   },
   "todayCombined": {
     "trades": 0,
@@ -31,7 +31,21 @@
         "winRate": "N/A",
         "totalPnl": "0.0000"
       },
-      "openPositions": [],
+      "openPositions": [
+        {
+          "symbol": "MMTUSDT",
+          "side": "short",
+          "entry": 0.1519,
+          "currentPrice": 0.1519,
+          "sl": 0.1701,
+          "tp": 0.1293,
+          "slDistPct": 11.98,
+          "tpDistPct": 14.88,
+          "unrealizedPct": 0,
+          "unrealizedPnl": 0,
+          "since": "2026-09-10T20:00"
+        }
+      ],
       "totalUnrealizedPnl": 0
     },
     "dn": {
@@ -110,7 +124,21 @@
       "winRate": "N/A",
       "totalPnl": "0.0000"
     },
-    "openPositions": [],
+    "openPositions": [
+      {
+        "symbol": "MMTUSDT",
+        "side": "short",
+        "entry": 0.1519,
+        "currentPrice": 0.1519,
+        "sl": 0.1701,
+        "tp": 0.1293,
+        "slDistPct": 11.98,
+        "tpDistPct": 14.88,
+        "unrealizedPct": 0,
+        "unrealizedPnl": 0,
+        "since": "2026-09-10T20:00"
+      }
+    ],
     "totalUnrealizedPnl": 0
   }
 }
