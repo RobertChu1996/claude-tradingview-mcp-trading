@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-09-13",
-  "generatedAt": "2026-09-13T23:30:41.893Z",
+  "generatedAt": "2026-09-13T23:45:34.913Z",
   "balance": {
-    "totalEq": 88.3869,
+    "totalEq": 88.4319,
     "availBal": 81.2157,
-    "frozenBal": 7.1712
+    "frozenBal": 7.2162
   },
   "todayCombined": {
     "trades": 0,
@@ -12,7 +12,7 @@
     "losses": 0,
     "winRate": "N/A",
     "totalPnl": "0.0000",
-    "totalUnrealizedPnl": 0.32
+    "totalUnrealizedPnl": 0.37
   },
   "strategies": {
     "dmc": {
@@ -36,13 +36,13 @@
           "symbol": "COREUSDT",
           "side": "short",
           "entry": 0.01924,
-          "currentPrice": 0.0188,
+          "currentPrice": 0.01874,
           "sl": 0.02043,
           "tp": 0.01779,
-          "slDistPct": 8.67,
-          "tpDistPct": 5.37,
-          "unrealizedPct": 2.29,
-          "unrealizedPnl": 0.33,
+          "slDistPct": 9.02,
+          "tpDistPct": 5.07,
+          "unrealizedPct": 2.6,
+          "unrealizedPnl": 0.38,
           "since": "2026-09-13T12:00"
         },
         {
@@ -59,7 +59,7 @@
           "since": "2026-09-10T20:00"
         }
       ],
-      "totalUnrealizedPnl": 0.32
+      "totalUnrealizedPnl": 0.37
     },
     "dn": {
       "label": "DN: Donchian 30/15 [4H] LIVE(dnbot01) 起:2026-08-24",
@@ -142,13 +142,13 @@
         "symbol": "COREUSDT",
         "side": "short",
         "entry": 0.01924,
-        "currentPrice": 0.0188,
+        "currentPrice": 0.01874,
         "sl": 0.02043,
         "tp": 0.01779,
-        "slDistPct": 8.67,
-        "tpDistPct": 5.37,
-        "unrealizedPct": 2.29,
-        "unrealizedPnl": 0.33,
+        "slDistPct": 9.02,
+        "tpDistPct": 5.07,
+        "unrealizedPct": 2.6,
+        "unrealizedPnl": 0.38,
         "since": "2026-09-13T12:00"
       },
       {
@@ -165,6 +165,6 @@
         "since": "2026-09-10T20:00"
       }
     ],
-    "totalUnrealizedPnl": 0.32
+    "totalUnrealizedPnl": 0.37
   }
 }
