@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-09-13",
-  "generatedAt": "2026-09-13T11:45:33.145Z",
+  "generatedAt": "2026-09-13T12:00:51.180Z",
   "balance": {
-    "totalEq": 88.0253,
-    "availBal": 86.0394,
-    "frozenBal": 1.9859
+    "totalEq": 88.0264,
+    "availBal": 81.2157,
+    "frozenBal": 6.8106
   },
   "todayCombined": {
     "trades": 0,
@@ -33,15 +33,28 @@
       },
       "openPositions": [
         {
+          "symbol": "COREUSDT",
+          "side": "short",
+          "entry": 0.01924,
+          "currentPrice": 0.01924,
+          "sl": 0.02043,
+          "tp": 0.01779,
+          "slDistPct": 6.19,
+          "tpDistPct": 7.54,
+          "unrealizedPct": 0,
+          "unrealizedPnl": 0,
+          "since": "2026-09-13T12:00"
+        },
+        {
           "symbol": "MMTUSDT",
           "side": "short",
           "entry": 0.1519,
-          "currentPrice": 0.153,
+          "currentPrice": 0.1528,
           "sl": 0.1701,
           "tp": 0.1293,
-          "slDistPct": 11.18,
-          "tpDistPct": 15.49,
-          "unrealizedPct": -0.72,
+          "slDistPct": 11.32,
+          "tpDistPct": 15.38,
+          "unrealizedPct": -0.59,
           "unrealizedPnl": -0.04,
           "since": "2026-09-10T20:00"
         }
@@ -101,7 +114,7 @@
           "symbol": "NEARUSDT",
           "side": "long",
           "entry": 2.167,
-          "sl": 1.778,
+          "sl": 1.79,
           "tp": 3.684999999999999,
           "since": "2026-09-04T20:00"
         }
@@ -126,15 +139,28 @@
     },
     "openPositions": [
       {
+        "symbol": "COREUSDT",
+        "side": "short",
+        "entry": 0.01924,
+        "currentPrice": 0.01924,
+        "sl": 0.02043,
+        "tp": 0.01779,
+        "slDistPct": 6.19,
+        "tpDistPct": 7.54,
+        "unrealizedPct": 0,
+        "unrealizedPnl": 0,
+        "since": "2026-09-13T12:00"
+      },
+      {
         "symbol": "MMTUSDT",
         "side": "short",
         "entry": 0.1519,
-        "currentPrice": 0.153,
+        "currentPrice": 0.1528,
         "sl": 0.1701,
         "tp": 0.1293,
-        "slDistPct": 11.18,
-        "tpDistPct": 15.49,
-        "unrealizedPct": -0.72,
+        "slDistPct": 11.32,
+        "tpDistPct": 15.38,
+        "unrealizedPct": -0.59,
         "unrealizedPnl": -0.04,
         "since": "2026-09-10T20:00"
       }
