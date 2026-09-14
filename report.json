@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-09-14",
-  "generatedAt": "2026-09-14T17:30:45.976Z",
+  "generatedAt": "2026-09-14T17:45:37.356Z",
   "balance": {
-    "totalEq": 87.8926,
+    "totalEq": 87.8962,
     "availBal": 81.2157,
-    "frozenBal": 6.6769
+    "frozenBal": 6.6804
   },
   "todayCombined": {
     "trades": 0,
@@ -12,7 +12,7 @@
     "losses": 0,
     "winRate": "N/A",
     "totalPnl": "0.0000",
-    "totalUnrealizedPnl": -0.18
+    "totalUnrealizedPnl": -0.17
   },
   "strategies": {
     "dmc": {
@@ -36,30 +36,30 @@
           "symbol": "COREUSDT",
           "side": "short",
           "entry": 0.01924,
-          "currentPrice": 0.01937,
+          "currentPrice": 0.01936,
           "sl": 0.02043,
           "tp": 0.01779,
-          "slDistPct": 5.47,
-          "tpDistPct": 8.16,
-          "unrealizedPct": -0.68,
-          "unrealizedPnl": -0.1,
+          "slDistPct": 5.53,
+          "tpDistPct": 8.11,
+          "unrealizedPct": -0.62,
+          "unrealizedPnl": -0.09,
           "since": "2026-09-13T12:00"
         },
         {
           "symbol": "MMTUSDT",
           "side": "short",
           "entry": 0.1519,
-          "currentPrice": 0.1539,
+          "currentPrice": 0.154,
           "sl": 0.1701,
           "tp": 0.1293,
-          "slDistPct": 10.53,
-          "tpDistPct": 15.98,
-          "unrealizedPct": -1.32,
+          "slDistPct": 10.45,
+          "tpDistPct": 16.04,
+          "unrealizedPct": -1.38,
           "unrealizedPnl": -0.08,
           "since": "2026-09-10T20:00"
         }
       ],
-      "totalUnrealizedPnl": -0.18
+      "totalUnrealizedPnl": -0.17
     },
     "dn": {
       "label": "DN: Donchian 30/15 [4H] LIVE(dnbot01) 起:2026-08-24",
@@ -142,29 +142,29 @@
         "symbol": "COREUSDT",
         "side": "short",
         "entry": 0.01924,
-        "currentPrice": 0.01937,
+        "currentPrice": 0.01936,
         "sl": 0.02043,
         "tp": 0.01779,
-        "slDistPct": 5.47,
-        "tpDistPct": 8.16,
-        "unrealizedPct": -0.68,
-        "unrealizedPnl": -0.1,
+        "slDistPct": 5.53,
+        "tpDistPct": 8.11,
+        "unrealizedPct": -0.62,
+        "unrealizedPnl": -0.09,
         "since": "2026-09-13T12:00"
       },
       {
         "symbol": "MMTUSDT",
         "side": "short",
         "entry": 0.1519,
-        "currentPrice": 0.1539,
+        "currentPrice": 0.154,
         "sl": 0.1701,
         "tp": 0.1293,
-        "slDistPct": 10.53,
-        "tpDistPct": 15.98,
-        "unrealizedPct": -1.32,
+        "slDistPct": 10.45,
+        "tpDistPct": 16.04,
+        "unrealizedPct": -1.38,
         "unrealizedPnl": -0.08,
         "since": "2026-09-10T20:00"
       }
     ],
-    "totalUnrealizedPnl": -0.18
+    "totalUnrealizedPnl": -0.17
   }
 }
