@@ -1,18 +1,5 @@
 {
-  "open": [
-    {
-      "symbol": "AAVEUSDT",
-      "side": "long",
-      "entryPrice": 131.13,
-      "initialSL": 123.49625,
-      "currentSL": 123.49625,
-      "tp": 140.67218749999998,
-      "quantity": 0.11494848074150646,
-      "entryTime": 1789416052892,
-      "orderId": "3922971389713928192",
-      "algoId": "3922971393613807616"
-    }
-  ],
+  "open": [],
   "closed": [
     {
       "symbol": "SPKUSDT",
@@ -987,6 +974,22 @@
       "exitState": "reconcile",
       "exitPrice": 0.0193673368841545,
       "pnl": -0.1029249650000295
+    },
+    {
+      "symbol": "AAVEUSDT",
+      "side": "long",
+      "entryPrice": 131.13,
+      "initialSL": 123.49625,
+      "currentSL": 123.49625,
+      "tp": 140.67218749999998,
+      "quantity": 0.11494848074150646,
+      "entryTime": 1789416052892,
+      "orderId": "3922971389713928192",
+      "algoId": "3922971393613807616",
+      "exitTime": 1789484443817,
+      "exitState": "reconcile",
+      "exitPrice": 123.46,
+      "pnl": -0.907186174140238
     }
   ],
   "cooldown": {
@@ -1044,6 +1047,7 @@
     "ATHUSDT": 1788849033055,
     "TRBUSDT": 1788875131742,
     "MMTUSDT": 1789431327030,
-    "COREUSDT": 1789431327030
+    "COREUSDT": 1789431327030,
+    "AAVEUSDT": 1789484443817
   }
 }
