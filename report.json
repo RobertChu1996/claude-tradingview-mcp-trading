@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-09-15",
-  "generatedAt": "2026-09-15T05:45:35.353Z",
+  "generatedAt": "2026-09-15T06:00:55.123Z",
   "balance": {
-    "totalEq": 87.3866,
+    "totalEq": 87.4581,
     "availBal": 83.0465,
-    "frozenBal": 4.3401
+    "frozenBal": 4.4116
   },
   "todayCombined": {
     "trades": 2,
@@ -12,7 +12,7 @@
     "losses": 2,
     "winRate": "0.0%",
     "totalPnl": "-0.1900",
-    "totalUnrealizedPnl": -0.48
+    "totalUnrealizedPnl": -0.41
   },
   "strategies": {
     "dmc": {
@@ -36,17 +36,17 @@
           "symbol": "AAVEUSDT",
           "side": "long",
           "entry": 131.58,
-          "currentPrice": 127.18,
+          "currentPrice": 127.83,
           "sl": 123.49,
           "tp": 140.67,
-          "slDistPct": 2.9,
-          "tpDistPct": 10.61,
-          "unrealizedPct": -3.34,
-          "unrealizedPnl": -0.48,
+          "slDistPct": 3.4,
+          "tpDistPct": 10.04,
+          "unrealizedPct": -2.85,
+          "unrealizedPnl": -0.41,
           "since": "2026-09-14T20:00"
         }
       ],
-      "totalUnrealizedPnl": -0.48
+      "totalUnrealizedPnl": -0.41
     },
     "dn": {
       "label": "DN: Donchian 30/15 [4H] LIVE(dnbot01) 起:2026-08-24",
@@ -129,16 +129,16 @@
         "symbol": "AAVEUSDT",
         "side": "long",
         "entry": 131.58,
-        "currentPrice": 127.18,
+        "currentPrice": 127.83,
         "sl": 123.49,
         "tp": 140.67,
-        "slDistPct": 2.9,
-        "tpDistPct": 10.61,
-        "unrealizedPct": -3.34,
-        "unrealizedPnl": -0.48,
+        "slDistPct": 3.4,
+        "tpDistPct": 10.04,
+        "unrealizedPct": -2.85,
+        "unrealizedPnl": -0.41,
         "since": "2026-09-14T20:00"
       }
     ],
-    "totalUnrealizedPnl": -0.48
+    "totalUnrealizedPnl": -0.41
   }
 }
