@@ -1,52 +1,52 @@
 {
   "reportDate": "2026-09-15",
-  "generatedAt": "2026-09-15T00:00:57.167Z",
+  "generatedAt": "2026-09-15T00:15:33.850Z",
   "balance": {
-    "totalEq": 87.4955,
+    "totalEq": 87.4614,
     "availBal": 83.0465,
-    "frozenBal": 4.449
+    "frozenBal": 4.4149
   },
   "todayCombined": {
-    "trades": 0,
+    "trades": 2,
     "wins": 0,
-    "losses": 0,
-    "winRate": "N/A",
-    "totalPnl": "0.0000",
-    "totalUnrealizedPnl": -0.38
+    "losses": 2,
+    "winRate": "0.0%",
+    "totalPnl": "-0.1900",
+    "totalUnrealizedPnl": -0.41
   },
   "strategies": {
     "dmc": {
       "label": "B: DMC/SMA25 [4H] 起:2026-05-29",
       "overall": {
-        "trades": 60,
+        "trades": 62,
         "wins": 14,
-        "losses": 46,
-        "winRate": "23.3%",
-        "totalPnl": "-25.3472"
+        "losses": 48,
+        "winRate": "22.6%",
+        "totalPnl": "-25.5372"
       },
       "today": {
-        "trades": 0,
+        "trades": 2,
         "wins": 0,
-        "losses": 0,
-        "winRate": "N/A",
-        "totalPnl": "0.0000"
+        "losses": 2,
+        "winRate": "0.0%",
+        "totalPnl": "-0.1900"
       },
       "openPositions": [
         {
           "symbol": "AAVEUSDT",
           "side": "long",
           "entry": 131.58,
-          "currentPrice": 128.17,
+          "currentPrice": 127.86,
           "sl": 123.49,
           "tp": 140.67,
-          "slDistPct": 3.65,
-          "tpDistPct": 9.75,
-          "unrealizedPct": -2.59,
-          "unrealizedPnl": -0.38,
+          "slDistPct": 3.42,
+          "tpDistPct": 10.02,
+          "unrealizedPct": -2.83,
+          "unrealizedPnl": -0.41,
           "since": "2026-09-14T20:00"
         }
       ],
-      "totalUnrealizedPnl": -0.38
+      "totalUnrealizedPnl": -0.41
     },
     "dn": {
       "label": "DN: Donchian 30/15 [4H] LIVE(dnbot01) 起:2026-08-24",
@@ -111,34 +111,34 @@
   "strategy": {
     "label": "B: DMC/SMA25 [4H] 起:2026-05-29",
     "overall": {
-      "trades": 60,
+      "trades": 62,
       "wins": 14,
-      "losses": 46,
-      "winRate": "23.3%",
-      "totalPnl": "-25.3472"
+      "losses": 48,
+      "winRate": "22.6%",
+      "totalPnl": "-25.5372"
     },
     "today": {
-      "trades": 0,
+      "trades": 2,
       "wins": 0,
-      "losses": 0,
-      "winRate": "N/A",
-      "totalPnl": "0.0000"
+      "losses": 2,
+      "winRate": "0.0%",
+      "totalPnl": "-0.1900"
     },
     "openPositions": [
       {
         "symbol": "AAVEUSDT",
         "side": "long",
         "entry": 131.58,
-        "currentPrice": 128.17,
+        "currentPrice": 127.86,
         "sl": 123.49,
         "tp": 140.67,
-        "slDistPct": 3.65,
-        "tpDistPct": 9.75,
-        "unrealizedPct": -2.59,
-        "unrealizedPnl": -0.38,
+        "slDistPct": 3.42,
+        "tpDistPct": 10.02,
+        "unrealizedPct": -2.83,
+        "unrealizedPnl": -0.41,
         "since": "2026-09-14T20:00"
       }
     ],
-    "totalUnrealizedPnl": -0.38
+    "totalUnrealizedPnl": -0.41
   }
 }
