@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-09-15",
-  "generatedAt": "2026-09-15T07:45:40.154Z",
+  "generatedAt": "2026-09-15T08:00:54.094Z",
   "balance": {
-    "totalEq": 87.3118,
+    "totalEq": 87.2926,
     "availBal": 83.0465,
-    "frozenBal": 4.2653
+    "frozenBal": 4.246
   },
   "todayCombined": {
     "trades": 2,
@@ -12,7 +12,7 @@
     "losses": 2,
     "winRate": "0.0%",
     "totalPnl": "-0.1900",
-    "totalUnrealizedPnl": -0.56
+    "totalUnrealizedPnl": -0.58
   },
   "strategies": {
     "dmc": {
@@ -36,17 +36,17 @@
           "symbol": "AAVEUSDT",
           "side": "long",
           "entry": 131.58,
-          "currentPrice": 126.49,
+          "currentPrice": 126.32,
           "sl": 123.49,
           "tp": 140.67,
-          "slDistPct": 2.37,
-          "tpDistPct": 11.21,
-          "unrealizedPct": -3.87,
-          "unrealizedPnl": -0.56,
+          "slDistPct": 2.24,
+          "tpDistPct": 11.36,
+          "unrealizedPct": -4,
+          "unrealizedPnl": -0.58,
           "since": "2026-09-14T20:00"
         }
       ],
-      "totalUnrealizedPnl": -0.56
+      "totalUnrealizedPnl": -0.58
     },
     "dn": {
       "label": "DN: Donchian 30/15 [4H] LIVE(dnbot01) 起:2026-08-24",
@@ -101,7 +101,7 @@
           "symbol": "NEARUSDT",
           "side": "long",
           "entry": 2.167,
-          "sl": 1.813,
+          "sl": 1.828,
           "tp": 3.684999999999999,
           "since": "2026-09-04T20:00"
         }
@@ -129,16 +129,16 @@
         "symbol": "AAVEUSDT",
         "side": "long",
         "entry": 131.58,
-        "currentPrice": 126.49,
+        "currentPrice": 126.32,
         "sl": 123.49,
         "tp": 140.67,
-        "slDistPct": 2.37,
-        "tpDistPct": 11.21,
-        "unrealizedPct": -3.87,
-        "unrealizedPnl": -0.56,
+        "slDistPct": 2.24,
+        "tpDistPct": 11.36,
+        "unrealizedPct": -4,
+        "unrealizedPnl": -0.58,
         "since": "2026-09-14T20:00"
       }
     ],
-    "totalUnrealizedPnl": -0.56
+    "totalUnrealizedPnl": -0.58
   }
 }
