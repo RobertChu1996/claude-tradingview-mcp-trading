@@ -23,18 +23,6 @@
       "entryTime": 1789574452383,
       "orderId": "3928286368088412160",
       "algoId": "3928286373934448640"
-    },
-    {
-      "symbol": "ZAMAUSDT",
-      "side": "short",
-      "entryPrice": 0.04585,
-      "initialSL": 0.04769267857142857,
-      "currentSL": 0.04769267857142857,
-      "tp": 0.04354665178571429,
-      "quantity": 471.9823533546662,
-      "entryTime": 1789574452383,
-      "orderId": "3928286438854709248",
-      "algoId": "3928286444298092544"
     }
   ],
   "closed": [
@@ -996,6 +984,22 @@
       "exitState": "reconcile",
       "exitPrice": 123.46,
       "pnl": -0.907186174140238
+    },
+    {
+      "symbol": "ZAMAUSDT",
+      "side": "short",
+      "entryPrice": 0.04585,
+      "initialSL": 0.04769267857142857,
+      "currentSL": 0.04769267857142857,
+      "tp": 0.04354665178571429,
+      "quantity": 471.9823533546662,
+      "entryTime": 1789574452383,
+      "orderId": "3928286438854709248",
+      "algoId": "3928286444298092544",
+      "exitTime": 1789601432383,
+      "exitState": "reconcile",
+      "exitPrice": 0.0477,
+      "pnl": -0.918474394999975
     }
   ],
   "cooldown": {
@@ -1047,7 +1051,7 @@
     "ASTERUSDT": 1788394530334,
     "GALAUSDT": 1788466536171,
     "BASEDUSDT": 1788466536171,
-    "ZAMAUSDT": 1788697831228,
+    "ZAMAUSDT": 1789601432383,
     "BTCUSDT": 1788793240801,
     "ARKMUSDT": 1788840928907,
     "ATHUSDT": 1788849033055,
