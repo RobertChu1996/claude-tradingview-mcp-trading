@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-09-17",
-  "generatedAt": "2026-09-17T16:45:39.220Z",
+  "generatedAt": "2026-09-17T17:00:52.636Z",
   "balance": {
-    "totalEq": 84.4872,
+    "totalEq": 84.4485,
     "availBal": 81.1662,
-    "frozenBal": 3.321
+    "frozenBal": 3.2823
   },
   "todayCombined": {
     "trades": 1,
@@ -12,7 +12,7 @@
     "losses": 1,
     "winRate": "0.0%",
     "totalPnl": "-0.8700",
-    "totalUnrealizedPnl": -0.69
+    "totalUnrealizedPnl": -0.73
   },
   "strategies": {
     "dmc": {
@@ -36,17 +36,17 @@
           "symbol": "KAITOUSDT",
           "side": "short",
           "entry": 0.2796,
-          "currentPrice": 0.2956,
+          "currentPrice": 0.2965,
           "sl": 0.3,
           "tp": 0.2554,
-          "slDistPct": 1.49,
-          "tpDistPct": 13.6,
-          "unrealizedPct": -5.72,
-          "unrealizedPnl": -0.69,
+          "slDistPct": 1.18,
+          "tpDistPct": 13.86,
+          "unrealizedPct": -6.04,
+          "unrealizedPnl": -0.73,
           "since": "2026-09-16T16:00"
         }
       ],
-      "totalUnrealizedPnl": -0.69
+      "totalUnrealizedPnl": -0.73
     },
     "dn": {
       "label": "DN: Donchian 30/15 [4H] LIVE(dnbot01) 起:2026-08-24",
@@ -129,16 +129,16 @@
         "symbol": "KAITOUSDT",
         "side": "short",
         "entry": 0.2796,
-        "currentPrice": 0.2956,
+        "currentPrice": 0.2965,
         "sl": 0.3,
         "tp": 0.2554,
-        "slDistPct": 1.49,
-        "tpDistPct": 13.6,
-        "unrealizedPct": -5.72,
-        "unrealizedPnl": -0.69,
+        "slDistPct": 1.18,
+        "tpDistPct": 13.86,
+        "unrealizedPct": -6.04,
+        "unrealizedPnl": -0.73,
         "since": "2026-09-16T16:00"
       }
     ],
-    "totalUnrealizedPnl": -0.69
+    "totalUnrealizedPnl": -0.73
   }
 }
