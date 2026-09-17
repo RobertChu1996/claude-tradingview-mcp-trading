@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-09-17",
-  "generatedAt": "2026-09-17T19:45:35.278Z",
+  "generatedAt": "2026-09-17T20:00:51.160Z",
   "balance": {
-    "totalEq": 84.4614,
+    "totalEq": 84.4319,
     "availBal": 81.1662,
-    "frozenBal": 3.2952
+    "frozenBal": 3.2657
   },
   "todayCombined": {
     "trades": 1,
@@ -12,7 +12,7 @@
     "losses": 1,
     "winRate": "0.0%",
     "totalPnl": "-0.8700",
-    "totalUnrealizedPnl": -0.71
+    "totalUnrealizedPnl": -0.74
   },
   "strategies": {
     "dmc": {
@@ -36,17 +36,17 @@
           "symbol": "KAITOUSDT",
           "side": "short",
           "entry": 0.2796,
-          "currentPrice": 0.2962,
+          "currentPrice": 0.2969,
           "sl": 0.3,
           "tp": 0.2554,
-          "slDistPct": 1.28,
-          "tpDistPct": 13.77,
-          "unrealizedPct": -5.94,
-          "unrealizedPnl": -0.71,
+          "slDistPct": 1.04,
+          "tpDistPct": 13.98,
+          "unrealizedPct": -6.19,
+          "unrealizedPnl": -0.74,
           "since": "2026-09-16T16:00"
         }
       ],
-      "totalUnrealizedPnl": -0.71
+      "totalUnrealizedPnl": -0.74
     },
     "dn": {
       "label": "DN: Donchian 30/15 [4H] LIVE(dnbot01) 起:2026-08-24",
@@ -93,7 +93,7 @@
           "symbol": "BNBUSDT",
           "side": "long",
           "entry": 727.8,
-          "sl": 684.7,
+          "sl": 685.5,
           "tp": 1068,
           "since": "2026-09-03T16:00"
         },
@@ -101,7 +101,7 @@
           "symbol": "NEARUSDT",
           "side": "long",
           "entry": 2.167,
-          "sl": 1.837,
+          "sl": 1.849,
           "tp": 3.684999999999999,
           "since": "2026-09-04T20:00"
         }
@@ -129,16 +129,16 @@
         "symbol": "KAITOUSDT",
         "side": "short",
         "entry": 0.2796,
-        "currentPrice": 0.2962,
+        "currentPrice": 0.2969,
         "sl": 0.3,
         "tp": 0.2554,
-        "slDistPct": 1.28,
-        "tpDistPct": 13.77,
-        "unrealizedPct": -5.94,
-        "unrealizedPnl": -0.71,
+        "slDistPct": 1.04,
+        "tpDistPct": 13.98,
+        "unrealizedPct": -6.19,
+        "unrealizedPnl": -0.74,
         "since": "2026-09-16T16:00"
       }
     ],
-    "totalUnrealizedPnl": -0.71
+    "totalUnrealizedPnl": -0.74
   }
 }
