@@ -1,18 +1,6 @@
 {
   "open": [
     {
-      "symbol": "COREUSDT",
-      "side": "short",
-      "entryPrice": 0.01772,
-      "initialSL": 0.019244428571428572,
-      "currentSL": 0.019244428571428572,
-      "tp": 0.015814464285714286,
-      "quantity": 570.5165757973476,
-      "entryTime": 1789574452383,
-      "orderId": "3928286297255006208",
-      "algoId": "3928286303671468032"
-    },
-    {
       "symbol": "KAITOUSDT",
       "side": "short",
       "entryPrice": 0.2802,
@@ -969,6 +957,22 @@
       "exitState": "reconcile",
       "exitPrice": 0.0477,
       "pnl": -0.918474394999975
+    },
+    {
+      "symbol": "COREUSDT",
+      "side": "short",
+      "entryPrice": 0.01772,
+      "initialSL": 0.019244428571428572,
+      "currentSL": 0.019244428571428572,
+      "tp": 0.015814464285714286,
+      "quantity": 570.5165757973476,
+      "entryTime": 1789574452383,
+      "orderId": "3928286297255006208",
+      "algoId": "3928286303671468032",
+      "exitTime": 1789660844882,
+      "exitState": "reconcile",
+      "exitPrice": 0.01924,
+      "pnl": -0.872859414999926
     }
   ],
   "cooldown": {
@@ -1026,7 +1030,7 @@
     "ATHUSDT": 1788849033055,
     "TRBUSDT": 1788875131742,
     "MMTUSDT": 1789431327030,
-    "COREUSDT": 1789431327030,
+    "COREUSDT": 1789660844882,
     "AAVEUSDT": 1789484443817
   }
 }
