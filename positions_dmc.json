@@ -1,18 +1,5 @@
 {
-  "open": [
-    {
-      "symbol": "ZENUSDT",
-      "side": "long",
-      "entryPrice": 8.123,
-      "initialSL": 7.323189285714285,
-      "currentSL": 7.323189285714285,
-      "tp": 9.122763392857141,
-      "quantity": 1.0538477192181448,
-      "entryTime": 1789934438811,
-      "orderId": "3940365484182687744",
-      "algoId": "3940365488216784896"
-    }
-  ],
+  "open": [],
   "closed": [
     {
       "symbol": "PENGUUSDT",
@@ -957,6 +944,22 @@
       "exitState": "reconcile",
       "exitPrice": 0.3001,
       "pnl": -0.891973346283735
+    },
+    {
+      "symbol": "ZENUSDT",
+      "side": "long",
+      "entryPrice": 8.123,
+      "initialSL": 7.323189285714285,
+      "currentSL": 7.323189285714285,
+      "tp": 9.122763392857141,
+      "quantity": 1.0538477192181448,
+      "entryTime": 1789934438811,
+      "orderId": "3940365484182687744",
+      "algoId": "3940365488216784896",
+      "exitTime": 1790172925587,
+      "exitState": "reconcile",
+      "exitPrice": 7.29,
+      "pnl": -0.8443782356689248
     }
   ],
   "cooldown": {
@@ -1016,6 +1019,7 @@
     "MMTUSDT": 1789431327030,
     "COREUSDT": 1789660844882,
     "AAVEUSDT": 1789484443817,
-    "KAITOUSDT": 1789685126312
+    "KAITOUSDT": 1789685126312,
+    "ZENUSDT": 1790172925587
   }
 }
