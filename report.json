@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-09-23",
-  "generatedAt": "2026-09-23T13:00:54.540Z",
+  "generatedAt": "2026-09-23T13:15:41.891Z",
   "balance": {
-    "totalEq": 84.3011,
+    "totalEq": 84.2751,
     "availBal": 81.5745,
-    "frozenBal": 2.7267
+    "frozenBal": 2.7007
   },
   "todayCombined": {
     "trades": 0,
@@ -12,7 +12,7 @@
     "losses": 0,
     "winRate": "N/A",
     "totalPnl": "0.0000",
-    "totalUnrealizedPnl": 0.02
+    "totalUnrealizedPnl": -0.01
   },
   "strategies": {
     "dmc": {
@@ -36,17 +36,17 @@
           "symbol": "ZENUSDT",
           "side": "long",
           "entry": 8.128,
-          "currentPrice": 8.144,
+          "currentPrice": 8.118,
           "sl": 7.323,
           "tp": 9.122,
-          "slDistPct": 10.08,
-          "tpDistPct": 12.01,
-          "unrealizedPct": 0.2,
-          "unrealizedPnl": 0.02,
+          "slDistPct": 9.79,
+          "tpDistPct": 12.37,
+          "unrealizedPct": -0.12,
+          "unrealizedPnl": -0.01,
           "since": "2026-09-20T20:00"
         }
       ],
-      "totalUnrealizedPnl": 0.02
+      "totalUnrealizedPnl": -0.01
     },
     "dn": {
       "label": "DN: Donchian 30/15 [4H] LIVE(dnbot01) 起:2026-08-24",
@@ -129,16 +129,16 @@
         "symbol": "ZENUSDT",
         "side": "long",
         "entry": 8.128,
-        "currentPrice": 8.144,
+        "currentPrice": 8.118,
         "sl": 7.323,
         "tp": 9.122,
-        "slDistPct": 10.08,
-        "tpDistPct": 12.01,
-        "unrealizedPct": 0.2,
-        "unrealizedPnl": 0.02,
+        "slDistPct": 9.79,
+        "tpDistPct": 12.37,
+        "unrealizedPct": -0.12,
+        "unrealizedPnl": -0.01,
         "since": "2026-09-20T20:00"
       }
     ],
-    "totalUnrealizedPnl": 0.02
+    "totalUnrealizedPnl": -0.01
   }
 }
