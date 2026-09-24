@@ -195,7 +195,7 @@ async function main() {
         totalUnrealizedPnl: parseFloat(totalUnrealized.toFixed(2)),
       },
       dn: {
-        label:         "DN: Donchian 30/15 [4H] LIVE(dnbot01) 起:2026-08-24",
+        label:         "DN: Donchian 20/10 [4H] LIVE(dnbot01) 起:2026-08-24（30/15→20/10 @2026-09-24）",
         mode:          "LIVE",
         overall:       calcStats(dnExits),        // 真錢
         today:         calcStats(dnTodayExits),
