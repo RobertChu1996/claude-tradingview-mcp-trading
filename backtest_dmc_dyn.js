@@ -22,18 +22,20 @@ const MIN_PRICE       = 0.001;
 const COMPARE_MODE  = process.argv[2] === "compare";
 const FILTER_MODE   = process.argv[2] === "filter";
 const OPTIMIZE_MODE = process.argv[2] === "optimize";
-const MAX_OPEN      = (COMPARE_MODE || FILTER_MODE || OPTIMIZE_MODE) ? 6 : parseInt(process.argv[2] || "6");
+const LONGFIX_MODE  = process.argv[2] === "longfix";   // 多單 regime 濾網驗證（含樣本內外拆分）
+const MAX_OPEN      = LONGFIX_MODE ? 4 : (COMPARE_MODE || FILTER_MODE || OPTIMIZE_MODE) ? 6 : parseInt(process.argv[2] || "6");
 const SYMBOL_LIMIT  = parseInt(process.argv[3] || "30");
 const MONTHS        = parseInt(process.argv[4] || "12");
 const PORTFOLIO     = 1000;
-const RISK_PCT      = 0.01;
-const MAX_TRADE_USD = 200;
+const RISK_PCT      = parseFloat(process.env.BT_RISK_PCT || "0.01");       // 可由環境變數覆寫做風險%取捨研究
+const MAX_TRADE_USD = parseFloat(process.env.BT_MAX_TRADE_USD || "200");   // 隨風險%等比放大以看純效果
 const FEE_RATE      = 0.0005;  // OKX taker 0.05%/邊；round-trip = 進場+出場各扣一次
 // 每筆平倉的手續費：進場名目 + 出場名目，各乘費率。分批止盈只算被平掉的那部分。
 const feeFor = (qty, entryPx, exitPx) => FEE_RATE * (qty * entryPx + qty * exitPx);
 const LOOKBACK      = SMA_PERIOD + SMA_PREV_OFFSET + 10;
-const INTERVAL      = "4h";
-const MS_CANDLE     = 4 * 3600 * 1000;
+const INTERVAL      = process.env.BT_INTERVAL || "4h";   // 可調時間週期：15m / 30m / 1h / 4h
+const _MS = { "15m": 15*60*1000, "30m": 30*60*1000, "1h": 3600*1000, "4h": 4*3600*1000 };
+const MS_CANDLE     = _MS[INTERVAL] || 4 * 3600 * 1000;
 
 // ─── 幣種清單（與 bot_dmc.js 靜態清單一致）──────────────────────────────────
 const WATCHLIST = [
@@ -136,9 +138,52 @@ function swingLowOf(candles, lb) {
 function swingHighOf(candles, lb) {
   return Math.max(...candles.slice(-lb - 1, -1).map(c => c.high));
 }
+// EMA of closes (最後一根的值)
+function emaOf(closes, n) {
+  if (closes.length < n) return null;
+  const k = 2 / (n + 1);
+  let ema = closes.slice(0, n).reduce((a, b) => a + b, 0) / n;  // 以前 n 根 SMA 起頭
+  for (let i = n; i < closes.length; i++) ema = closes[i] * k + ema * (1 - k);
+  return ema;
+}
+// Wilder ADX（回傳最後一根的 ADX；資料不足回 null）—— 趨勢強度，用來擋震盪盤
+function adxOf(candles, n = 14) {
+  if (candles.length < n * 2 + 1) return null;
+  const tr = [], plusDM = [], minusDM = [];
+  for (let i = 1; i < candles.length; i++) {
+    const h = candles[i].high, l = candles[i].low, pc = candles[i - 1].close;
+    const ph = candles[i - 1].high, pl = candles[i - 1].low;
+    tr.push(Math.max(h - l, Math.abs(h - pc), Math.abs(l - pc)));
+    const up = h - ph, down = pl - l;
+    plusDM.push(up > down && up > 0 ? up : 0);
+    minusDM.push(down > up && down > 0 ? down : 0);
+  }
+  // Wilder 平滑
+  const wilder = (arr) => {
+    let s = arr.slice(0, n).reduce((a, b) => a + b, 0);
+    const out = [s];
+    for (let i = n; i < arr.length; i++) { s = s - s / n + arr[i]; out.push(s); }
+    return out;
+  };
+  const trS = wilder(tr), pdS = wilder(plusDM), mdS = wilder(minusDM);
+  const dx = [];
+  for (let i = 0; i < trS.length; i++) {
+    const pDI = 100 * pdS[i] / (trS[i] || 1e-9);
+    const mDI = 100 * mdS[i] / (trS[i] || 1e-9);
+    const sum = pDI + mDI;
+    dx.push(sum ? 100 * Math.abs(pDI - mDI) / sum : 0);
+  }
+  if (dx.length < n) return null;
+  // ADX = DX 的 Wilder 平均
+  let adx = dx.slice(0, n).reduce((a, b) => a + b, 0) / n;
+  for (let i = n; i < dx.length; i++) adx = (adx * (n - 1) + dx[i]) / n;
+  return adx;
+}
 
-// ─── 進場信號（volRatio 可調）────────────────────────────────────────────────
-function checkSignal(candles, volRatio = VOL_RATIO) {
+// ─── 進場信號（volRatio 可調 + 波動率自適應門檻）─────────────────────────────
+// adapt: { kVol, kStr } —— 借 GainzAlgo 概念，門檻 = 固定值 × (1 + (atr/price)*k)
+//   高波動 → 門檻拉高（要求更強確認）；低波動 → 放寬。null/0 = 沿用固定門檻。
+function checkSignal(candles, volRatio = VOL_RATIO, adapt = null) {
   if (candles.length < SMA_PERIOD + SMA_PREV_OFFSET + 10) return null;
   const closes   = candles.map(c => c.close);
   const price    = closes[closes.length - 1];
@@ -155,16 +200,23 @@ function checkSignal(candles, volRatio = VOL_RATIO) {
   const prev3   = closes.slice(-6, -3).reduce((a, b) => a + b, 0) / 3;
   const atr     = atrOf(candles, 14);
 
-  if (smaNow > smaPrev && price > smaNow && volR > volRatio &&
-      last.close > last.open && strength > STRENGTH && rec3 > prev3) {
+  // 波動率自適應門檻
+  const atrPct  = atr / price;
+  const kVol    = adapt?.kVol ?? 0;
+  const kStr    = adapt?.kStr ?? 0;
+  const volThr  = volRatio * (1 + atrPct * kVol);
+  const strThr  = Math.min(0.95, STRENGTH * (1 + atrPct * kStr));   // 強度上限 0.95（body/range≤1）
+
+  if (smaNow > smaPrev && price > smaNow && volR > volThr &&
+      last.close > last.open && strength > strThr && rec3 > prev3) {
     const sl    = swingLowOf(candles, SWING_LB) - atr * ATR_MULT;
     const slPct = (price - sl) / price;
     if (sl >= price || slPct < 0.003 || slPct > 0.15) return null;
     const tp = price + (price - sl) * TP_RATIO;
     return { side: "long", stopLoss: sl, tp };
   }
-  if (smaNow < smaPrev && price < smaNow && volR > volRatio &&
-      last.close < last.open && strength > STRENGTH && rec3 < prev3) {
+  if (smaNow < smaPrev && price < smaNow && volR > volThr &&
+      last.close < last.open && strength > strThr && rec3 < prev3) {
     const sl    = swingHighOf(candles, SWING_LB) + atr * ATR_MULT;
     const slPct = (sl - price) / price;
     if (sl <= price || slPct < 0.003 || slPct > 0.15) return null;
@@ -329,6 +381,7 @@ function runSimulation(allData, times, cutoff, maxOpen, opts = {}) {
     shortVolRatio       = null,     // 空頭專屬量能門檻
     shortStrength       = null,     // 空頭專屬蠟燭強度門檻
     volRatio            = VOL_RATIO,
+    adapt               = null,   // 波動率自適應門檻 { kVol, kStr }
     timeFilter          = false,
     partialTP           = false,
     timeSL              = false,
@@ -341,6 +394,11 @@ function runSimulation(allData, times, cutoff, maxOpen, opts = {}) {
     tpRatio             = TP_RATIO,
     lossStreakReduce    = false,
     strictSidewaysShort = false,
+    // ── 多單專屬「趨勢/regime」濾網（診斷發現多單=13%勝率的止血目標）──
+    longRequireDailyUp  = false,  // 個幣 1D 必須「明確上升」(dailyTrend===1)，不只是「非下跌」
+    longAdxMin          = 0,      // 多單要求 4H ADX ≥ 此值（趨勢強度，擋震盪盤；0=關）
+    longEmaTrend        = 0,      // 多單要求 收盤 > EMA(此週期) 且 EMA 上升（0=關）
+    longBlock           = false,  // 直接封鎖所有多單（對照組：看空單獨立表現）
   } = opts;
 
   const btcCandles  = allData["BTCUSDT"] || [];
@@ -461,7 +519,7 @@ function runSimulation(allData, times, cutoff, maxOpen, opts = {}) {
 
       const slice = candles.slice(0, idx + 1);
       const price = candles[idx].close;
-      const sig   = checkSignal(slice, volRatio);
+      const sig   = checkSignal(slice, volRatio, adapt);
       if (!sig) continue;
 
       // BTC 方向過濾
@@ -511,6 +569,7 @@ function runSimulation(allData, times, cutoff, maxOpen, opts = {}) {
 
       // 多頭專屬品質過濾
       if (sig.side === "long") {
+        if (longBlock) continue;             // 對照組：完全不做多
         if (slPct > longMaxSlPct) continue;  // SL 太寬跳過
         const last = candles[idx];
         const volR = last.volume / avgVolOf(candles.slice(0, idx + 1), 20);
@@ -518,6 +577,22 @@ function runSimulation(allData, times, cutoff, maxOpen, opts = {}) {
         const str  = body / (last.high - last.low || 0.0001);
         if (longVolRatio   !== null && volR < longVolRatio)   continue;
         if (longStrength   !== null && str  < longStrength)   continue;
+        // ── regime 濾網 ──
+        if (longRequireDailyUp) {
+          const dd = dailyData && dailyData[symbol] ? dailyTrend(dailyData[symbol], ts, mtfBand) : 0;
+          if (dd !== 1) continue;            // 1D 沒有明確上升就不做多
+        }
+        if (longAdxMin > 0) {
+          const adx = adxOf(slice, 14);
+          if (adx === null || adx < longAdxMin) continue;   // 趨勢太弱（震盪）不做多
+        }
+        if (longEmaTrend > 0) {
+          const closes = slice.map(c => c.close);
+          const emaNow  = emaOf(closes, longEmaTrend);
+          const emaPrev = emaOf(closes.slice(0, -SMA_PREV_OFFSET), longEmaTrend);
+          if (emaNow === null || emaPrev === null) continue;
+          if (!(price > emaNow && emaNow > emaPrev)) continue;  // 需站上且 EMA 上升
+        }
       }
       // 空頭專屬品質過濾
       if (sig.side === "short") {
@@ -560,7 +635,7 @@ async function main() {
   console.log("═".repeat(62));
 
   // 下載資料（filter/optimize 模式需確保 BTCUSDT 在清單內）
-  const fetchList = ((FILTER_MODE || OPTIMIZE_MODE) && !WATCHLIST.includes("BTCUSDT"))
+  const fetchList = ((FILTER_MODE || OPTIMIZE_MODE || LONGFIX_MODE) && !WATCHLIST.includes("BTCUSDT"))
     ? ["BTCUSDT", ...WATCHLIST]
     : WATCHLIST;
 
@@ -599,7 +674,94 @@ async function main() {
     return `  ${label.padEnd(22)} ${String(t.length).padStart(5)}  ${(wr+"%").padStart(6)}  ${("$"+pnl).padStart(9)}  ${pf.padStart(6)}  ${(mdd+"%").padStart(7)}`;
   };
 
-  if (OPTIMIZE_MODE) {
+  if (LONGFIX_MODE) {
+    // 下載 1D 資料（regime 濾網需要）
+    console.log("\n下載 1D 資料（regime 濾網）...");
+    const fetch1D = (await import("node-fetch")).default;
+    const dailyData = {};
+    for (const symbol of Object.keys(allData)) {
+      if (symbol === "BTCUSDT") continue;
+      try {
+        const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1d&limit=400`;
+        const r   = await fetch1D(url);
+        const d   = await r.json();
+        if (Array.isArray(d) && d.length) { dailyData[symbol] = d.map(k => ({ time: k[0], close: +k[4] })); process.stdout.write("."); }
+      } catch {}
+    }
+    console.log(`\n完成（${Object.keys(dailyData).length} 幣）\n`);
+
+    // BASE = 現行 LIVE 等效設定（maxOpen 依 MAX_OPEN，建議跑 4 對齊實盤）
+    const BASE = {
+      btcFilter: true, dailyData, mtfBand: 0.001, trailStart: 0.75,
+      fundingProxy: true, trendTightenSL: true,
+      tpRatio: 1.25, longMaxSlPct: 0.10, timeSL: true, timeSLBars: 60,
+    };
+    const scenarios = [
+      { label: "現行(LIVE等效)",          opts: { ...BASE } },
+      { label: "多單:1D須明確上升",        opts: { ...BASE, longRequireDailyUp: true } },
+      { label: "多單:ADX≥20",             opts: { ...BASE, longAdxMin: 20 } },
+      { label: "多單:ADX≥25",             opts: { ...BASE, longAdxMin: 25 } },
+      { label: "多單:站上EMA50且上升",     opts: { ...BASE, longEmaTrend: 50 } },
+      { label: "多單:1D上升+ADX≥20",      opts: { ...BASE, longRequireDailyUp: true, longAdxMin: 20 } },
+      { label: "對照:完全不做多(只空)",     opts: { ...BASE, longBlock: true } },
+    ];
+
+    const dirStats = (t, side) => {
+      const s = t.filter(x => x.side === side);
+      if (!s.length) return { n: 0, wr: 0, pnl: 0, pf: 0 };
+      const w = s.filter(x => x.win).reduce((a, x) => a + x.pnl, 0);
+      const l = Math.abs(s.filter(x => !x.win).reduce((a, x) => a + x.pnl, 0));
+      return { n: s.length, wr: s.filter(x => x.win).length / s.length * 100, pnl: s.reduce((a, x) => a + x.pnl, 0), pf: l > 0 ? w / l : Infinity };
+    };
+    const agg = (t) => {
+      const w = t.filter(x => x.win).reduce((s, x) => s + x.pnl, 0);
+      const l = Math.abs(t.filter(x => !x.win).reduce((s, x) => s + x.pnl, 0));
+      return { n: t.length, wr: t.length ? t.filter(x => x.win).length / t.length * 100 : 0, pnl: t.reduce((s, x) => s + x.pnl, 0), pf: l > 0 ? w / l : Infinity, mdd: calcMDD(t) };
+    };
+
+    // 樣本內/外拆分點：整段時間的 65% 為界
+    const splitTs = times[Math.floor(times.length * 0.65)];
+    const splitDate = new Date(splitTs).toISOString().slice(0, 10);
+
+    const results = [];
+    for (const sc of scenarios) {
+      process.stdout.write(`  ${sc.label}... `);
+      const t = runSimulation(allData, times, cutoff, MAX_OPEN, sc.opts);
+      const inS  = t.filter(x => x.entryTime <  splitTs);
+      const outS = t.filter(x => x.entryTime >= splitTs);
+      console.log(`${t.length} 筆`);
+      results.push({ label: sc.label, all: agg(t), lng: dirStats(t, "long"), sht: dirStats(t, "short"), inS: agg(inS), outS: agg(outS) });
+    }
+
+    const pfS = (v) => v.pf === Infinity ? "∞" : v.pf.toFixed(2);
+    console.log(`\n${"═".repeat(104)}`);
+    console.log(`  多單 regime 濾網驗證（${MONTHS}個月, ${Object.keys(allData).length - 1}幣, MAX_OPEN=${MAX_OPEN}, 含手續費）`);
+    console.log(`${"─".repeat(104)}`);
+    console.log(`  ${"方案".padEnd(26)} ${"筆".padStart(4)} ${"勝率".padStart(6)} ${"PnL".padStart(8)} ${"PF".padStart(5)} ${"MDD".padStart(6)} | ${"多頭 n/勝/PF/PnL".padEnd(24)} ${"空頭 n/勝/PF/PnL"}`);
+    console.log(`  ${"─".repeat(101)}`);
+    for (const r of results) {
+      const a = r.all;
+      const lngStr = `${r.lng.n}/${r.lng.wr.toFixed(0)}%/${pfS(r.lng)}/$${r.lng.pnl.toFixed(0)}`;
+      const shtStr = `${r.sht.n}/${r.sht.wr.toFixed(0)}%/${pfS(r.sht)}/$${r.sht.pnl.toFixed(0)}`;
+      const flag = r !== results[0] && a.pf > results[0].all.pf ? " ✓" : "";
+      console.log(
+        `  ${r.label.padEnd(26)} ${String(a.n).padStart(4)} ${(a.wr.toFixed(1)+"%").padStart(6)} ${("$"+a.pnl.toFixed(0)).padStart(8)} ${pfS(a).padStart(5)} ${(a.mdd.toFixed(0)+"%").padStart(6)} | ${lngStr.padEnd(24)} ${shtStr}${flag}`
+      );
+    }
+    console.log(`${"═".repeat(104)}`);
+
+    console.log(`\n  樣本內/外拆分（界: ${splitDate}，前65%=樣本內 / 後35%=樣本外）—— 檢驗是否只擬合近期`);
+    console.log(`  ${"─".repeat(78)}`);
+    console.log(`  ${"方案".padEnd(26)} ${"樣本內 n/PF/PnL".padEnd(24)} ${"樣本外 n/PF/PnL"}`);
+    console.log(`  ${"─".repeat(78)}`);
+    for (const r of results) {
+      const inStr  = `${r.inS.n}/${pfS(r.inS)}/$${r.inS.pnl.toFixed(0)}`;
+      const outStr = `${r.outS.n}/${pfS(r.outS)}/$${r.outS.pnl.toFixed(0)}`;
+      console.log(`  ${r.label.padEnd(26)} ${inStr.padEnd(24)} ${outStr}`);
+    }
+    console.log(`  ${"─".repeat(78)}\n`);
+
+  } else if (OPTIMIZE_MODE) {
     // 下載 1D 資料供 MTF 使用
     console.log("\n下載 1D 資料（多時框確認）...");
     const fetch1D  = (await import("node-fetch")).default;
@@ -621,12 +783,14 @@ async function main() {
     // 現行最佳設定（BTC過濾 + 1D MTF + trailing 0.75R + 資金費代理 + Step2a）
     const BASE_BEST = { btcFilter: true, dailyData, mtfBand: 0.001, trailStart: 0.75, fundingProxy: true, trendTightenSL: true };
 
+    const BASE = { ...BASE_BEST, tpRatio: 1.25, longMaxSlPct: 0.10, timeSL: true, timeSLBars: 60 };
     const scenarios = [
-      { label: "已部署基準 (同向上限6)",    opts: { ...BASE_BEST, tpRatio: 1.25, longMaxSlPct: 0.10, timeSL: true, timeSLBars: 60 } },
-      { label: "同向上限5",                 opts: { ...BASE_BEST, tpRatio: 1.25, longMaxSlPct: 0.10, timeSL: true, timeSLBars: 60, maxSameDir: 5 } },
-      { label: "同向上限4",                 opts: { ...BASE_BEST, tpRatio: 1.25, longMaxSlPct: 0.10, timeSL: true, timeSLBars: 60, maxSameDir: 4 } },
-      { label: "同向上限3",                 opts: { ...BASE_BEST, tpRatio: 1.25, longMaxSlPct: 0.10, timeSL: true, timeSLBars: 60, maxSameDir: 3 } },
-      { label: "同向上限2",                 opts: { ...BASE_BEST, tpRatio: 1.25, longMaxSlPct: 0.10, timeSL: true, timeSLBars: 60, maxSameDir: 2 } },
+      { label: "現行固定門檻",         opts: { ...BASE } },
+      { label: "自適應量比 k=2",       opts: { ...BASE, adapt: { kVol: 2 } } },
+      { label: "自適應量比 k=4",       opts: { ...BASE, adapt: { kVol: 4 } } },
+      { label: "自適應強度 k=2",       opts: { ...BASE, adapt: { kStr: 2 } } },
+      { label: "自適應 量比+強度 k=2", opts: { ...BASE, adapt: { kVol: 2, kStr: 2 } } },
+      { label: "反向:高波動放寬 k=-2", opts: { ...BASE, adapt: { kVol: -2 } } },
     ];
 
     // 輔助：計算方向拆解
