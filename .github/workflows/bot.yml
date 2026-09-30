@@ -98,16 +98,29 @@ jobs:
                    positions_dn.json trades_dn.csv safety-check-log-dn.json watchlist_dn.json; do
             [ -f "$f" ] && git update-index --add "$f"
           done
-
           TREE=$(git write-tree)
-          PARENT=$(git rev-parse --verify refs/heads/state 2>/dev/null || echo "")
           MSG="state: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 
-          if [ -n "$PARENT" ]; then
-            COMMIT=$(git commit-tree "$TREE" -p "$PARENT" -m "$MSG")
-          else
-            COMMIT=$(git commit-tree "$TREE" -m "$MSG")
+          # 推送重試：對付 GitHub 暫時性 500 以及 parent 被其他輪推進（非快轉）
+          #   每次重試都重新 fetch state、以最新 parent 重建 commit-tree 再推
+          pushed=false
+          for attempt in 1 2 3; do
+            git fetch origin state:refs/heads/state 2>/dev/null || true
+            PARENT=$(git rev-parse --verify refs/heads/state 2>/dev/null || echo "")
+            if [ -n "$PARENT" ]; then
+              COMMIT=$(git commit-tree "$TREE" -p "$PARENT" -m "$MSG")
+            else
+              COMMIT=$(git commit-tree "$TREE" -m "$MSG")
+            fi
+            if git push origin "$COMMIT:refs/heads/state"; then
+              echo "State saved: $MSG (attempt $attempt)"
+              pushed=true
+              break
+            fi
+            echo "⚠️ push 第 $attempt 次失敗，退避後重試..."
+            sleep $((attempt * 5))
+          done
+          if [ "$pushed" != "true" ]; then
+            echo "❌ state 推送重試 3 次後仍失敗（下一輪會靠 OKX reconcile 自我修復）"
+            exit 1
           fi
-
-          git push origin "$COMMIT:refs/heads/state"
-          echo "State saved: $MSG"
