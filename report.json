@@ -1,52 +1,38 @@
 {
   "reportDate": "2026-10-02",
-  "generatedAt": "2026-10-02T15:01:02.523Z",
+  "generatedAt": "2026-10-02T15:15:36.778Z",
   "balance": {
-    "totalEq": 83.786,
-    "availBal": 82.0136,
-    "frozenBal": 1.7724
+    "totalEq": 83.9726,
+    "availBal": 83.9726,
+    "frozenBal": 0
   },
   "todayCombined": {
-    "trades": 0,
-    "wins": 0,
+    "trades": 1,
+    "wins": 1,
     "losses": 0,
-    "winRate": "N/A",
-    "totalPnl": "0.0000",
-    "totalUnrealizedPnl": 0.34
+    "winRate": "100.0%",
+    "totalPnl": "0.5300",
+    "totalUnrealizedPnl": 0
   },
   "strategies": {
     "dmc": {
       "label": "B: DMC/SMA25 [4H] 起:2026-05-29",
       "overall": {
-        "trades": 67,
-        "wins": 14,
+        "trades": 68,
+        "wins": 15,
         "losses": 53,
-        "winRate": "20.9%",
-        "totalPnl": "-29.9672"
+        "winRate": "22.1%",
+        "totalPnl": "-29.4372"
       },
       "today": {
-        "trades": 0,
-        "wins": 0,
+        "trades": 1,
+        "wins": 1,
         "losses": 0,
-        "winRate": "N/A",
-        "totalPnl": "0.0000"
+        "winRate": "100.0%",
+        "totalPnl": "0.5300"
       },
-      "openPositions": [
-        {
-          "symbol": "MAGICUSDT",
-          "side": "long",
-          "entry": 0.05711,
-          "currentPrice": 0.06167,
-          "sl": 0.05189,
-          "tp": 0.06425,
-          "slDistPct": 15.86,
-          "tpDistPct": 4.18,
-          "unrealizedPct": 7.98,
-          "unrealizedPnl": 0.34,
-          "since": "2026-10-02T08:01"
-        }
-      ],
-      "totalUnrealizedPnl": 0.34
+      "openPositions": [],
+      "totalUnrealizedPnl": 0
     },
     "dn": {
       "label": "DN: Donchian 20/10 [4H] LIVE(dnbot01) 起:2026-08-24（30/15→20/10 @2026-09-24）",
@@ -127,34 +113,20 @@
   "strategy": {
     "label": "B: DMC/SMA25 [4H] 起:2026-05-29",
     "overall": {
-      "trades": 67,
-      "wins": 14,
+      "trades": 68,
+      "wins": 15,
       "losses": 53,
-      "winRate": "20.9%",
-      "totalPnl": "-29.9672"
+      "winRate": "22.1%",
+      "totalPnl": "-29.4372"
     },
     "today": {
-      "trades": 0,
-      "wins": 0,
+      "trades": 1,
+      "wins": 1,
       "losses": 0,
-      "winRate": "N/A",
-      "totalPnl": "0.0000"
+      "winRate": "100.0%",
+      "totalPnl": "0.5300"
     },
-    "openPositions": [
-      {
-        "symbol": "MAGICUSDT",
-        "side": "long",
-        "entry": 0.05711,
-        "currentPrice": 0.06167,
-        "sl": 0.05189,
-        "tp": 0.06425,
-        "slDistPct": 15.86,
-        "tpDistPct": 4.18,
-        "unrealizedPct": 7.98,
-        "unrealizedPnl": 0.34,
-        "since": "2026-10-02T08:01"
-      }
-    ],
-    "totalUnrealizedPnl": 0.34
+    "openPositions": [],
+    "totalUnrealizedPnl": 0
   }
 }

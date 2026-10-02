@@ -1,18 +1,5 @@
 {
-  "open": [
-    {
-      "symbol": "MAGICUSDT",
-      "side": "long",
-      "entryPrice": 0.05739,
-      "initialSL": 0.05189646428571428,
-      "currentSL": 0.05189646428571428,
-      "tp": 0.06425691964285714,
-      "quantity": 75.94698187996049,
-      "entryTime": 1790928056845,
-      "orderId": "3973705889305284608",
-      "algoId": "3973705894916440064"
-    }
-  ],
+  "open": [],
   "closed": [
     {
       "symbol": "ETCUSDT",
@@ -893,6 +880,22 @@
       "exitState": "reconcile",
       "exitPrice": 7.29,
       "pnl": -0.8443782356689248
+    },
+    {
+      "symbol": "MAGICUSDT",
+      "side": "long",
+      "entryPrice": 0.05739,
+      "initialSL": 0.05189646428571428,
+      "currentSL": 0.05189646428571428,
+      "tp": 0.06425691964285714,
+      "quantity": 75.94698187996049,
+      "entryTime": 1790928056845,
+      "orderId": "3973705889305284608",
+      "algoId": "3973705894916440064",
+      "exitTime": 1790954129148,
+      "exitState": "reconcile",
+      "exitPrice": 0.06419,
+      "pnl": 0.5290761659788581
     }
   ],
   "cooldown": {
@@ -953,6 +956,7 @@
     "COREUSDT": 1789660844882,
     "AAVEUSDT": 1789484443817,
     "KAITOUSDT": 1789685126312,
-    "ZENUSDT": 1790172925587
+    "ZENUSDT": 1790172925587,
+    "MAGICUSDT": 1790954129148
   }
 }
