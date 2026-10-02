@@ -71,7 +71,7 @@ jobs:
           OKX_PASSPHRASE:       ${{ secrets.OKX_DN_PASSPHRASE }}
           PORTFOLIO_VALUE_USD:  "200"      # live 時實際讀子帳戶餘額，此為 fallback
           RISK_PCT:             "0.01"     # $200 × 1% = 每筆約 $2 敞口（極小額驗證）
-          DONCHIAN_MAX_OPEN:    "4"        # 上限降到 4 筆
+          DONCHIAN_MAX_OPEN:    "6"        # 4→6 @2026-10-02：回測18mo多賺~32%(PF 1.77,MDD~9%),樣本內外皆正；RISK 維持 1% 不動
           DAILY_LOSS_LIMIT_PCT: ${{ vars.DAILY_LOSS_LIMIT_PCT }}
         run: node bot_donchian.js
         continue-on-error: true
