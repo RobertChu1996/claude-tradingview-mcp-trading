@@ -25,16 +25,16 @@
       "algoId": "3981919610069762048"
     },
     {
-      "symbol": "MINAUSDT",
+      "symbol": "ATOMUSDT",
       "side": "long",
-      "entryPrice": 0.16856,
-      "initialSL": 0.15505060714285715,
-      "currentSL": 0.15505060714285715,
-      "tp": 0.18544674107142853,
-      "quantity": 31.033900369835038,
-      "entryTime": 1791187246904,
-      "orderId": "3982402847167434752",
-      "algoId": "3982402853147688960"
+      "entryPrice": 1.826,
+      "initialSL": 1.7281857142857142,
+      "currentSL": 1.7281857142857142,
+      "tp": 1.9482678571428573,
+      "quantity": 4.263071920574731,
+      "entryTime": 1791239442530,
+      "orderId": "3984154220678565888",
+      "algoId": "3984154225148870656"
     }
   ],
   "closed": [
@@ -901,6 +901,22 @@
       "exitState": "reconcile",
       "exitPrice": 0.06419,
       "pnl": 0.5290761659788581
+    },
+    {
+      "symbol": "MINAUSDT",
+      "side": "long",
+      "entryPrice": 0.16856,
+      "initialSL": 0.15505060714285715,
+      "currentSL": 0.15505060714285715,
+      "tp": 0.18544674107142853,
+      "quantity": 31.033900369835038,
+      "entryTime": 1791187246904,
+      "orderId": "3982402847167434752",
+      "algoId": "3982402853147688960",
+      "exitTime": 1791239443209,
+      "exitState": "reconcile",
+      "exitPrice": 0.15447,
+      "pnl": -0.4275595297479505
     }
   ],
   "cooldown": {
@@ -962,6 +978,7 @@
     "AAVEUSDT": 1789484443817,
     "KAITOUSDT": 1789685126312,
     "ZENUSDT": 1790172925587,
-    "MAGICUSDT": 1790954129148
+    "MAGICUSDT": 1790954129148,
+    "MINAUSDT": 1791239443209
   }
 }
