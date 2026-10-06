@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-10-06",
-  "generatedAt": "2026-10-06T13:30:47.022Z",
+  "generatedAt": "2026-10-06T13:45:33.887Z",
   "balance": {
-    "totalEq": 83.1144,
+    "totalEq": 83.1029,
     "availBal": 78.0831,
-    "frozenBal": 5.0313
+    "frozenBal": 5.0198
   },
   "todayCombined": {
     "trades": 0,
@@ -12,7 +12,7 @@
     "losses": 0,
     "winRate": "N/A",
     "totalPnl": "0.0000",
-    "totalUnrealizedPnl": -0.41
+    "totalUnrealizedPnl": -0.43
   },
   "strategies": {
     "dmc": {
@@ -36,43 +36,43 @@
           "symbol": "ATOMUSDT",
           "side": "long",
           "entry": 1.817,
-          "currentPrice": 1.791,
+          "currentPrice": 1.789,
           "sl": 1.728,
           "tp": 1.948,
-          "slDistPct": 3.52,
-          "tpDistPct": 8.77,
-          "unrealizedPct": -1.43,
-          "unrealizedPnl": -0.1,
+          "slDistPct": 3.41,
+          "tpDistPct": 8.89,
+          "unrealizedPct": -1.54,
+          "unrealizedPnl": -0.11,
           "since": "2026-10-05T22:30"
         },
         {
           "symbol": "CELOUSDT",
           "side": "long",
           "entry": 0.10656,
-          "currentPrice": 0.10415,
+          "currentPrice": 0.10381,
           "sl": 0.09862,
           "tp": 0.11731,
-          "slDistPct": 5.31,
-          "tpDistPct": 12.64,
-          "unrealizedPct": -2.26,
-          "unrealizedPnl": -0.12,
+          "slDistPct": 5,
+          "tpDistPct": 13,
+          "unrealizedPct": -2.58,
+          "unrealizedPnl": -0.14,
           "since": "2026-10-05T04:00"
         },
         {
           "symbol": "SUIUSDT",
           "side": "long",
           "entry": 1.2551,
-          "currentPrice": 1.1902,
+          "currentPrice": 1.1947,
           "sl": 1.1427,
           "tp": 1.3959,
-          "slDistPct": 3.99,
-          "tpDistPct": 17.28,
-          "unrealizedPct": -5.17,
-          "unrealizedPnl": -0.19,
+          "slDistPct": 4.35,
+          "tpDistPct": 16.84,
+          "unrealizedPct": -4.81,
+          "unrealizedPnl": -0.18,
           "since": "2026-10-04T16:00"
         }
       ],
-      "totalUnrealizedPnl": -0.41
+      "totalUnrealizedPnl": -0.43
     },
     "dn": {
       "label": "DN: Donchian 20/10 [4H] LIVE(dnbot01) 起:2026-08-24（30/15→20/10 @2026-09-24）",
@@ -171,42 +171,42 @@
         "symbol": "ATOMUSDT",
         "side": "long",
         "entry": 1.817,
-        "currentPrice": 1.791,
+        "currentPrice": 1.789,
         "sl": 1.728,
         "tp": 1.948,
-        "slDistPct": 3.52,
-        "tpDistPct": 8.77,
-        "unrealizedPct": -1.43,
-        "unrealizedPnl": -0.1,
+        "slDistPct": 3.41,
+        "tpDistPct": 8.89,
+        "unrealizedPct": -1.54,
+        "unrealizedPnl": -0.11,
         "since": "2026-10-05T22:30"
       },
       {
         "symbol": "CELOUSDT",
         "side": "long",
         "entry": 0.10656,
-        "currentPrice": 0.10415,
+        "currentPrice": 0.10381,
         "sl": 0.09862,
         "tp": 0.11731,
-        "slDistPct": 5.31,
-        "tpDistPct": 12.64,
-        "unrealizedPct": -2.26,
-        "unrealizedPnl": -0.12,
+        "slDistPct": 5,
+        "tpDistPct": 13,
+        "unrealizedPct": -2.58,
+        "unrealizedPnl": -0.14,
         "since": "2026-10-05T04:00"
       },
       {
         "symbol": "SUIUSDT",
         "side": "long",
         "entry": 1.2551,
-        "currentPrice": 1.1902,
+        "currentPrice": 1.1947,
         "sl": 1.1427,
         "tp": 1.3959,
-        "slDistPct": 3.99,
-        "tpDistPct": 17.28,
-        "unrealizedPct": -5.17,
-        "unrealizedPnl": -0.19,
+        "slDistPct": 4.35,
+        "tpDistPct": 16.84,
+        "unrealizedPct": -4.81,
+        "unrealizedPnl": -0.18,
         "since": "2026-10-04T16:00"
       }
     ],
-    "totalUnrealizedPnl": -0.41
+    "totalUnrealizedPnl": -0.43
   }
 }
