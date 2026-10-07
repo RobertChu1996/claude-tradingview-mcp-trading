@@ -1,18 +1,6 @@
 {
   "open": [
     {
-      "symbol": "SUIUSDT",
-      "side": "long",
-      "entryPrice": 1.2553,
-      "initialSL": 1.1427828571428573,
-      "currentSL": 1.1427828571428573,
-      "tp": 1.3959464285714285,
-      "quantity": 3.7315455006953524,
-      "entryTime": 1791129642518,
-      "orderId": "3980470002228350976",
-      "algoId": "3980470007839506432"
-    },
-    {
       "symbol": "CELOUSDT",
       "side": "long",
       "entryPrice": 0.10693,
@@ -23,18 +11,6 @@
       "entryTime": 1791172843736,
       "orderId": "3981919603854626816",
       "algoId": "3981919610069762048"
-    },
-    {
-      "symbol": "ATOMUSDT",
-      "side": "long",
-      "entryPrice": 1.826,
-      "initialSL": 1.7281857142857142,
-      "currentSL": 1.7281857142857142,
-      "tp": 1.9482678571428573,
-      "quantity": 4.263071920574731,
-      "entryTime": 1791239442530,
-      "orderId": "3984154220678565888",
-      "algoId": "3984154225148870656"
     }
   ],
   "closed": [
@@ -853,6 +829,38 @@
       "exitState": "reconcile",
       "exitPrice": 0.15447,
       "pnl": -0.4275595297479505
+    },
+    {
+      "symbol": "SUIUSDT",
+      "side": "long",
+      "entryPrice": 1.2553,
+      "initialSL": 1.1427828571428573,
+      "currentSL": 1.1427828571428573,
+      "tp": 1.3959464285714285,
+      "quantity": 3.7315455006953524,
+      "entryTime": 1791129642518,
+      "orderId": "3980470002228350976",
+      "algoId": "3980470007839506432",
+      "exitTime": 1791338447766,
+      "exitState": "reconcile",
+      "exitPrice": 1.1426,
+      "pnl": -0.3409132938850718
+    },
+    {
+      "symbol": "ATOMUSDT",
+      "side": "long",
+      "entryPrice": 1.826,
+      "initialSL": 1.7281857142857142,
+      "currentSL": 1.7281857142857142,
+      "tp": 1.9482678571428573,
+      "quantity": 4.263071920574731,
+      "entryTime": 1791239442530,
+      "orderId": "3984154220678565888",
+      "algoId": "3984154225148870656",
+      "exitTime": 1791338447766,
+      "exitState": "reconcile",
+      "exitPrice": 1.727,
+      "pnl": -0.3686625859477896
     }
   ],
   "cooldown": {
@@ -887,7 +895,7 @@
     "LDOUSDT": 1784484047442,
     "ETHUSDT": 1786436132162,
     "INJUSDT": 1784938525646,
-    "SUIUSDT": 1784829655190,
+    "SUIUSDT": 1791338447766,
     "CELOUSDT": 1784938525646,
     "XTZUSDT": 1784938525646,
     "MOVEUSDT": 1786581932104,
@@ -915,6 +923,7 @@
     "KAITOUSDT": 1789685126312,
     "ZENUSDT": 1790172925587,
     "MAGICUSDT": 1790954129148,
-    "MINAUSDT": 1791239443209
+    "MINAUSDT": 1791239443209,
+    "ATOMUSDT": 1791338447766
   }
 }
