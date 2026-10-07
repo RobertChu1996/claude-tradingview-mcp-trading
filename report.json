@@ -1,52 +1,38 @@
 {
   "reportDate": "2026-10-07",
-  "generatedAt": "2026-10-07T02:00:58.780Z",
+  "generatedAt": "2026-10-07T02:15:43.213Z",
   "balance": {
-    "totalEq": 82.462,
-    "availBal": 81.0568,
-    "frozenBal": 1.4052
+    "totalEq": 82.4265,
+    "availBal": 82.4265,
+    "frozenBal": 0
   },
   "todayCombined": {
-    "trades": 2,
+    "trades": 3,
     "wins": 0,
-    "losses": 2,
+    "losses": 3,
     "winRate": "0.0%",
-    "totalPnl": "-0.7100",
-    "totalUnrealizedPnl": -0.37
+    "totalPnl": "-1.1200",
+    "totalUnrealizedPnl": 0
   },
   "strategies": {
     "dmc": {
       "label": "B: DMC/SMA25 [4H] 起:2026-05-29",
       "overall": {
-        "trades": 71,
+        "trades": 72,
         "wins": 15,
-        "losses": 56,
-        "winRate": "21.1%",
-        "totalPnl": "-30.5772"
+        "losses": 57,
+        "winRate": "20.8%",
+        "totalPnl": "-30.9872"
       },
       "today": {
-        "trades": 2,
+        "trades": 3,
         "wins": 0,
-        "losses": 2,
+        "losses": 3,
         "winRate": "0.0%",
-        "totalPnl": "-0.7100"
+        "totalPnl": "-1.1200"
       },
-      "openPositions": [
-        {
-          "symbol": "CELOUSDT",
-          "side": "long",
-          "entry": 0.10656,
-          "currentPrice": 0.0992,
-          "sl": 0.09862,
-          "tp": 0.11731,
-          "slDistPct": 0.58,
-          "tpDistPct": 18.26,
-          "unrealizedPct": -6.91,
-          "unrealizedPnl": -0.37,
-          "since": "2026-10-05T04:00"
-        }
-      ],
-      "totalUnrealizedPnl": -0.37
+      "openPositions": [],
+      "totalUnrealizedPnl": 0
     },
     "dn": {
       "label": "DN: Donchian 20/10 [4H] LIVE(dnbot01) 起:2026-08-24（30/15→20/10 @2026-09-24）",
@@ -127,34 +113,20 @@
   "strategy": {
     "label": "B: DMC/SMA25 [4H] 起:2026-05-29",
     "overall": {
-      "trades": 71,
+      "trades": 72,
       "wins": 15,
-      "losses": 56,
-      "winRate": "21.1%",
-      "totalPnl": "-30.5772"
+      "losses": 57,
+      "winRate": "20.8%",
+      "totalPnl": "-30.9872"
     },
     "today": {
-      "trades": 2,
+      "trades": 3,
       "wins": 0,
-      "losses": 2,
+      "losses": 3,
       "winRate": "0.0%",
-      "totalPnl": "-0.7100"
+      "totalPnl": "-1.1200"
     },
-    "openPositions": [
-      {
-        "symbol": "CELOUSDT",
-        "side": "long",
-        "entry": 0.10656,
-        "currentPrice": 0.0992,
-        "sl": 0.09862,
-        "tp": 0.11731,
-        "slDistPct": 0.58,
-        "tpDistPct": 18.26,
-        "unrealizedPct": -6.91,
-        "unrealizedPnl": -0.37,
-        "since": "2026-10-05T04:00"
-      }
-    ],
-    "totalUnrealizedPnl": -0.37
+    "openPositions": [],
+    "totalUnrealizedPnl": 0
   }
 }

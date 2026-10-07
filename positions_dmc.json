@@ -1,18 +1,5 @@
 {
-  "open": [
-    {
-      "symbol": "CELOUSDT",
-      "side": "long",
-      "entryPrice": 0.10693,
-      "initialSL": 0.09862499999999999,
-      "currentSL": 0.09862499999999999,
-      "tp": 0.11731125,
-      "quantity": 50.50797713882155,
-      "entryTime": 1791172843736,
-      "orderId": "3981919603854626816",
-      "algoId": "3981919610069762048"
-    }
-  ],
+  "open": [],
   "closed": [
     {
       "symbol": "FILUSDT",
@@ -861,6 +848,22 @@
       "exitState": "reconcile",
       "exitPrice": 1.727,
       "pnl": -0.3686625859477896
+    },
+    {
+      "symbol": "CELOUSDT",
+      "side": "long",
+      "entryPrice": 0.10693,
+      "initialSL": 0.09862499999999999,
+      "currentSL": 0.09862499999999999,
+      "tp": 0.11731125,
+      "quantity": 50.50797713882155,
+      "entryTime": 1791172843736,
+      "orderId": "3981919603854626816",
+      "algoId": "3981919610069762048",
+      "exitTime": 1791339334175,
+      "exitState": "reconcile",
+      "exitPrice": 0.09854,
+      "pnl": -0.4089444737793058
     }
   ],
   "cooldown": {
@@ -896,7 +899,7 @@
     "ETHUSDT": 1786436132162,
     "INJUSDT": 1784938525646,
     "SUIUSDT": 1791338447766,
-    "CELOUSDT": 1784938525646,
+    "CELOUSDT": 1791339334175,
     "XTZUSDT": 1784938525646,
     "MOVEUSDT": 1786581932104,
     "IOTAUSDT": 1788875131742,
