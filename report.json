@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-10-08",
-  "generatedAt": "2026-10-08T14:30:53.341Z",
+  "generatedAt": "2026-10-08T14:45:46.152Z",
   "balance": {
-    "totalEq": 82.392,
+    "totalEq": 82.41,
     "availBal": 81.1913,
-    "frozenBal": 1.2007
+    "frozenBal": 1.2187
   },
   "todayCombined": {
     "trades": 0,
@@ -12,7 +12,7 @@
     "losses": 0,
     "winRate": "N/A",
     "totalPnl": "0.0000",
-    "totalUnrealizedPnl": -0.03
+    "totalUnrealizedPnl": -0.01
   },
   "strategies": {
     "dmc": {
@@ -36,17 +36,17 @@
           "symbol": "TRUMPUSDT",
           "side": "short",
           "entry": 1.85,
-          "currentPrice": 1.865,
+          "currentPrice": 1.856,
           "sl": 2.061,
           "tp": 1.599,
-          "slDistPct": 10.51,
-          "tpDistPct": 14.26,
-          "unrealizedPct": -0.81,
-          "unrealizedPnl": -0.03,
+          "slDistPct": 11.05,
+          "tpDistPct": 13.85,
+          "unrealizedPct": -0.32,
+          "unrealizedPnl": -0.01,
           "since": "2026-10-07T12:00"
         }
       ],
-      "totalUnrealizedPnl": -0.03
+      "totalUnrealizedPnl": -0.01
     },
     "dn": {
       "label": "DN: Donchian 20/10 [4H] LIVE(dnbot01) 起:2026-08-24（30/15→20/10 @2026-09-24）",
@@ -145,16 +145,16 @@
         "symbol": "TRUMPUSDT",
         "side": "short",
         "entry": 1.85,
-        "currentPrice": 1.865,
+        "currentPrice": 1.856,
         "sl": 2.061,
         "tp": 1.599,
-        "slDistPct": 10.51,
-        "tpDistPct": 14.26,
-        "unrealizedPct": -0.81,
-        "unrealizedPnl": -0.03,
+        "slDistPct": 11.05,
+        "tpDistPct": 13.85,
+        "unrealizedPct": -0.32,
+        "unrealizedPnl": -0.01,
         "since": "2026-10-07T12:00"
       }
     ],
-    "totalUnrealizedPnl": -0.03
+    "totalUnrealizedPnl": -0.01
   }
 }
