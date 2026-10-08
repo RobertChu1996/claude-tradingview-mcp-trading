@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-10-08",
-  "generatedAt": "2026-10-08T11:45:47.366Z",
+  "generatedAt": "2026-10-08T12:01:04.426Z",
   "balance": {
-    "totalEq": 82.4166,
+    "totalEq": 82.428,
     "availBal": 81.1913,
-    "frozenBal": 1.2253
+    "frozenBal": 1.2367
   },
   "todayCombined": {
     "trades": 0,
@@ -12,7 +12,7 @@
     "losses": 0,
     "winRate": "N/A",
     "totalPnl": "0.0000",
-    "totalUnrealizedPnl": -0.01
+    "totalUnrealizedPnl": 0.01
   },
   "strategies": {
     "dmc": {
@@ -36,17 +36,17 @@
           "symbol": "TRUMPUSDT",
           "side": "short",
           "entry": 1.85,
-          "currentPrice": 1.853,
+          "currentPrice": 1.847,
           "sl": 2.061,
           "tp": 1.599,
-          "slDistPct": 11.23,
-          "tpDistPct": 13.71,
-          "unrealizedPct": -0.16,
-          "unrealizedPnl": -0.01,
+          "slDistPct": 11.59,
+          "tpDistPct": 13.43,
+          "unrealizedPct": 0.16,
+          "unrealizedPnl": 0.01,
           "since": "2026-10-07T12:00"
         }
       ],
-      "totalUnrealizedPnl": -0.01
+      "totalUnrealizedPnl": 0.01
     },
     "dn": {
       "label": "DN: Donchian 20/10 [4H] LIVE(dnbot01) 起:2026-08-24（30/15→20/10 @2026-09-24）",
@@ -85,7 +85,7 @@
           "symbol": "GMXUSDT",
           "side": "long",
           "entry": 8.197,
-          "sl": 7.681,
+          "sl": 7.683,
           "tp": 13.539999999999996,
           "since": "2026-08-29T20:00"
         },
@@ -145,16 +145,16 @@
         "symbol": "TRUMPUSDT",
         "side": "short",
         "entry": 1.85,
-        "currentPrice": 1.853,
+        "currentPrice": 1.847,
         "sl": 2.061,
         "tp": 1.599,
-        "slDistPct": 11.23,
-        "tpDistPct": 13.71,
-        "unrealizedPct": -0.16,
-        "unrealizedPnl": -0.01,
+        "slDistPct": 11.59,
+        "tpDistPct": 13.43,
+        "unrealizedPct": 0.16,
+        "unrealizedPnl": 0.01,
         "since": "2026-10-07T12:00"
       }
     ],
-    "totalUnrealizedPnl": -0.01
+    "totalUnrealizedPnl": 0.01
   }
 }
