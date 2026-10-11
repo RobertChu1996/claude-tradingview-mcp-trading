@@ -1,10 +1,10 @@
 {
   "reportDate": "2026-10-11",
-  "generatedAt": "2026-10-11T01:15:41.676Z",
+  "generatedAt": "2026-10-11T01:30:52.330Z",
   "balance": {
-    "totalEq": 82.1192,
+    "totalEq": 82.1007,
     "availBal": 80.193,
-    "frozenBal": 1.9263
+    "frozenBal": 1.9078
   },
   "todayCombined": {
     "trades": 0,
@@ -12,7 +12,7 @@
     "losses": 0,
     "winRate": "N/A",
     "totalPnl": "0.0000",
-    "totalUnrealizedPnl": -0.3
+    "totalUnrealizedPnl": -0.32
   },
   "strategies": {
     "dmc": {
@@ -36,30 +36,30 @@
           "symbol": "ZENUSDT",
           "side": "short",
           "entry": 5.981,
-          "currentPrice": 6.467,
+          "currentPrice": 6.488,
           "sl": 6.811,
           "tp": 5.021,
-          "slDistPct": 5.32,
-          "tpDistPct": 22.36,
-          "unrealizedPct": -8.13,
-          "unrealizedPnl": -0.24,
+          "slDistPct": 4.98,
+          "tpDistPct": 22.61,
+          "unrealizedPct": -8.48,
+          "unrealizedPnl": -0.25,
           "since": "2026-10-08T16:01"
         },
         {
           "symbol": "TRUMPUSDT",
           "side": "short",
           "entry": 1.85,
-          "currentPrice": 1.88,
+          "currentPrice": 1.884,
           "sl": 2.061,
           "tp": 1.599,
-          "slDistPct": 9.63,
-          "tpDistPct": 14.95,
-          "unrealizedPct": -1.62,
-          "unrealizedPnl": -0.06,
+          "slDistPct": 9.39,
+          "tpDistPct": 15.13,
+          "unrealizedPct": -1.84,
+          "unrealizedPnl": -0.07,
           "since": "2026-10-07T12:00"
         }
       ],
-      "totalUnrealizedPnl": -0.3
+      "totalUnrealizedPnl": -0.32
     },
     "dn": {
       "label": "DN: Donchian 20/10 [4H] LIVE(dnbot01) 起:2026-08-24（30/15→20/10 @2026-09-24）",
@@ -158,29 +158,29 @@
         "symbol": "ZENUSDT",
         "side": "short",
         "entry": 5.981,
-        "currentPrice": 6.467,
+        "currentPrice": 6.488,
         "sl": 6.811,
         "tp": 5.021,
-        "slDistPct": 5.32,
-        "tpDistPct": 22.36,
-        "unrealizedPct": -8.13,
-        "unrealizedPnl": -0.24,
+        "slDistPct": 4.98,
+        "tpDistPct": 22.61,
+        "unrealizedPct": -8.48,
+        "unrealizedPnl": -0.25,
         "since": "2026-10-08T16:01"
       },
       {
         "symbol": "TRUMPUSDT",
         "side": "short",
         "entry": 1.85,
-        "currentPrice": 1.88,
+        "currentPrice": 1.884,
         "sl": 2.061,
         "tp": 1.599,
-        "slDistPct": 9.63,
-        "tpDistPct": 14.95,
-        "unrealizedPct": -1.62,
-        "unrealizedPnl": -0.06,
+        "slDistPct": 9.39,
+        "tpDistPct": 15.13,
+        "unrealizedPct": -1.84,
+        "unrealizedPnl": -0.07,
         "since": "2026-10-07T12:00"
       }
     ],
-    "totalUnrealizedPnl": -0.3
+    "totalUnrealizedPnl": -0.32
   }
 }
