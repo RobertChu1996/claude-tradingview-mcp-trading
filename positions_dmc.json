@@ -1,30 +1,5 @@
 {
-  "open": [
-    {
-      "symbol": "TRUMPUSDT",
-      "side": "short",
-      "entryPrice": 1.856,
-      "initialSL": 2.0615928571428572,
-      "currentSL": 2.0615928571428572,
-      "tp": 1.5990089285714286,
-      "quantity": 2.0046048510162713,
-      "entryTime": 1791374448053,
-      "orderId": "3988684379645497344",
-      "algoId": "3988684386665938944"
-    },
-    {
-      "symbol": "ZENUSDT",
-      "side": "short",
-      "entryPrice": 6.016,
-      "initialSL": 6.811228571428571,
-      "currentSL": 6.811228571428571,
-      "tp": 5.0219642857142865,
-      "quantity": 0.5192055177441093,
-      "entryTime": 1791475254049,
-      "orderId": "3992066949087186950",
-      "algoId": "3992066955939856384"
-    }
-  ],
+  "open": [],
   "closed": [
     {
       "symbol": "EGLDUSDT",
@@ -857,6 +832,38 @@
       "exitState": "reconcile",
       "exitPrice": 0.09854,
       "pnl": -0.4089444737793058
+    },
+    {
+      "symbol": "TRUMPUSDT",
+      "side": "short",
+      "entryPrice": 1.856,
+      "initialSL": 2.0615928571428572,
+      "currentSL": 2.0615928571428572,
+      "tp": 1.5990089285714286,
+      "quantity": 2.0046048510162713,
+      "entryTime": 1791374448053,
+      "orderId": "3988684379645497344",
+      "algoId": "3988684386665938944",
+      "exitTime": 1791792928488,
+      "exitState": "reconcile",
+      "exitPrice": 1.947,
+      "pnl": -0.199683522323888
+    },
+    {
+      "symbol": "ZENUSDT",
+      "side": "short",
+      "entryPrice": 6.016,
+      "initialSL": 6.811228571428571,
+      "currentSL": 6.811228571428571,
+      "tp": 5.0219642857142865,
+      "quantity": 0.5192055177441093,
+      "entryTime": 1791475254049,
+      "orderId": "3992066949087186950",
+      "algoId": "3992066955939856384",
+      "exitTime": 1791792928488,
+      "exitState": "reconcile",
+      "exitPrice": 6.593,
+      "pnl": -0.3057783116841725
     }
   ],
   "cooldown": {
@@ -917,9 +924,10 @@
     "COREUSDT": 1789660844882,
     "AAVEUSDT": 1789484443817,
     "KAITOUSDT": 1789685126312,
-    "ZENUSDT": 1790172925587,
+    "ZENUSDT": 1791792928488,
     "MAGICUSDT": 1790954129148,
     "MINAUSDT": 1791239443209,
-    "ATOMUSDT": 1791338447766
+    "ATOMUSDT": 1791338447766,
+    "TRUMPUSDT": 1791792928488
   }
 }
