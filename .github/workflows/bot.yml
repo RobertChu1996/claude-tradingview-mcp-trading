@@ -46,6 +46,7 @@ jobs:
         run: npm ci
 
       - name: Run DMC bot (Strategy B)
+        if: false   # 退役 @2026-10-13：探針(0.5%)期間 5連敗創新低(-$31.50)，forward 確認無優勢；資金移往 DN。要復活改回 true 即可
         env:
           DATA_DIR: "."
           OKX_API_KEY:          ${{ secrets.OKX_API_KEY }}
