@@ -80,9 +80,14 @@ jobs:
       - name: Generate report
         env:
           DATA_DIR: "."
-          OKX_API_KEY:    ${{ secrets.OKX_API_KEY }}
-          OKX_SECRET_KEY: ${{ secrets.OKX_SECRET_KEY }}
-          OKX_PASSPHRASE: ${{ secrets.OKX_PASSPHRASE }}
+          OKX_API_KEY:        ${{ secrets.OKX_API_KEY }}
+          OKX_SECRET_KEY:     ${{ secrets.OKX_SECRET_KEY }}
+          OKX_PASSPHRASE:     ${{ secrets.OKX_PASSPHRASE }}
+          # DN 子帳戶金鑰：供報告抓 dnbot01 即時持倉/餘額，算未實現與報酬率
+          OKX_DN_API_KEY:     ${{ secrets.OKX_DN_API_KEY }}
+          OKX_DN_SECRET_KEY:  ${{ secrets.OKX_DN_SECRET_KEY }}
+          OKX_DN_PASSPHRASE:  ${{ secrets.OKX_DN_PASSPHRASE }}
+          DN_BASE_USD:        "200"
         run: node generate_report.js
         continue-on-error: true
 

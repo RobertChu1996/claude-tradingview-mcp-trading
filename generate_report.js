@@ -20,19 +20,25 @@ async function initOkxTime() {
   } catch {}
 }
 
-function okxSign(ts, method, path, body = "") {
-  return crypto.createHmac("sha256", process.env.OKX_SECRET_KEY)
+// 主帳戶（DMC，已退役但仍讀餘額）與 DN 子帳戶（dnbot01）各自金鑰
+const MAIN_CREDS = { key: process.env.OKX_API_KEY,    secret: process.env.OKX_SECRET_KEY,    pass: process.env.OKX_PASSPHRASE };
+const DN_CREDS   = { key: process.env.OKX_DN_API_KEY, secret: process.env.OKX_DN_SECRET_KEY, pass: process.env.OKX_DN_PASSPHRASE };
+const hasDnCreds = DN_CREDS.key && DN_CREDS.secret && DN_CREDS.pass;
+const DN_BASE_USD = parseFloat(process.env.DN_BASE_USD || "200");  // DN 子帳戶起始本金（報酬率分母）
+
+function okxSign(ts, method, path, body = "", secret = process.env.OKX_SECRET_KEY) {
+  return crypto.createHmac("sha256", secret)
     .update(`${ts}${method}${path}${body}`).digest("base64");
 }
-async function okxGet(path) {
+async function okxGet(path, creds = MAIN_CREDS) {
   const ts  = new Date(Date.now() + _serverTimeOffset).toISOString();
   const res = await fetch(`${OKX_BASE}${path}`, {
     signal: AbortSignal.timeout(15000),
     headers: {
-      "OK-ACCESS-KEY":       process.env.OKX_API_KEY,
-      "OK-ACCESS-SIGN":      okxSign(ts, "GET", path),
+      "OK-ACCESS-KEY":       creds.key,
+      "OK-ACCESS-SIGN":      okxSign(ts, "GET", path, "", creds.secret),
       "OK-ACCESS-TIMESTAMP": ts,
-      "OK-ACCESS-PASSPHRASE":process.env.OKX_PASSPHRASE,
+      "OK-ACCESS-PASSPHRASE":creds.pass,
     },
   });
   return res.json();
@@ -46,10 +52,10 @@ function toOkxInstId(sym) {
 }
 
 // ─── 從 OKX 取得即時持倉（含 SL/TP from active OCO）────────────────────────
-async function fetchOkxPositions() {
+async function fetchOkxPositions(creds = MAIN_CREDS) {
   const [posRes, algoRes] = await Promise.all([
-    okxGet("/api/v5/account/positions?instType=SWAP"),
-    okxGet("/api/v5/trade/orders-algo-pending?ordType=oco&instType=SWAP"),
+    okxGet("/api/v5/account/positions?instType=SWAP", creds),
+    okxGet("/api/v5/trade/orders-algo-pending?ordType=oco&instType=SWAP", creds),
   ]);
 
   // Build instId → active OCO map
@@ -93,8 +99,8 @@ async function fetchOkxPositions() {
 }
 
 // ─── 從 OKX 取得 USDT 餘額 ────────────────────────────────────────────────────
-async function fetchOkxBalance() {
-  const res = await okxGet("/api/v5/account/balance");
+async function fetchOkxBalance(creds = MAIN_CREDS) {
+  const res = await okxGet("/api/v5/account/balance", creds);
   const usdt = res.data?.[0]?.details?.find(d => d.ccy === "USDT");
   if (!usdt) return null;
   return {
@@ -172,11 +178,36 @@ async function main() {
       dnOpen = (dnPos.open || []).map(p => ({
         symbol: p.symbol, side: p.side, entry: p.entryPrice,
         sl: p.currentSL ?? p.sl ?? null, tp: p.tp ?? null,
+        qty: p.quantity ?? null,
         since: p.entryTime ? new Date(p.entryTime).toISOString().slice(0, 16) : null,
       }));
     }
   } catch (e) { console.error("[report][dn] 讀取持倉失敗:", e.message); }
-  console.log(`[report][dn] 開倉:${dnOpen.length} | 已平:${dnExits.length}`);
+
+  // DN 即時：用 dnbot01 子帳戶金鑰抓 OKX 即時持倉（markPx/未實現）+餘額，算未實現與報酬率
+  let dnBalance = null, dnTotalUnrealized = 0;
+  if (hasDnCreds) {
+    try {
+      const [dnPosLive, dnBal] = await Promise.all([fetchOkxPositions(DN_CREDS), fetchOkxBalance(DN_CREDS)]);
+      dnBalance = dnBal;
+      const liveMap = {};
+      for (const lp of dnPosLive) liveMap[lp.symbol] = lp;   // fetchOkxPositions 已回 currentPrice/unrealizedPnl/unrealizedPct
+      dnOpen = dnOpen.map(p => {
+        const lp = liveMap[p.symbol];
+        if (lp) {
+          return { ...p, currentPrice: lp.currentPrice, unrealizedPct: lp.unrealizedPct, unrealizedPnl: lp.unrealizedPnl };
+        }
+        return p;
+      });
+      dnTotalUnrealized = dnPosLive.reduce((s, lp) => s + (lp.unrealizedPnl ?? 0), 0);
+    } catch (e) { console.error("[report][dn] OKX 即時查詢失敗:", e.message); }
+  }
+  // 報酬率：優先用子帳戶真實權益 (totalEq 已含未實現)；否則用 已實現+未實現 / 本金
+  const dnRealized  = parseFloat(calcStats(dnExits).totalPnl) || 0;
+  const dnReturnPct = dnBalance?.totalEq != null
+    ? parseFloat(((dnBalance.totalEq - DN_BASE_USD) / DN_BASE_USD * 100).toFixed(2))
+    : parseFloat(((dnRealized + dnTotalUnrealized) / DN_BASE_USD * 100).toFixed(2));
+  console.log(`[report][dn] 開倉:${dnOpen.length} | 已平:${dnExits.length} | 未實現:$${dnTotalUnrealized.toFixed(2)} | 報酬率:${dnReturnPct}%`);
 
   const report = {
     reportDate:  today,
@@ -195,12 +226,16 @@ async function main() {
         totalUnrealizedPnl: parseFloat(totalUnrealized.toFixed(2)),
       },
       dn: {
-        label:         "DN: Donchian 20/10 [4H] LIVE(dnbot01) 起:2026-08-24（30/15→20/10 @2026-09-24）",
-        mode:          "LIVE",
-        overall:       calcStats(dnExits),        // 真錢
-        today:         calcStats(dnTodayExits),
-        paperRecord:   calcStats(dnPaperExits),   // 上線前模擬盤參考
-        openPositions: dnOpen,
+        label:              "DN: Donchian 20/10 [4H] LIVE(dnbot01) 起:2026-08-24（30/15→20/10 @2026-09-24）",
+        mode:               "LIVE",
+        overall:            calcStats(dnExits),        // 真錢
+        today:              calcStats(dnTodayExits),
+        paperRecord:        calcStats(dnPaperExits),   // 上線前模擬盤參考
+        balance:            dnBalance,
+        totalUnrealizedPnl: parseFloat(dnTotalUnrealized.toFixed(2)),
+        returnPct:          dnReturnPct,               // 報酬率%（本金 $DN_BASE_USD）
+        baseUsd:            DN_BASE_USD,
+        openPositions:      dnOpen,
       },
     },
     strategy: {
