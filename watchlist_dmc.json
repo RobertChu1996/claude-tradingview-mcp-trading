@@ -1,62 +1,89 @@
 {
-  "updatedAt": "2026-10-12T07:01:51.029Z",
+  "updatedAt": "2026-10-19T05:49:08.598Z",
   "minPf": 1.2,
   "symbols": [
-    "AXSUSDT",
+    "BNBUSDT",
+    "PENDLEUSDT",
+    "LINKUSDT",
+    "IRYSUSDT",
     "LTCUSDT",
     "UNIUSDT",
-    "NMRUSDT",
     "PUMPUSDT",
-    "ARKMUSDT",
-    "METISUSDT",
-    "LINKUSDT",
     "COREUSDT",
-    "ZAMAUSDT",
+    "LUNAUSDT",
+    "ETCUSDT",
     "MAGICUSDT",
     "CHIPUSDT",
+    "PYTHUSDT",
+    "WETUSDT",
     "AVAXUSDT",
-    "MANAUSDT",
-    "TIAUSDT",
+    "ATHUSDT",
     "PROSUSDT",
     "BASEDUSDT",
     "ALLOUSDT",
     "SEIUSDT",
+    "KATUSDT",
     "SENTUSDT",
-    "ETCUSDT",
     "DASHUSDT",
-    "BATUSDT",
-    "OKBUSDT",
+    "RENDERUSDT",
+    "BCHUSDT",
+    "ZAMAUSDT",
     "ZKUSDT",
     "ZROUSDT",
     "KMNOUSDT",
-    "MEGAUSDT",
+    "BATUSDT",
     "KAITOUSDT",
     "TRBUSDT",
-    "NIGHTUSDT",
+    "BICOUSDT",
     "HBARUSDT",
     "ZENUSDT",
     "LINEAUSDT",
+    "OKBUSDT",
+    "AUSDT",
     "RAYUSDT",
+    "TRUMPUSDT",
     "INJUSDT",
-    "PYTHUSDT",
     "LPTUSDT",
     "CRVUSDT",
+    "ENAUSDT",
     "SUSDT",
-    "ATHUSDT",
-    "ONTUSDT",
     "WLFIUSDT",
-    "RENDERUSDT",
-    "PENDLEUSDT",
-    "ATOMUSDT"
+    "MEGAUSDT",
+    "ATOMUSDT",
+    "NIGHTUSDT"
   ],
   "stats": [
     {
-      "symbol": "AXSUSDT",
+      "symbol": "BNBUSDT",
       "trades": 3,
       "wins": 1,
       "wr": 33.3,
       "pf": 999,
-      "pnl": 30
+      "pnl": 24.47
+    },
+    {
+      "symbol": "PENDLEUSDT",
+      "trades": 3,
+      "wins": 2,
+      "wr": 66.7,
+      "pf": 999,
+      "pnl": 12.5
+    },
+    {
+      "symbol": "LINKUSDT",
+      "trades": 4,
+      "wins": 3,
+      "wr": 75,
+      "pf": 8.36,
+      "pnl": 73.62
+    },
+    {
+      "symbol": "IRYSUSDT",
+      "trades": 3,
+      "wins": 2,
+      "wr": 66.7,
+      "pf": 6,
+      "pnl": 50
     },
     {
       "symbol": "LTCUSDT",
@@ -68,19 +95,11 @@
     },
     {
       "symbol": "UNIUSDT",
-      "trades": 6,
+      "trades": 7,
       "wins": 3,
-      "wr": 50,
+      "wr": 42.9,
       "pf": 5.42,
       "pnl": 72.34
-    },
-    {
-      "symbol": "NMRUSDT",
-      "trades": 3,
-      "wins": 2,
-      "wr": 66.7,
-      "pf": 5.19,
-      "pnl": 36.18
     },
     {
       "symbol": "PUMPUSDT",
@@ -91,30 +110,6 @@
       "pnl": 37.5
     },
     {
-      "symbol": "ARKMUSDT",
-      "trades": 3,
-      "wins": 2,
-      "wr": 66.7,
-      "pf": 4.45,
-      "pnl": 26.64
-    },
-    {
-      "symbol": "METISUSDT",
-      "trades": 5,
-      "wins": 2,
-      "wr": 40,
-      "pf": 4.24,
-      "pnl": 45.19
-    },
-    {
-      "symbol": "LINKUSDT",
-      "trades": 5,
-      "wins": 3,
-      "wr": 60,
-      "pf": 4.18,
-      "pnl": 63.62
-    },
-    {
       "symbol": "COREUSDT",
       "trades": 4,
       "wins": 2,
@@ -123,12 +118,20 @@
       "pnl": 30
     },
     {
-      "symbol": "ZAMAUSDT",
+      "symbol": "LUNAUSDT",
       "trades": 5,
+      "wins": 3,
+      "wr": 60,
+      "pf": 3.7,
+      "pnl": 54.05
+    },
+    {
+      "symbol": "ETCUSDT",
+      "trades": 4,
       "wins": 2,
-      "wr": 40,
-      "pf": 3.33,
-      "pnl": 41.96
+      "wr": 50,
+      "pf": 3.65,
+      "pnl": 43.56
     },
     {
       "symbol": "MAGICUSDT",
@@ -147,6 +150,22 @@
       "pnl": 20.01
     },
     {
+      "symbol": "PYTHUSDT",
+      "trades": 3,
+      "wins": 1,
+      "wr": 33.3,
+      "pf": 3,
+      "pnl": 20
+    },
+    {
+      "symbol": "WETUSDT",
+      "trades": 4,
+      "wins": 1,
+      "wr": 25,
+      "pf": 3,
+      "pnl": 20
+    },
+    {
       "symbol": "AVAXUSDT",
       "trades": 3,
       "wins": 1,
@@ -155,15 +174,7 @@
       "pnl": 20
     },
     {
-      "symbol": "MANAUSDT",
-      "trades": 3,
-      "wins": 1,
-      "wr": 33.3,
-      "pf": 3,
-      "pnl": 20
-    },
-    {
-      "symbol": "TIAUSDT",
+      "symbol": "ATHUSDT",
       "trades": 3,
       "wins": 1,
       "wr": 33.3,
@@ -203,20 +214,20 @@
       "pnl": 40
     },
     {
+      "symbol": "KATUSDT",
+      "trades": 4,
+      "wins": 2,
+      "wr": 50,
+      "pf": 2.87,
+      "pnl": 35.62
+    },
+    {
       "symbol": "SENTUSDT",
       "trades": 6,
       "wins": 2,
       "wr": 33.3,
       "pf": 2.86,
       "pnl": 37.16
-    },
-    {
-      "symbol": "ETCUSDT",
-      "trades": 5,
-      "wins": 2,
-      "wr": 40,
-      "pf": 2.52,
-      "pnl": 36.24
     },
     {
       "symbol": "DASHUSDT",
@@ -227,20 +238,28 @@
       "pnl": 14.43
     },
     {
-      "symbol": "BATUSDT",
+      "symbol": "RENDERUSDT",
+      "trades": 4,
+      "wins": 1,
+      "wr": 25,
+      "pf": 2.22,
+      "pnl": 16.48
+    },
+    {
+      "symbol": "BCHUSDT",
+      "trades": 5,
+      "wins": 2,
+      "wr": 40,
+      "pf": 2.17,
+      "pnl": 21.57
+    },
+    {
+      "symbol": "ZAMAUSDT",
       "trades": 6,
       "wins": 2,
       "wr": 33.3,
-      "pf": 2.16,
-      "pnl": 17.56
-    },
-    {
-      "symbol": "OKBUSDT",
-      "trades": 6,
-      "wins": 3,
-      "wr": 50,
-      "pf": 2.03,
-      "pnl": 30.91
+      "pf": 2.14,
+      "pnl": 31.96
     },
     {
       "symbol": "ZKUSDT",
@@ -252,9 +271,9 @@
     },
     {
       "symbol": "ZROUSDT",
-      "trades": 5,
+      "trades": 6,
       "wins": 2,
-      "wr": 40,
+      "wr": 33.3,
       "pf": 2,
       "pnl": 30
     },
@@ -267,12 +286,12 @@
       "pnl": 20
     },
     {
-      "symbol": "MEGAUSDT",
-      "trades": 4,
-      "wins": 2,
-      "wr": 50,
-      "pf": 1.9,
-      "pnl": 18.04
+      "symbol": "BATUSDT",
+      "trades": 5,
+      "wins": 1,
+      "wr": 20,
+      "pf": 1.99,
+      "pnl": 14.89
     },
     {
       "symbol": "KAITOUSDT",
@@ -291,12 +310,12 @@
       "pnl": 14.05
     },
     {
-      "symbol": "NIGHTUSDT",
-      "trades": 8,
-      "wins": 3,
-      "wr": 37.5,
-      "pf": 1.8,
-      "pnl": 40
+      "symbol": "BICOUSDT",
+      "trades": 5,
+      "wins": 2,
+      "wr": 40,
+      "pf": 1.75,
+      "pnl": 15
     },
     {
       "symbol": "HBARUSDT",
@@ -323,6 +342,22 @@
       "pnl": 11.19
     },
     {
+      "symbol": "OKBUSDT",
+      "trades": 7,
+      "wins": 3,
+      "wr": 42.9,
+      "pf": 1.57,
+      "pnl": 21.6
+    },
+    {
+      "symbol": "AUSDT",
+      "trades": 4,
+      "wins": 1,
+      "wr": 25,
+      "pf": 1.5,
+      "pnl": 10
+    },
+    {
       "symbol": "RAYUSDT",
       "trades": 4,
       "wins": 1,
@@ -331,26 +366,26 @@
       "pnl": 10
     },
     {
-      "symbol": "INJUSDT",
-      "trades": 6,
+      "symbol": "TRUMPUSDT",
+      "trades": 3,
       "wins": 1,
-      "wr": 16.7,
+      "wr": 33.3,
       "pf": 1.5,
       "pnl": 10
     },
     {
-      "symbol": "PYTHUSDT",
-      "trades": 4,
+      "symbol": "INJUSDT",
+      "trades": 5,
       "wins": 1,
-      "wr": 25,
+      "wr": 20,
       "pf": 1.5,
       "pnl": 10
     },
     {
       "symbol": "LPTUSDT",
-      "trades": 4,
+      "trades": 3,
       "wins": 1,
-      "wr": 25,
+      "wr": 33.3,
       "pf": 1.5,
       "pnl": 10
     },
@@ -363,7 +398,7 @@
       "pnl": 20
     },
     {
-      "symbol": "SUSDT",
+      "symbol": "ENAUSDT",
       "trades": 3,
       "wins": 1,
       "wr": 33.3,
@@ -371,18 +406,10 @@
       "pnl": 10
     },
     {
-      "symbol": "ATHUSDT",
-      "trades": 4,
+      "symbol": "SUSDT",
+      "trades": 3,
       "wins": 1,
-      "wr": 25,
-      "pf": 1.5,
-      "pnl": 10
-    },
-    {
-      "symbol": "ONTUSDT",
-      "trades": 4,
-      "wins": 1,
-      "wr": 25,
+      "wr": 33.3,
       "pf": 1.5,
       "pnl": 10
     },
@@ -395,28 +422,28 @@
       "pnl": 10
     },
     {
-      "symbol": "RENDERUSDT",
+      "symbol": "MEGAUSDT",
       "trades": 5,
-      "wins": 1,
-      "wr": 20,
-      "pf": 1.35,
-      "pnl": 7.76
-    },
-    {
-      "symbol": "PENDLEUSDT",
-      "trades": 4,
       "wins": 2,
-      "wr": 50,
-      "pf": 1.25,
-      "pnl": 2.5
+      "wr": 40,
+      "pf": 1.27,
+      "pnl": 8.04
     },
     {
       "symbol": "ATOMUSDT",
+      "trades": 8,
+      "wins": 2,
+      "wr": 25,
+      "pf": 1.21,
+      "pnl": 6.21
+    },
+    {
+      "symbol": "NIGHTUSDT",
       "trades": 7,
       "wins": 2,
       "wr": 28.6,
-      "pf": 1.21,
-      "pnl": 6.21
+      "pf": 1.2,
+      "pnl": 10
     }
   ]
 }
