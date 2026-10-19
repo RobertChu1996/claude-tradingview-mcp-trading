@@ -319,6 +319,14 @@ async function okxGet(path) {
   return res.json();
 }
 
+// OKX 錯誤詳情：頂層 msg 常為空，真正原因在 data[0].sCode/sMsg
+function okxErr(res) {
+  const d = res?.data?.[0];
+  let s = `code=${res?.code ?? "?"} msg="${res?.msg ?? ""}"`;
+  if (d?.sCode) s += ` sCode=${d.sCode} sMsg="${d.sMsg ?? ""}"`;
+  return s;
+}
+
 const _specCache = {};
 async function fetchSpec(instId) {
   if (_specCache[instId]) return _specCache[instId];
@@ -354,7 +362,7 @@ async function placeEntry(symbol, sig, portfolioValue) {
     instId, tdMode: "isolated", side: entrySide, posSide,
     ordType: "market", sz,
   });
-  if (entryRes.code !== "0") throw new Error(`進場失敗: ${entryRes.msg}`);
+  if (entryRes.code !== "0") throw new Error(`進場失敗: ${okxErr(entryRes)}`);
   const orderId = entryRes.data?.[0]?.ordId;
 
   // 2. OCO（止損 + 止盈）
@@ -364,7 +372,7 @@ async function placeEntry(symbol, sig, portfolioValue) {
     slTriggerPx: sig.sl.toFixed(8), slOrdPx: "-1", slTriggerPxType: "last",
     tpTriggerPx: sig.tp.toFixed(8), tpOrdPx: "-1", tpTriggerPxType: "last",
   });
-  if (ocoRes.code !== "0") throw new Error(`OCO失敗: ${ocoRes.msg}`);
+  if (ocoRes.code !== "0") throw new Error(`OCO失敗: ${okxErr(ocoRes)}`);
   const algoId = ocoRes.data?.[0]?.algoId;
 
   return { orderId, algoId, sz: +sz * spec.ctVal * sig.entry };
@@ -381,7 +389,7 @@ async function updateOCO(pos, newSL) {
   const exitSide = isShort ? "buy" : "sell";
 
   const cancel = await okxPost("/api/v5/trade/cancel-algos", [{ algoId: pos.algoId, instId }]);
-  if (cancel.code !== "0") log(`⚠️  取消舊OCO失敗 ${pos.symbol}: ${cancel.msg}`);
+  if (cancel.code !== "0") log(`⚠️  取消舊OCO失敗 ${pos.symbol}: ${okxErr(cancel)}`);
 
   const ocoRes = await okxPost("/api/v5/trade/order-algo", {
     instId, tdMode: "isolated", side: exitSide, posSide,
@@ -389,7 +397,7 @@ async function updateOCO(pos, newSL) {
     slTriggerPx: newSL.toFixed(8), slOrdPx: "-1", slTriggerPxType: "last",
     tpTriggerPx: tp.toFixed(8),   tpOrdPx: "-1", tpTriggerPxType: "last",
   });
-  if (ocoRes.code !== "0") throw new Error(`新OCO失敗: ${ocoRes.msg}`);
+  if (ocoRes.code !== "0") throw new Error(`新OCO失敗: ${okxErr(ocoRes)}`);
   return ocoRes.data?.[0]?.algoId;
 }
 
@@ -450,6 +458,29 @@ async function run() {
       savePositions(positions);
       return;
     }
+  }
+
+  // ── Reconcile（Live）：清除 OKX 上實際不存在的幽靈持倉 ──────────────────────
+  //   DN 原本沒有對帳：狀態檔一旦有了不存在的倉，就永遠「滿倉跳過掃描」而卡死。
+  //   僅在「查詢成功」時才清，避免暫時性 API 失敗誤刪真倉。
+  if (!CONFIG.paperTrading && positions.open.length > 0) {
+    try {
+      const posRes = await okxGet("/api/v5/account/positions?instType=SWAP");
+      if (!posRes.data) throw new Error(`持倉查詢回應異常: ${okxErr(posRes)}`);
+      const liveSize = {};
+      for (const p of posRes.data) liveSize[p.instId] = Math.abs(parseFloat(p.pos) || 0);
+      const liveN = Object.values(liveSize).filter(v => v > 0).length;
+      const phantom = positions.open.filter(p => !(liveSize[p.symbol.replace("USDT", "-USDT-SWAP")] > 0));
+      if (phantom.length > 0) {
+        log(`[DN][reconcile] OKX 實際持倉 ${liveN} 筆｜狀態檔 ${positions.open.length} 筆 → 清除 ${phantom.length} 筆幽靈倉: ${phantom.map(p => p.symbol).join(", ")}`);
+        const ghost = new Set(phantom);
+        positions.open = positions.open.filter(p => !ghost.has(p));
+        for (const ph of phantom) positions.cooldown[ph.symbol] = now;   // 冷卻一下，避免立刻重進同幣
+        savePositions(positions);
+      } else {
+        log(`[DN][reconcile] 狀態與 OKX 一致（${positions.open.length} 筆）`);
+      }
+    } catch (e) { log(`⚠️ [DN][reconcile] 跳過（查詢失敗，不動倉）: ${e.message}`); }
   }
 
   // ── Step 1：檢查已關閉的倉位 ─────────────────────────────────────────────
