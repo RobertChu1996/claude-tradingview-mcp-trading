@@ -1,0 +1,25 @@
+name: DN history audit (one-off)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+      - run: npm ci
+      - name: Run DN history audit (dnbot01 keys)
+        env:
+          # 用 DN 子帳戶金鑰（唯讀查詢：balance / positions / positions-history / fills / bills）
+          OKX_API_KEY:    ${{ secrets.OKX_DN_API_KEY }}
+          OKX_SECRET_KEY: ${{ secrets.OKX_DN_SECRET_KEY }}
+          OKX_PASSPHRASE: ${{ secrets.OKX_DN_PASSPHRASE }}
+        run: node dn_history_audit.js
