@@ -378,24 +378,45 @@ async function placeEntry(symbol, sig, portfolioValue) {
   return { orderId, algoId, sz: +sz * spec.ctVal * sig.entry };
 }
 
-// 更新追蹤止損：取消舊 OCO → 重掛新 OCO
+// 更新追蹤止損：優先用 amend-algos 原子改 SL 觸發價（最穩）；失敗才退回「查實際持倉→取消→重掛」
+//   舊版單純 cancel+重掛，遇到 stale algoId / 張數對不上就整個失敗，導致停損從沒真正上移（幽靈鎖利）。
 async function updateOCO(pos, newSL) {
-  const instId  = pos.symbol.replace("USDT", "-USDT-SWAP");
-  const spec    = await fetchSpec(instId);
-  const sz      = String(floorLot(pos.quantity / spec.ctVal, spec.lotSz));
-  const tp      = pos.tp;
-  const isShort = pos.side === "short";
-  const posSide = isShort ? "short" : "long";
+  const instId   = pos.symbol.replace("USDT", "-USDT-SWAP");
+  const isShort  = pos.side === "short";
+  const posSide  = isShort ? "short" : "long";
   const exitSide = isShort ? "buy" : "sell";
 
-  const cancel = await okxPost("/api/v5/trade/cancel-algos", [{ algoId: pos.algoId, instId }]);
-  if (cancel.code !== "0") log(`⚠️  取消舊OCO失敗 ${pos.symbol}: ${okxErr(cancel)}`);
+  // 1) 優先：amend-algos 只改 SL 觸發價（原子、不動 TP、algoId 不變）
+  if (pos.algoId) {
+    const amend = await okxPost("/api/v5/trade/amend-algos", {
+      instId, algoId: pos.algoId,
+      newSlTriggerPx: newSL.toFixed(8), newSlTriggerPxType: "last",
+    });
+    if (amend.code === "0") { log(`[DN] amend 停損 ${pos.symbol} → $${newSL.toFixed(6)}`); return pos.algoId; }
+    log(`⚠️ amend-algos 失敗 ${pos.symbol}: ${okxErr(amend)} → 改走 取消+重掛`);
+  }
+
+  // 2) fallback：以 OKX「實際持倉張數」+「實際 pending OCO」重建，避免 stale algoId / 張數不符
+  const spec = await fetchSpec(instId);
+  const [posRes, algoPend] = await Promise.all([
+    okxGet(`/api/v5/account/positions?instType=SWAP&instId=${instId}`),
+    okxGet(`/api/v5/trade/orders-algo-pending?instType=SWAP&instId=${instId}&ordType=oco`),
+  ]);
+  const livePos = (posRes.data || []).find(p => parseFloat(p.pos) !== 0);
+  if (!livePos) { log(`⚠️ ${pos.symbol} OKX 無實際持倉，略過更新停損`); return pos.algoId; }
+  const sz = String(floorLot(Math.abs(parseFloat(livePos.pos)), spec.lotSz));  // pos 已是張數
+
+  const toCancel = (algoPend.data || []).map(a => ({ algoId: a.algoId, instId }));
+  if (toCancel.length) {
+    const cancel = await okxPost("/api/v5/trade/cancel-algos", toCancel);
+    if (cancel.code !== "0") log(`⚠️  取消舊OCO失敗 ${pos.symbol}: ${okxErr(cancel)}`);
+  }
 
   const ocoRes = await okxPost("/api/v5/trade/order-algo", {
     instId, tdMode: "isolated", side: exitSide, posSide,
     ordType: "oco", sz,
     slTriggerPx: newSL.toFixed(8), slOrdPx: "-1", slTriggerPxType: "last",
-    tpTriggerPx: tp.toFixed(8),   tpOrdPx: "-1", tpTriggerPxType: "last",
+    tpTriggerPx: pos.tp.toFixed(8), tpOrdPx: "-1", tpTriggerPxType: "last",
   });
   if (ocoRes.code !== "0") throw new Error(`新OCO失敗: ${okxErr(ocoRes)}`);
   return ocoRes.data?.[0]?.algoId;
