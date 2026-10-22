@@ -483,25 +483,45 @@ async function run() {
     }
   }
 
-  // ── Reconcile（Live）：清除 OKX 上實際不存在的幽靈持倉 ──────────────────────
-  //   DN 原本沒有對帳：狀態檔一旦有了不存在的倉，就永遠「滿倉跳過掃描」而卡死。
-  //   僅在「查詢成功」時才清，避免暫時性 API 失敗誤刪真倉。
-  if (!CONFIG.paperTrading && positions.open.length > 0) {
+  // ── Reconcile（Live）：清幽靈持倉 + 清孤兒 OCO 委託 ──────────────────────────
+  //   (1) 狀態檔有、OKX 無 → 幽靈倉，清掉（否則「滿倉跳過」卡死）。
+  //   (2) OKX 有 pending OCO、卻無對應持倉 → 孤兒委託（舊倉平掉後殘留），取消掉，
+  //       否則之後在同幣開新倉時可能誤觸孤兒止損、在錯價位平倉。
+  //   每輪都跑（孤兒委託在狀態檔有倉時也可能存在）；僅在查詢成功時動作，避免誤刪真倉。
+  if (!CONFIG.paperTrading) {
     try {
-      const posRes = await okxGet("/api/v5/account/positions?instType=SWAP");
+      const [posRes, algoRes] = await Promise.all([
+        okxGet("/api/v5/account/positions?instType=SWAP"),
+        okxGet("/api/v5/trade/orders-algo-pending?instType=SWAP&ordType=oco"),
+      ]);
       if (!posRes.data) throw new Error(`持倉查詢回應異常: ${okxErr(posRes)}`);
-      const liveSize = {};
-      for (const p of posRes.data) liveSize[p.instId] = Math.abs(parseFloat(p.pos) || 0);
-      const liveN = Object.values(liveSize).filter(v => v > 0).length;
-      const phantom = positions.open.filter(p => !(liveSize[p.symbol.replace("USDT", "-USDT-SWAP")] > 0));
+      const realInst = new Set((posRes.data || []).filter(p => Math.abs(parseFloat(p.pos) || 0) > 0).map(p => p.instId));
+      const stateInst = new Set(positions.open.map(p => p.symbol.replace("USDT", "-USDT-SWAP")));
+
+      // (1) 幽靈持倉
+      const phantom = positions.open.filter(p => !realInst.has(p.symbol.replace("USDT", "-USDT-SWAP")));
       if (phantom.length > 0) {
-        log(`[DN][reconcile] OKX 實際持倉 ${liveN} 筆｜狀態檔 ${positions.open.length} 筆 → 清除 ${phantom.length} 筆幽靈倉: ${phantom.map(p => p.symbol).join(", ")}`);
+        log(`[DN][reconcile] OKX 實際持倉 ${realInst.size} 筆｜狀態檔 ${positions.open.length} 筆 → 清除 ${phantom.length} 筆幽靈倉: ${phantom.map(p => p.symbol).join(", ")}`);
         const ghost = new Set(phantom);
         positions.open = positions.open.filter(p => !ghost.has(p));
-        for (const ph of phantom) positions.cooldown[ph.symbol] = now;   // 冷卻一下，避免立刻重進同幣
+        for (const ph of phantom) positions.cooldown[ph.symbol] = now;
         savePositions(positions);
       } else {
         log(`[DN][reconcile] 狀態與 OKX 一致（${positions.open.length} 筆）`);
+      }
+
+      // (2) 孤兒 OCO：pending 但無真實持倉、也不在狀態檔 → 取消（每次最多 10 筆，分批）
+      const orphans = (algoRes.data || [])
+        .filter(a => !realInst.has(a.instId) && !stateInst.has(a.instId))
+        .map(a => ({ algoId: a.algoId, instId: a.instId }));
+      if (orphans.length > 0) {
+        const syms = [...new Set(orphans.map(o => o.instId))].join(", ");
+        for (let i = 0; i < orphans.length; i += 10) {
+          const batch = orphans.slice(i, i + 10);
+          const c = await okxPost("/api/v5/trade/cancel-algos", batch);
+          if (c.code !== "0") log(`⚠️ [DN][reconcile] 取消孤兒OCO失敗: ${okxErr(c)}`);
+        }
+        log(`[DN][reconcile] 取消 ${orphans.length} 筆孤兒OCO委託（無對應持倉）: ${syms}`);
       }
     } catch (e) { log(`⚠️ [DN][reconcile] 跳過（查詢失敗，不動倉）: ${e.message}`); }
   }
