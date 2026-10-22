@@ -1,6 +1,6 @@
 {
-  "reportDate": "2026-10-21",
-  "generatedAt": "2026-10-21T23:45:35.405Z",
+  "reportDate": "2026-10-22",
+  "generatedAt": "2026-10-22T00:00:56.362Z",
   "balance": {
     "totalEq": 81.921,
     "availBal": 81.921,
@@ -59,14 +59,27 @@
         "totalPnl": "16.8400"
       },
       "balance": {
-        "totalEq": 200.7352,
-        "availBal": 200.7352,
-        "frozenBal": 0
+        "totalEq": 200.7288,
+        "availBal": 197.9155,
+        "frozenBal": 2.8133
       },
       "totalUnrealizedPnl": 0,
-      "returnPct": 0.37,
+      "returnPct": 0.36,
       "baseUsd": 200,
-      "openPositions": []
+      "openPositions": [
+        {
+          "symbol": "CRVUSDT",
+          "side": "long",
+          "entry": 0.403,
+          "sl": 0.3105,
+          "tp": 0.6805000000000001,
+          "qty": 21.683738683335257,
+          "since": "2026-10-22T00:00",
+          "currentPrice": 0.4021,
+          "unrealizedPct": -0.02,
+          "unrealizedPnl": 0
+        }
+      ]
     }
   },
   "strategy": {
