@@ -61,7 +61,8 @@ async function main() {
   const algo = await get("/api/v5/trade/orders-algo-pending?instType=SWAP&ordType=oco");
   const algos = algo.data || [];
   const orphanAlgos = algos.filter(a => !realInst.has(a.instId));
-  console.log(`【當前 pending OCO 委託】${algos.length} 筆` + (algos.length ? ": " + algos.map(a => `${a.instId}${realInst.has(a.instId) ? "✅有持倉" : "⚠️孤兒"}`).join(", ") : "（無）"));
+  console.log(`【當前 pending OCO 委託】${algos.length} 筆` + (algos.length ? "" : "（無）"));
+  for (const a of algos) console.log(`  ${a.instId}${realInst.has(a.instId) ? "✅有持倉" : "⚠️孤兒"} | 止損觸發 ${a.slTriggerPx || "—"} | 止盈觸發 ${a.tpTriggerPx || "—"}`);
   console.log(`  → 孤兒委託（無對應持倉）: ${orphanAlgos.length} 筆` + (orphanAlgos.length ? " ⚠️ " + orphanAlgos.map(a => a.instId).join(", ") : " ✅ 無"));
 
   // 3. 歷史平倉（positions-history）＝ 真正成交並平掉的倉，含已實現損益
