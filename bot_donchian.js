@@ -498,13 +498,31 @@ async function run() {
       const realInst = new Set((posRes.data || []).filter(p => Math.abs(parseFloat(p.pos) || 0) > 0).map(p => p.instId));
       const stateInst = new Set(positions.open.map(p => p.symbol.replace("USDT", "-USDT-SWAP")));
 
-      // (1) 幽靈持倉
+      // (1) 已從 OKX 消失的倉：先去歷史補記實際平倉損益（否則統計漏記），再移除
       const phantom = positions.open.filter(p => !realInst.has(p.symbol.replace("USDT", "-USDT-SWAP")));
       if (phantom.length > 0) {
-        log(`[DN][reconcile] OKX 實際持倉 ${realInst.size} 筆｜狀態檔 ${positions.open.length} 筆 → 清除 ${phantom.length} 筆幽靈倉: ${phantom.map(p => p.symbol).join(", ")}`);
+        log(`[DN][reconcile] OKX 實際持倉 ${realInst.size} 筆｜狀態檔 ${positions.open.length} 筆 → 處理 ${phantom.length} 筆已消失倉: ${phantom.map(p => p.symbol).join(", ")}`);
+        for (const ph of phantom) {
+          try {
+            const instId = ph.symbol.replace("USDT", "-USDT-SWAP");
+            const hist = await okxGet(`/api/v5/account/positions-history?instType=SWAP&instId=${instId}&limit=10`);
+            // 配對本倉：平倉時間在進場後、開倉時間最接近 state 進場時間者
+            const recs = (hist.data || []).filter(h => parseInt(h.uTime) >= (ph.entryTime || 0) - 60000);
+            const rec = recs.sort((a, b) => Math.abs(parseInt(a.cTime) - (ph.entryTime || 0)) - Math.abs(parseInt(b.cTime) - (ph.entryTime || 0)))[0];
+            if (rec) {
+              const exitPx = parseFloat(rec.closeAvgPx) || null;
+              const pnl    = parseFloat(rec.realizedPnl ?? rec.pnl) || 0;
+              appendCsv(ph, exitPx, pnl, "軌道/止損平倉");
+              positions.closed.push({ ...ph, exitTime: parseInt(rec.uTime) || now, exitPrice: exitPx, pnl });
+              log(`[DN][reconcile] 補記平倉 ${ph.symbol}: 出場 $${exitPx} 已實現 $${pnl.toFixed(4)}`);
+            } else {
+              log(`[DN][reconcile] ${ph.symbol} 無可補記的歷史平倉（視為幽靈，不記）`);
+            }
+          } catch (e) { log(`⚠️ [DN][reconcile] 補記平倉失敗 ${ph.symbol}: ${e.message}`); }
+          positions.cooldown[ph.symbol] = now;
+        }
         const ghost = new Set(phantom);
         positions.open = positions.open.filter(p => !ghost.has(p));
-        for (const ph of phantom) positions.cooldown[ph.symbol] = now;
         savePositions(positions);
       } else {
         log(`[DN][reconcile] 狀態與 OKX 一致（${positions.open.length} 筆）`);
