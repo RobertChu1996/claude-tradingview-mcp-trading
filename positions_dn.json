@@ -1,19 +1,5 @@
 {
-  "open": [
-    {
-      "symbol": "TRXUSDT",
-      "side": "long",
-      "entryPrice": 0.3605,
-      "initialSL": 0.3273,
-      "currentSL": 0.3273,
-      "tp": 0.4601,
-      "quantity": 119.73580306023518,
-      "entryTime": 1793318449212,
-      "orderId": "4053914205044543489",
-      "algoId": "4053914214419193856",
-      "sizeUSD": 39.655
-    }
-  ],
+  "open": [],
   "closed": [
     {
       "symbol": "DOTUSDT",
@@ -194,6 +180,22 @@
       "exitTime": 1787371244183,
       "exitPrice": 0.15786999999999998,
       "pnl": 8.887391394165148
+    },
+    {
+      "symbol": "TRXUSDT",
+      "side": "long",
+      "entryPrice": 0.3605,
+      "initialSL": 0.3273,
+      "currentSL": 0.3273,
+      "tp": 0.4601,
+      "quantity": 119.73580306023518,
+      "entryTime": 1793318449212,
+      "orderId": "4053914205044543489",
+      "algoId": "4053914214419193856",
+      "sizeUSD": 39.655,
+      "exitTime": 1793405366271,
+      "exitPrice": 0.32728,
+      "pnl": -2.6975428491483284
     }
   ],
   "cooldown": {
@@ -214,6 +216,7 @@
     "BNBUSDT": 1792407842987,
     "DYDXUSDT": 1792407842987,
     "AAVEUSDT": 1792407842987,
-    "CRVUSDT": 1793238331440
+    "CRVUSDT": 1793238331440,
+    "TRXUSDT": 1793405728828
   }
 }

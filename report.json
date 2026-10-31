@@ -1,6 +1,6 @@
 {
   "reportDate": "2026-10-31",
-  "generatedAt": "2026-10-31T00:00:55.784Z",
+  "generatedAt": "2026-10-31T00:15:35.444Z",
   "balance": {
     "totalEq": 81.921,
     "availBal": 81.921,
@@ -38,18 +38,18 @@
       "label": "DN: Donchian 20/10 [4H] LIVE(dnbot01) 起:2026-08-24（30/15→20/10 @2026-09-24）",
       "mode": "LIVE",
       "overall": {
+        "trades": 2,
+        "wins": 0,
+        "losses": 2,
+        "winRate": "0.0%",
+        "totalPnl": "-4.2200"
+      },
+      "today": {
         "trades": 1,
         "wins": 0,
         "losses": 1,
         "winRate": "0.0%",
-        "totalPnl": "-1.5200"
-      },
-      "today": {
-        "trades": 0,
-        "wins": 0,
-        "losses": 0,
-        "winRate": "N/A",
-        "totalPnl": "0.0000"
+        "totalPnl": "-2.7000"
       },
       "paperRecord": {
         "trades": 12,
@@ -59,27 +59,14 @@
         "totalPnl": "16.8400"
       },
       "balance": {
-        "totalEq": 196.867,
-        "availBal": 186.2185,
-        "frozenBal": 10.6485
+        "totalEq": 196.5201,
+        "availBal": 196.5201,
+        "frozenBal": 0
       },
-      "totalUnrealizedPnl": -2.61,
-      "returnPct": -1.57,
+      "totalUnrealizedPnl": 0,
+      "returnPct": -1.74,
       "baseUsd": 200,
-      "openPositions": [
-        {
-          "symbol": "TRXUSDT",
-          "side": "long",
-          "entry": 0.3605,
-          "sl": 0.3273,
-          "tp": 0.4601,
-          "qty": 119.73580306023518,
-          "since": "2026-10-30T00:00",
-          "currentPrice": 0.33027,
-          "unrealizedPct": -6.7,
-          "unrealizedPnl": -2.61
-        }
-      ]
+      "openPositions": []
     }
   },
   "strategy": {
