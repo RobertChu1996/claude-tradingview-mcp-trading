@@ -1,6 +1,6 @@
 {
   "reportDate": "2026-11-05",
-  "generatedAt": "2026-11-05T11:45:36.996Z",
+  "generatedAt": "2026-11-05T12:00:54.586Z",
   "balance": {
     "totalEq": 81.921,
     "availBal": 81.921,
@@ -59,12 +59,12 @@
         "totalPnl": "16.8400"
       },
       "balance": {
-        "totalEq": 195.8816,
-        "availBal": 188.8111,
-        "frozenBal": 7.0706
+        "totalEq": 195.8364,
+        "availBal": 180.3241,
+        "frozenBal": 15.5123
       },
-      "totalUnrealizedPnl": -0.62,
-      "returnPct": -2.06,
+      "totalUnrealizedPnl": -0.66,
+      "returnPct": -2.08,
       "baseUsd": 200,
       "openPositions": [
         {
@@ -75,9 +75,21 @@
           "tp": 13.845000000000002,
           "qty": 2.541405547329437,
           "since": "2026-11-04T16:00",
-          "currentPrice": 8.988,
-          "unrealizedPct": -2.7,
-          "unrealizedPnl": -0.62
+          "currentPrice": 8.975,
+          "unrealizedPct": -2.84,
+          "unrealizedPnl": -0.66
+        },
+        {
+          "symbol": "POLUSDT",
+          "side": "long",
+          "entry": 0.09793,
+          "sl": 0.08314,
+          "tp": 0.14229999999999998,
+          "qty": 264.5278660407789,
+          "since": "2026-11-05T12:00",
+          "currentPrice": 0.09778,
+          "unrealizedPct": 0,
+          "unrealizedPnl": 0
         }
       ]
     }
