@@ -1,17 +1,17 @@
 {
   "open": [
     {
-      "symbol": "POLUSDT",
-      "side": "long",
-      "entryPrice": 0.09793,
-      "initialSL": 0.08314,
-      "currentSL": 0.08601,
-      "tp": 0.14229999999999998,
-      "quantity": 264.5278660407789,
-      "entryTime": 1793880042927,
-      "orderId": "4072758175279288320",
-      "algoId": "4072758180761624576",
-      "sizeUSD": 25.4618
+      "symbol": "SOLUSDT",
+      "side": "short",
+      "entryPrice": 84.71,
+      "initialSL": 98.16,
+      "currentSL": 98.16,
+      "tp": 44.359999999999985,
+      "quantity": 0.2814519192828542,
+      "entryTime": 1794325535470,
+      "orderId": "4087706187222945792",
+      "algoId": "4087706193946796032",
+      "sizeUSD": 23.7188
     }
   ],
   "closed": [
@@ -196,6 +196,22 @@
       "exitTime": 1794174947384,
       "exitPrice": 7.664,
       "pnl": -3.975425906156775
+    },
+    {
+      "symbol": "POLUSDT",
+      "side": "long",
+      "entryPrice": 0.09793,
+      "initialSL": 0.08314,
+      "currentSL": 0.08601,
+      "tp": 0.14229999999999998,
+      "quantity": 264.5278660407789,
+      "entryTime": 1793880042927,
+      "orderId": "4072758175279288320",
+      "algoId": "4072758180761624576",
+      "sizeUSD": 25.4618,
+      "exitTime": 1794325239201,
+      "exitPrice": 0.08599,
+      "pnl": -3.078791124353422
     }
   ],
   "cooldown": {
@@ -217,6 +233,7 @@
     "DYDXUSDT": 1792407842987,
     "AAVEUSDT": 1792407842987,
     "CRVUSDT": 1793238331440,
-    "TRXUSDT": 1793405728828
+    "TRXUSDT": 1793405728828,
+    "POLUSDT": 1794325535470
   }
 }
