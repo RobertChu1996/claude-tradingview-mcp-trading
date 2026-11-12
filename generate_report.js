@@ -195,7 +195,8 @@ async function main() {
       dnOpen = dnOpen.map(p => {
         const lp = liveMap[p.symbol];
         if (lp) {
-          return { ...p, currentPrice: lp.currentPrice, unrealizedPct: lp.unrealizedPct, unrealizedPnl: lp.unrealizedPnl };
+          // entry 一併換成 OKX 實際成交均價(lp.entry = avgPx)，避免顯示訊號價而與即時損益矛盾
+          return { ...p, entry: lp.entry, currentPrice: lp.currentPrice, unrealizedPct: lp.unrealizedPct, unrealizedPnl: lp.unrealizedPnl };
         }
         return p;
       });

@@ -367,7 +367,29 @@ async function placeEntry(symbol, sig, portfolioValue) {
   if (entryRes.code !== "0") throw new Error(`進場失敗: ${okxErr(entryRes)}`);
   const orderId = entryRes.data?.[0]?.ordId;
 
-  // 2. OCO（止損 + 止盈）
+  // 1b. 回讀實際成交均價（市價單 avgPx）：OKX 可能略有延遲，短暫重試幾次。
+  //     僅用於「誠實記錄進場價 + 滑價」；SL/TP/張數仍沿用訊號價(sig)，不在此處重算風控。
+  let fillPx = null;
+  if (orderId) {
+    for (let i = 0; i < 4; i++) {
+      try {
+        const od = await okxGet(`/api/v5/trade/order?instId=${instId}&ordId=${orderId}`);
+        const o  = od.data?.[0];
+        const ap = parseFloat(o?.avgPx);
+        if (o?.state === "filled" && ap > 0) { fillPx = ap; break; }
+      } catch (_) { /* 容忍暫時性查詢失敗，續試 */ }
+      await new Promise(r => setTimeout(r, 250));
+    }
+  }
+  if (fillPx) {
+    const slipPct = (fillPx - sig.entry) / sig.entry * 100;   // 空單成交低於訊號=負;多單高於訊號=正
+    const adverse = isShort ? fillPx < sig.entry : fillPx > sig.entry;
+    log(`[DN][FILL] ${symbol}(${sig.side}) 訊號價 $${sig.entry.toFixed(6)} → 實際成交 $${fillPx.toFixed(6)} | 滑價 ${slipPct >= 0 ? "+" : ""}${slipPct.toFixed(2)}%${adverse ? " ⚠️不利" : ""}`);
+  } else {
+    log(`⚠️ [DN][FILL] ${symbol} 無法回讀成交均價，進場價暫記訊號價 $${sig.entry.toFixed(6)}`);
+  }
+
+  // 2. OCO（止損 + 止盈）── 仍以訊號價算出的 sig.sl/sig.tp 掛單（真實成交價重算風控待議）
   const ocoRes = await okxPost("/api/v5/trade/order-algo", {
     instId, tdMode: "isolated", side: exitSide, posSide,
     ordType: "oco", sz,
@@ -377,7 +399,7 @@ async function placeEntry(symbol, sig, portfolioValue) {
   if (ocoRes.code !== "0") throw new Error(`OCO失敗: ${okxErr(ocoRes)}`);
   const algoId = ocoRes.data?.[0]?.algoId;
 
-  return { orderId, algoId, sz: +sz * spec.ctVal * sig.entry };
+  return { orderId, algoId, entryPx: fillPx, sz: +sz * spec.ctVal * (fillPx || sig.entry) };
 }
 
 // 更新追蹤止損：優先用 amend-algos 原子改 SL 觸發價（最穩）；失敗才退回「查實際持倉→取消→重掛」
@@ -657,11 +679,15 @@ async function run() {
         pos.algoId  = null;
         log(`[DN][PAPER] 開倉 ${symbol}(${sig.side}) | 進場 $${sig.entry.toFixed(4)} | SL $${sig.sl.toFixed(4)} | TP $${sig.tp.toFixed(4)}`);
       } else {
-        const { orderId, algoId, sz } = await placeEntry(symbol, sig, portfolioValue);
+        const { orderId, algoId, entryPx, sz } = await placeEntry(symbol, sig, portfolioValue);
         pos.orderId   = orderId;
         pos.algoId    = algoId;
         pos.sizeUSD   = sz;
-        log(`[DN][LIVE] 開倉 ${symbol}(${sig.side}) | orderId ${orderId} | algoId ${algoId}`);
+        if (entryPx) {
+          pos.signalEntry = sig.entry;   // 保留訊號價供滑價稽核
+          pos.entryPrice  = entryPx;     // 真實成交均價（誠實記錄；SL/TP/張數仍基於 signalEntry）
+        }
+        log(`[DN][LIVE] 開倉 ${symbol}(${sig.side}) | orderId ${orderId} | algoId ${algoId} | 進場 $${(entryPx ?? sig.entry).toFixed(6)}`);
       }
 
       appendCsv(pos, null, null, "開倉");
