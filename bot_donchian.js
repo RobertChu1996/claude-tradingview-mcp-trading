@@ -20,7 +20,7 @@ import {
 // ─── 策略參數 ─────────────────────────────────────────────────────────────────
 const N_HIGH      = 120;   // 突破：前120根4H（= 20天）
 const N_LOW       = 60;    // 止損：前60根4H（= 10天）
-const TP_RATIO    = 3.0;   // 止盈比
+const TP_RATIO    = 2.0;   // 止盈比（2026-11-18 由 3.0→2.0：回測顯示 3:1 幾乎不觸發、近 TP 全期/樣本內外皆較優）
 const BTC_MA_BARS = 200;   // BTC 趨勢過濾
 const COOLDOWN_MS = 3 * 24 * 3600 * 1000; // 3天冷卻
 
@@ -404,14 +404,15 @@ async function placeEntry(symbol, sig, portfolioValue) {
 
 // 更新追蹤止損：優先用 amend-algos 原子改 SL 觸發價（最穩）；失敗才退回「查實際持倉→取消→重掛」
 //   舊版單純 cancel+重掛，遇到 stale algoId / 張數對不上就整個失敗，導致停損從沒真正上移（幽靈鎖利）。
-async function updateOCO(pos, newSL) {
+async function updateOCO(pos, newSL, newTp = null) {
   const instId   = pos.symbol.replace("USDT", "-USDT-SWAP");
   const isShort  = pos.side === "short";
   const posSide  = isShort ? "short" : "long";
   const exitSide = isShort ? "buy" : "sell";
 
   // 1) 優先：amend-algos 只改 SL 觸發價（原子、不動 TP、algoId 不變）
-  if (pos.algoId) {
+  //    若有帶 newTp（要同時改止盈），跳過此捷徑，直接走取消+重掛，確保 TP 一併更新
+  if (pos.algoId && newTp == null) {
     const amend = await okxPost("/api/v5/trade/amend-algos", {
       instId, algoId: pos.algoId,
       newSlTriggerPx: newSL.toFixed(8), newSlTriggerPxType: "last",
@@ -440,7 +441,7 @@ async function updateOCO(pos, newSL) {
     instId, tdMode: "isolated", side: exitSide, posSide,
     ordType: "oco", sz,
     slTriggerPx: newSL.toFixed(8), slOrdPx: "-1", slTriggerPxType: "last",
-    tpTriggerPx: pos.tp.toFixed(8), tpOrdPx: "-1", tpTriggerPxType: "last",
+    tpTriggerPx: (newTp ?? pos.tp).toFixed(8), tpOrdPx: "-1", tpTriggerPxType: "last",
   });
   if (ocoRes.code !== "0") throw new Error(`新OCO失敗: ${okxErr(ocoRes)}`);
   return ocoRes.data?.[0]?.algoId;
@@ -596,6 +597,39 @@ async function run() {
     }
   }
 
+  // ── Step 1.5：一次性 TP 比例遷移（2026-11-18，3:1→2:1）────────────────────
+  //   對既有倉重算 2:1 止盈，優先用 amend-algos 原子改 TP（保留 SL、algoId 不變、無空窗），
+  //   失敗才退回 updateOCO 取消+重掛。以 tpRatioApplied 標記，每倉只做一次；失敗則下輪重試。
+  if (!CONFIG.paperTrading) {
+    let tpChanged = false;
+    for (const pos of positions.open) {
+      if (pos.tpRatioApplied === TP_RATIO) continue;
+      const base = pos.signalEntry ?? pos.entryPrice;        // 用訊號價基準（與新倉 TP 算法一致）
+      const risk = Math.abs(base - pos.initialSL);
+      if (!(risk > 0)) { pos.tpRatioApplied = TP_RATIO; tpChanged = true; continue; }
+      const newTp = pos.side === "short" ? base - risk * TP_RATIO : base + risk * TP_RATIO;
+      if (!(newTp > 0)) { log(`⚠️ [DN][TP遷移] ${pos.symbol} 新TP<=0，略過`); continue; }
+      try {
+        const instId = pos.symbol.replace("USDT", "-USDT-SWAP");
+        let ok = false;
+        if (pos.algoId) {
+          const amend = await okxPost("/api/v5/trade/amend-algos", {
+            instId, algoId: pos.algoId,
+            newTpTriggerPx: newTp.toFixed(8), newTpTriggerPxType: "last",
+          });
+          if (amend.code === "0") ok = true;
+          else log(`⚠️ [DN][TP遷移] amend 失敗 ${pos.symbol}: ${okxErr(amend)} → 取消重掛`);
+        }
+        if (!ok) { pos.algoId = await updateOCO(pos, pos.currentSL, newTp); }
+        log(`[DN][TP遷移] ${pos.symbol}(${pos.side}) TP $${pos.tp.toFixed(6)} → $${newTp.toFixed(6)} (${TP_RATIO}:1)`);
+        pos.tp = newTp;
+        pos.tpRatioApplied = TP_RATIO;
+        tpChanged = true;
+      } catch (e) { log(`⚠️ [DN][TP遷移] ${pos.symbol} 失敗，下輪重試: ${e.message}`); }
+    }
+    if (tpChanged) savePositions(positions);
+  }
+
   // ── Step 2：更新追蹤止損 + 掃描信號（每15分鐘）────────────────────────────
   // Step 2a：更新追蹤止損
   for (const pos of positions.open) {
@@ -672,6 +706,7 @@ async function run() {
         tp:         sig.tp,
         quantity,
         entryTime:  now,
+        tpRatioApplied: TP_RATIO,   // 標記此倉 TP 用的比例（遷移邏輯據此判斷是否需調整）
       };
 
       if (CONFIG.paperTrading) {
