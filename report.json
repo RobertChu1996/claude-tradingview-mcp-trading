@@ -1,6 +1,6 @@
 {
   "reportDate": "2026-11-20",
-  "generatedAt": "2026-11-20T15:45:40.197Z",
+  "generatedAt": "2026-11-20T16:00:54.819Z",
   "balance": {
     "totalEq": 81.921,
     "availBal": 81.921,
@@ -38,18 +38,18 @@
       "label": "DN: Donchian 20/10 [4H] LIVE(dnbot01) 起:2026-08-24（30/15→20/10 @2026-09-24）",
       "mode": "LIVE",
       "overall": {
-        "trades": 4,
-        "wins": 0,
+        "trades": 5,
+        "wins": 1,
         "losses": 4,
-        "winRate": "0.0%",
-        "totalPnl": "-11.2800"
+        "winRate": "20.0%",
+        "totalPnl": "-4.2500"
       },
       "today": {
-        "trades": 0,
-        "wins": 0,
+        "trades": 1,
+        "wins": 1,
         "losses": 0,
-        "winRate": "N/A",
-        "totalPnl": "0.0000"
+        "winRate": "100.0%",
+        "totalPnl": "7.0300"
       },
       "paperRecord": {
         "trades": 12,
@@ -59,12 +59,12 @@
         "totalPnl": "16.8400"
       },
       "balance": {
-        "totalEq": 214.2522,
-        "availBal": 140.9497,
-        "frozenBal": 73.3025
+        "totalEq": 214.1254,
+        "availBal": 153.9983,
+        "frozenBal": 60.1271
       },
-      "totalUnrealizedPnl": 24.87,
-      "returnPct": 7.13,
+      "totalUnrealizedPnl": 17.73,
+      "returnPct": 7.06,
       "baseUsd": 200,
       "openPositions": [
         {
@@ -75,69 +75,69 @@
           "tp": 57.80999999999999,
           "qty": 0.2814519192828542,
           "since": "2026-11-10T15:45",
-          "currentPrice": 68.07,
-          "unrealizedPct": 16.85,
-          "unrealizedPnl": 3.86
-        },
-        {
-          "symbol": "BNBUSDT",
-          "side": "short",
-          "entry": 663.77,
-          "sl": 691.4,
-          "tp": 546.0399999999998,
-          "qty": 0.0638981275474748,
-          "since": "2026-11-12T12:00",
-          "currentPrice": 547.95,
-          "unrealizedPct": 17.45,
-          "unrealizedPnl": 6.95
+          "currentPrice": 68.32,
+          "unrealizedPct": 16.54,
+          "unrealizedPnl": 3.79
         },
         {
           "symbol": "LINKUSDT",
           "side": "short",
           "entry": 9.985142857142858,
-          "sl": 10.605,
+          "sl": 10.591,
           "tp": 6.402999999999997,
           "qty": 2.1019962135961983,
           "since": "2026-11-12T12:00",
-          "currentPrice": 8.333,
-          "unrealizedPct": 16.55,
-          "unrealizedPnl": 3.47
+          "currentPrice": 8.337,
+          "unrealizedPct": 16.51,
+          "unrealizedPnl": 3.46
         },
         {
           "symbol": "LTCUSDT",
           "side": "short",
           "entry": 49.1,
-          "sl": 51.81,
+          "sl": 51.73,
           "tp": 33.28,
           "qty": 0.47685891403020975,
           "since": "2026-11-12T12:00",
-          "currentPrice": 39.97,
-          "unrealizedPct": 18.59,
-          "unrealizedPnl": 3.65
+          "currentPrice": 39.91,
+          "unrealizedPct": 18.72,
+          "unrealizedPnl": 3.68
         },
         {
           "symbol": "AAVEUSDT",
           "side": "short",
           "entry": 114.095,
-          "sl": 126.64,
+          "sl": 125.55,
           "tp": 68.91000000000001,
           "qty": 0.16673241570809366,
           "since": "2026-11-12T12:00",
-          "currentPrice": 96.78,
-          "unrealizedPct": 15.18,
-          "unrealizedPnl": 2.77
+          "currentPrice": 97.05,
+          "unrealizedPct": 14.94,
+          "unrealizedPnl": 2.73
         },
         {
           "symbol": "ALGOUSDT",
           "side": "short",
           "entry": 0.08785,
-          "sl": 0.09268,
+          "sl": 0.0923,
           "tp": 0.06072000000000001,
           "qty": 277.84652375162113,
           "since": "2026-11-12T12:00",
-          "currentPrice": 0.07239,
-          "unrealizedPct": 17.6,
-          "unrealizedPnl": 4.17
+          "currentPrice": 0.07277,
+          "unrealizedPct": 17.17,
+          "unrealizedPnl": 4.07
+        },
+        {
+          "symbol": "ATOMUSDT",
+          "side": "short",
+          "entry": 1.211,
+          "sl": 1.444,
+          "tp": 0.754,
+          "qty": 18.601704118024305,
+          "since": "2026-11-20T16:00",
+          "currentPrice": 1.211,
+          "unrealizedPct": 0,
+          "unrealizedPnl": 0
         }
       ]
     }
