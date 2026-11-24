@@ -80,7 +80,7 @@ function loadSymbols() {
   return FALLBACK_SYMBOLS;
 }
 
-const CSV_HEADERS = "Date,Time(UTC),Symbol,Side,Entry,Exit,PnL,Reason,Mode,OrderID";
+const CSV_HEADERS = "Date,Time(UTC),Symbol,Side,Entry,Exit,PnL,Reason,Mode,OrderID,MarginPct";
 
 // ─── 工具函式 ─────────────────────────────────────────────────────────────────
 function loadPositions() {
@@ -109,7 +109,8 @@ function appendCsv(pos, exitPrice, pnl, reason) {
   writeFileSync(CSV_FILE,
     `${d.slice(0,10)},${d.slice(11,19)},${pos.symbol},${pos.side ?? "long"},` +
     `${pos.entryPrice},${exitPrice?.toFixed(6) ?? ""},${pnl?.toFixed(2) ?? ""},` +
-    `${reason},${CONFIG.paperTrading ? "PAPER" : "LIVE"},${pos.orderId}\n`,
+    `${reason},${CONFIG.paperTrading ? "PAPER" : "LIVE"},${pos.orderId},` +
+    `${pos.marginPct != null ? (pos.marginPct*100).toFixed(2) : ""}\n`,
     { flag: "a" }
   );
 }
@@ -237,7 +238,8 @@ async function checkLongSignal(symbol) {
   if (slPct < 0.003 || slPct > 0.25) return null;
 
   const tp = entry + (entry - sl) * TP_RATIO;
-  return { side: "long", entry, sl, tp, slPct, level: prevHigh, candle: last };
+  const marginPct = (entry - prevHigh) / entry;   // 突破幅度：收盤超出軌道多少（埋點，不影響交易）
+  return { side: "long", entry, sl, tp, slPct, level: prevHigh, marginPct, candle: last };
 }
 
 async function checkShortSignal(symbol) {
@@ -261,7 +263,8 @@ async function checkShortSignal(symbol) {
 
   const tp = entry - (sl - entry) * TP_RATIO;
   if (tp <= 0) return null;
-  return { side: "short", entry, sl, tp, slPct, level: prevLow, candle: last };
+  const marginPct = (prevLow - entry) / entry;    // 突破幅度：收盤低於軌道多少（埋點，不影響交易）
+  return { side: "short", entry, sl, tp, slPct, level: prevLow, marginPct, candle: last };
 }
 
 // ─── 追蹤止損更新（4H）───────────────────────────────────────────────────────
@@ -691,7 +694,7 @@ async function run() {
       const sig = bull ? await checkLongSignal(symbol) : await checkShortSignal(symbol);
       if (!sig) continue;
 
-      log(`[DN] 信號 ${symbol}(${sig.side}) | 突破 $${sig.level.toFixed(4)} | SL $${sig.sl.toFixed(4)} | TP $${sig.tp.toFixed(4)} | 止損% ${(sig.slPct*100).toFixed(2)}%`);
+      log(`[DN] 信號 ${symbol}(${sig.side}) | 突破 $${sig.level.toFixed(4)} | SL $${sig.sl.toFixed(4)} | TP $${sig.tp.toFixed(4)} | 止損% ${(sig.slPct*100).toFixed(2)}% | 幅度 ${(sig.marginPct*100).toFixed(2)}%`);
 
       // Issue 2: 使用動態資產規模計算倉位
       const riskUSD  = portfolioValue * CONFIG.riskPct;
@@ -707,6 +710,7 @@ async function run() {
         quantity,
         entryTime:  now,
         tpRatioApplied: TP_RATIO,   // 標記此倉 TP 用的比例（遷移邏輯據此判斷是否需調整）
+        marginPct:  sig.marginPct,  // 突破幅度埋點（2026-11-24）：驗證低幅度突破是否較差，不影響交易
       };
 
       if (CONFIG.paperTrading) {

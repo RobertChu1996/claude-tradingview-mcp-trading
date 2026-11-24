@@ -117,7 +117,7 @@ function readExits(csvFile) {
     .trim().split("\n").slice(1)
     .map(line => {
       const p = line.split(",");
-      return { date: p[0], symbol: p[2], side: p[3], pnl: parseFloat(p[6]) || 0, reason: p[7], mode: p[8], orderId: p[9] };
+      return { date: p[0], symbol: p[2], side: p[3], pnl: parseFloat(p[6]) || 0, reason: p[7], mode: p[8], orderId: p[9], marginPct: p[10] !== undefined && p[10] !== "" ? parseFloat(p[10]) : null };
     })
     .filter(r => r.reason && r.reason !== "開倉");
 }
