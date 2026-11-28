@@ -16,21 +16,6 @@
       "tpRatioApplied": 2
     },
     {
-      "symbol": "LTCUSDT",
-      "side": "short",
-      "entryPrice": 49.1,
-      "initialSL": 57.07,
-      "currentSL": 45.37,
-      "tp": 33.28,
-      "quantity": 0.47685891403020975,
-      "entryTime": 1794484849485,
-      "orderId": "4093051925381451776",
-      "algoId": "4093051933380370432",
-      "sizeUSD": 19.64,
-      "signalEntry": 49.14,
-      "tpRatioApplied": 2
-    },
-    {
       "symbol": "AAVEUSDT",
       "side": "short",
       "entryPrice": 114.095,
@@ -160,6 +145,24 @@
       "exitTime": 1795747202285,
       "exitPrice": 9.562,
       "pnl": 0.8917028320305052
+    },
+    {
+      "symbol": "LTCUSDT",
+      "side": "short",
+      "entryPrice": 49.1,
+      "initialSL": 57.07,
+      "currentSL": 45.37,
+      "tp": 33.28,
+      "quantity": 0.47685891403020975,
+      "entryTime": 1794484849485,
+      "orderId": "4093051925381451776",
+      "algoId": "4093051933380370432",
+      "sizeUSD": 19.64,
+      "signalEntry": 49.14,
+      "tpRatioApplied": 2,
+      "exitTime": 1795824817983,
+      "exitPrice": 45.37,
+      "pnl": 1.4867395786682438
     }
   ],
   "cooldown": {
@@ -183,6 +186,7 @@
     "CRVUSDT": 1793238331440,
     "TRXUSDT": 1793405728828,
     "POLUSDT": 1794325535470,
-    "LINKUSDT": 1795747528233
+    "LINKUSDT": 1795747528233,
+    "LTCUSDT": 1795824927811
   }
 }

@@ -1,6 +1,6 @@
 {
   "reportDate": "2026-11-28",
-  "generatedAt": "2026-11-28T00:01:00.395Z",
+  "generatedAt": "2026-11-28T00:15:38.354Z",
   "balance": {
     "totalEq": 81.921,
     "availBal": 81.921,
@@ -38,18 +38,18 @@
       "label": "DN: Donchian 20/10 [4H] LIVE(dnbot01) 起:2026-08-24（30/15→20/10 @2026-09-24）",
       "mode": "LIVE",
       "overall": {
-        "trades": 6,
-        "wins": 2,
+        "trades": 7,
+        "wins": 3,
         "losses": 4,
-        "winRate": "33.3%",
-        "totalPnl": "-3.3600"
+        "winRate": "42.9%",
+        "totalPnl": "-1.8700"
       },
       "today": {
-        "trades": 0,
-        "wins": 0,
+        "trades": 1,
+        "wins": 1,
         "losses": 0,
-        "winRate": "N/A",
-        "totalPnl": "0.0000"
+        "winRate": "100.0%",
+        "totalPnl": "1.4900"
       },
       "paperRecord": {
         "trades": 12,
@@ -59,12 +59,12 @@
         "totalPnl": "16.8400"
       },
       "balance": {
-        "totalEq": 206.1357,
-        "availBal": 161.8901,
-        "frozenBal": 44.2456
+        "totalEq": 205.9653,
+        "availBal": 169.9333,
+        "frozenBal": 36.032
       },
-      "totalUnrealizedPnl": 8.88,
-      "returnPct": 3.07,
+      "totalUnrealizedPnl": 7.23,
+      "returnPct": 2.98,
       "baseUsd": 200,
       "openPositions": [
         {
@@ -75,21 +75,9 @@
           "tp": 57.80999999999999,
           "qty": 0.2814519192828542,
           "since": "2026-11-10T15:45",
-          "currentPrice": 71.67,
-          "unrealizedPct": 12.45,
-          "unrealizedPnl": 2.85
-        },
-        {
-          "symbol": "LTCUSDT",
-          "side": "short",
-          "entry": 49.1,
-          "sl": 45.37,
-          "tp": 33.28,
-          "qty": 0.47685891403020975,
-          "since": "2026-11-12T12:00",
-          "currentPrice": 45.11,
-          "unrealizedPct": 8.13,
-          "unrealizedPnl": 1.6
+          "currentPrice": 71.77,
+          "unrealizedPct": 12.33,
+          "unrealizedPnl": 2.83
         },
         {
           "symbol": "AAVEUSDT",
@@ -99,9 +87,9 @@
           "tp": 68.91000000000001,
           "qty": 0.16673241570809366,
           "since": "2026-11-12T12:00",
-          "currentPrice": 95.6,
-          "unrealizedPct": 16.21,
-          "unrealizedPnl": 2.96
+          "currentPrice": 95.53,
+          "unrealizedPct": 16.27,
+          "unrealizedPnl": 2.97
         },
         {
           "symbol": "ALGOUSDT",
@@ -111,9 +99,9 @@
           "tp": 0.06072000000000001,
           "qty": 277.84652375162113,
           "since": "2026-11-12T12:00",
-          "currentPrice": 0.08127,
-          "unrealizedPct": 7.49,
-          "unrealizedPnl": 1.78
+          "currentPrice": 0.08142,
+          "unrealizedPct": 7.32,
+          "unrealizedPnl": 1.74
         },
         {
           "symbol": "ATOMUSDT",
